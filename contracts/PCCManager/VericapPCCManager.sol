@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 /**
  * @title Vericap: PCC Manager smart contract
  * @author Vericap Blockchain Engineering Team
- * @notice This Contract Is Used For Creating PCCBatch
+ * @notice This Contract Is Used For PCC Management
  */
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
