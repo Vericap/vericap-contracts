@@ -1,0 +1,2324 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for LiquidityManager/LiquidityManager.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">LiquidityManager/</a> LiquidityManager.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">97.47% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>77/79</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">71.15% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>37/52</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">85% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>17/20</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">97% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>97/100</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+717
+718
+719
+720
+721
+722
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736
+737
+738
+739
+740
+741
+742
+743
+744
+745
+746
+747
+748
+749
+750
+751
+752
+753
+754</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">6×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity 0.8.22;
+&nbsp;
+/**
+ * @title EnverX: LiquidityManager smart contract
+ * @author EnverX Blockchain Engineering Team
+ * @notice This Contract Is Used For Managing Liquidity For Pre-PDD
+ */
+&nbsp;
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import "../interfaces/ILiquidityToken.sol";
+import "../helper/BasicMetaTransaction.sol";
+import "hardhat/console.sol";
+&nbsp;
+error RELEASE_LIQUIDITY_POOL_ALREADY_EXIST();
+error RELEASE_LIQUIDITY_POOL_NOT_EXIST();
+error GOAL_AMOUNT_TO_RAISE_REACHED();
+error GOAL_AMOUNT_TO_RAISE_NOT_REACHED();
+error IVESTMENT_AMOUNT_EXCEED_AMOUNT_TO_RAISE();
+error BATCH_SUPPLY_IS_LOWER_THEN_INVESTOR_ALLOCATION();
+error PROJECT_NOT_REACHED_POST_PDD_STAGE();
+error PCC_NOT_YET_CREDITED_FOR_RELEASE();
+&nbsp;
+contract LiquidityManager is
+    Initializable,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    ERC1155HolderUpgradeable,
+    AccessControlUpgradeable,
+    BasicMetaTransaction
+{
+    using StringsUpgradeable for uint256;
+    using SafeERC20 for IERC20;
+&nbsp;
+    IERC1155Upgradeable public PCCTokenContract;
+&nbsp;
+    /**
+        @notice Declaring access based roles
+     */
+    bytes32 public constant EVX_LIQUIDITY_MANAGER_ROLE =
+        keccak256("EVX_LIQUIDITY_MANAGER_ROLE");
+&nbsp;
+    /**
+     * @notice Investor Detail
+     */
+    struct InvestorDetail {
+        address investorAddress;
+        uint256 totalInvestment;
+        // ReleaseType =&gt; Bool (Claimed or not)
+        mapping(string =&gt; bool) pccClaimedForRelease;
+        // ReleaseType =&gt; User's Percentage
+        mapping(string =&gt; uint256) releaseBasedLPTokenAllocation;
+        // ReleaseType =&gt; LPToken
+        mapping(string =&gt; ILiquidityToken) LPTokenBasedOnRelease;
+    }
+&nbsp;
+    /**
+     * @notice Release Detail
+     */
+    struct ReleaseDetail {
+        uint256 categoryId;
+        uint256 commodityId;
+        uint256 goalAmountToRaise;
+        uint256 totalAmountRaised;
+        uint256 amountOfPCCRealised;
+        uint256[] batchIdList;
+        string releaseType;
+        bool goalAmountReached;
+        bool existence;
+        bool PCCCredited;
+        bool PCCRealised;
+        ILiquidityToken lpTokenContractAddress;
+    }
+&nbsp;
+    /**
+     * @notice Investor Address =&gt; Investor Detail
+     */
+    mapping(address =&gt; InvestorDetail) public investorDetails;
+&nbsp;
+    /**
+     * @notice Project Id =&gt; Commodity Id =&gt; Release Type =&gt; Release Detail
+     */
+    mapping(uint256 =&gt; mapping(uint256 =&gt; mapping(string =&gt; ReleaseDetail)))
+        public releaseDetails;
+&nbsp;
+    /**
+     * @notice ReleaseLiquidityPoolCreated: Event
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param amountToRaise Amount To Raise
+     */
+    event ReleaseLiquidityPoolCreated(
+        uint256 categoryId,
+        uint256 commodityId,
+        uint256 amountToRaise,
+        string releaseType
+    );
+&nbsp;
+    /**
+     * @notice LiquidityAddedToReleasePool: Event
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param investmentAmount Investment Amount
+     * @param totalAmountRaised Total Amount Raised
+     * @param investorAddress Investor Address
+     */
+    event LiquidityAddedToReleasePool(
+        uint256 categoryId,
+        uint256 commodityId,
+        uint256 investmentAmount,
+        uint256 totalAmountRaised,
+        uint256 investorAllocation,
+        string releaseType,
+        address investorAddress
+    );
+&nbsp;
+    /**
+     * @notice LiquidityRemovedFromReleasePool: Event
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param amountOfLiquidityRemoved Amount Of Liquidity Removed
+     * @param investorAddress Investor Address
+     */
+    event LiquidityRemovedFromReleasePool(
+        uint256 categoryId,
+        uint256 commodityId,
+        uint256 amountOfLiquidityRemoved,
+        string releaseType,
+        address investorAddress
+    );
+&nbsp;
+    /**
+     * @notice NewPCCBatchAddedToRelease
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param batchIds Batch Ids
+     * @param batchSupply Batch Supply
+     */
+    event NewPCCBatchAddedToRelease(
+        uint256 categoryId,
+        uint256 commodityId,
+        string releaseType,
+        uint256[] batchIds,
+        uint256[] batchSupply
+    );
+&nbsp;
+    event PCCRedemptionForReleaseEnabledOrDisabled(
+        uint256 categoryId,
+        uint256 commodityId,
+        string releaseType,
+        bool pccRedemptionEnables
+    );
+&nbsp;
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+&nbsp;
+    /**
+        @notice Initialize: Initialize a smart contract
+        @dev Works as a constructor for proxy contracts
+        @param superAdmin Admin wallet address
+        @param pccTokenContract PCC token contract address
+     */
+    function initialize(
+        address superAdmin,
+        IERC1155Upgradeable pccTokenContract
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>initializer {
+        __Ownable_init();
+        _setRoleAdmin(EVX_LIQUIDITY_MANAGER_ROLE, EVX_LIQUIDITY_MANAGER_ROLE);
+        _setupRole(DEFAULT_ADMIN_ROLE, superAdmin);
+        _setupRole(EVX_LIQUIDITY_MANAGER_ROLE, superAdmin);
+        PCCTokenContract = pccTokenContract;
+    }
+&nbsp;
+    /** 
+        @notice UUPS upgrade mandatory function: To authorize the owner to upgrade 
+                the contract
+    */
+<span class="fstat-no" title="function not covered" >    function _authorizeUpgrade(</span>
+        address newImplementation
+    ) internal override onlyOwner {}
+&nbsp;
+    /**
+     * @notice getReleaseDetail: Get Release Detail
+     * @param categoryId Project Id
+     * @param commodityId  Commodity Id
+     * @param releaseType Release Type
+     */
+    function getReleaseDetail(
+        uint256 categoryId,
+        uint256 commodityId,
+        string memory releaseType
+    ) public view returns (ReleaseDetail memory) {
+        return releaseDetails[categoryId][commodityId][releaseType];
+    }
+&nbsp;
+    /**
+     * @notice getUserStakeInRelease: Get User's Stake In Release
+     * @param investorAddress Investor Address
+     * @param releaseType Release Type
+     */
+    function getInvestorDetailForRelease(
+        address investorAddress,
+        string memory releaseType
+    ) public view returns (address, uint256) {
+        ILiquidityToken lpToken = investorDetails[investorAddress]
+            .LPTokenBasedOnRelease[releaseType];
+        return (
+            address(lpToken),
+            investorDetails[investorAddress].releaseBasedLPTokenAllocation[
+                releaseType
+            ]
+        );
+    }
+&nbsp;
+    /** @notice createReleasePool: Create Release Pool
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType  Release Type
+     * @param goalAmountToRaise Amount To Raise
+     */
+    function createReleaseLiquidityPool(
+        uint256 categoryId,
+        uint256 commodityId,
+        string memory releaseType,
+        uint256 goalAmountToRaise
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        _checkBeforeForArguments(categoryId, commodityId, releaseType);
+        if (releaseDetails[categoryId][commodityId][releaseType].existence) {
+            revert RELEASE_LIQUIDITY_POOL_ALREADY_EXIST();
+        }
+&nbsp;
+        LiquidityToken lpToken = new LiquidityToken(
+            string(
+                abi.encodePacked(
+                    "EVXLP-",
+                    categoryId.toString(),
+                    "-",
+                    commodityId.toString(),
+                    "-",
+                    releaseType
+                )
+            ),
+            string(abi.encodePacked("EVXLP-", releaseType)),
+            address(this)
+        );
+&nbsp;
+        uint256[] memory _batchIdList;
+        releaseDetails[categoryId][commodityId][releaseType] = ReleaseDetail(
+            categoryId,
+            commodityId,
+            goalAmountToRaise,
+            0,
+            0,
+            _batchIdList,
+            releaseType,
+            false,
+            true,
+            false,
+            false,
+            lpToken
+        );
+&nbsp;
+        emit ReleaseLiquidityPoolCreated(
+            categoryId,
+            commodityId,
+            goalAmountToRaise,
+            releaseType
+        );
+    }
+&nbsp;
+    /**
+     * @notice addLiquidityToReleasePool: Add Liquidity To Release Pool
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param investmentAmount Investment Amount
+     * @param investorAddress Investor Address
+     */
+    function addLiquidityToReleasePool(
+        uint256 categoryId,
+        uint256 commodityId,
+        string memory releaseType,
+        uint256 investmentAmount,
+        address investorAddress
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        _checkBeforeForArguments(categoryId, commodityId, releaseType);
+&nbsp;
+        if (!releaseDetails[categoryId][commodityId][releaseType].existence) {
+            revert RELEASE_LIQUIDITY_POOL_NOT_EXIST();
+        }
+&nbsp;
+        ReleaseDetail storage _releaseDetail = releaseDetails[categoryId][
+            commodityId
+        ][releaseType];
+&nbsp;
+        InvestorDetail storage _investorDetail = investorDetails[
+            investorAddress
+        ];
+&nbsp;
+        if (_releaseDetail.goalAmountReached) {
+            revert GOAL_AMOUNT_TO_RAISE_REACHED();
+        } else if (
+            _releaseDetail.goalAmountToRaise &lt;
+            (_releaseDetail.totalAmountRaised + investmentAmount)
+        ) {
+            revert IVESTMENT_AMOUNT_EXCEED_AMOUNT_TO_RAISE();
+        }
+&nbsp;
+        _releaseDetail.totalAmountRaised += investmentAmount;
+&nbsp;
+        _investorDetail.totalInvestment += investmentAmount;
+&nbsp;
+        if (
+            _releaseDetail.totalAmountRaised == _releaseDetail.goalAmountToRaise
+        ) {
+            _releaseDetail.goalAmountReached = true;
+        }
+&nbsp;
+        uint256 _userCurrentAllocation = _updateInvestorAllocation(
+            _investorDetail,
+            releaseType,
+            investmentAmount,
+            _releaseDetail,
+            investorAddress
+        );
+&nbsp;
+        emit LiquidityAddedToReleasePool(
+            categoryId,
+            commodityId,
+            investmentAmount,
+            _userCurrentAllocation,
+            _releaseDetail.totalAmountRaised,
+            releaseType,
+            investorAddress
+        );
+    }
+&nbsp;
+    /**
+     * @notice removeLiquidityAndClaimPCCToken: Deposit LPs And Claim PCC Token
+     * @dev Deposit LP Token And Claim PCC Tokens In Return
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param investorAddress Investor Address
+     */
+    function removeLiquidityAndClaimPCCToken(
+        uint256 categoryId,
+        uint256 commodityId,
+        string memory releaseType,
+        address investorAddress
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        _checkBeforeForArguments(categoryId, commodityId, releaseType);
+&nbsp;
+        ReleaseDetail memory _releaseDetail = releaseDetails[categoryId][
+            commodityId
+        ][releaseType];
+        InvestorDetail storage _investorDetail = investorDetails[
+            investorAddress
+        ];
+        ILiquidityToken lpToken = _releaseDetail.lpTokenContractAddress;
+&nbsp;
+        if (
+            _releaseDetail.goalAmountToRaise &gt; _releaseDetail.totalAmountRaised
+        ) {
+            revert GOAL_AMOUNT_TO_RAISE_NOT_REACHED();
+        }
+&nbsp;
+        if (!releaseDetails[categoryId][commodityId][releaseType].PCCRealised) {
+            revert PROJECT_NOT_REACHED_POST_PDD_STAGE();
+        }
+&nbsp;
+        uint256 _investorPoolPercentage = _investorDetail
+            .releaseBasedLPTokenAllocation[releaseType];
+&nbsp;
+        uint256 _pccRealised = releaseDetails[categoryId][commodityId][
+            releaseType
+        ].amountOfPCCRealised;
+&nbsp;
+        uint256 _claimablePCC = (_pccRealised * _investorPoolPercentage) / 100;
+&nbsp;
+        IERC20(address(lpToken)).safeTransferFrom(
+            investorAddress,
+            address(this),
+            _investorPoolPercentage
+        );
+&nbsp;
+        emit IERC20.Transfer(
+            investorAddress,
+            address(this),
+            _investorPoolPercentage
+        );
+&nbsp;
+        lpToken.burn(address(this), _investorPoolPercentage);
+&nbsp;
+        emit IERC20.Transfer(
+            address(this),
+            address(0),
+            _investorPoolPercentage
+        );
+&nbsp;
+        uint256 _batchIdListLength = _releaseDetail.batchIdList.length;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (
+            _checkForBatchSupply(categoryId, commodityId, releaseType) &lt;
+            _investorPoolPercentage
+        ) {
+            revert BATCH_SUPPLY_IS_LOWER_THEN_INVESTOR_ALLOCATION();
+        }
+&nbsp;
+        _transferClaimablePCC(
+            categoryId,
+            commodityId,
+            releaseType,
+            _batchIdListLength,
+            _claimablePCC,
+            investorAddress
+        );
+&nbsp;
+        emit LiquidityRemovedFromReleasePool(
+            categoryId,
+            commodityId,
+            _claimablePCC,
+            releaseType,
+            investorAddress
+        );
+    }
+&nbsp;
+    /**
+     * @notice addPCCBatchToRelease: Add PCC Batch To Release
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     * @param projectDeveloperAddress Project Developer Address
+     * @param batchIds Batch Ids
+     * @param amountToTransfer Amount To Transfer
+     */
+    function addPCCBatchToRelease(
+        uint256 categoryId,
+        uint256 commodityId,
+        string memory releaseType,
+        address projectDeveloperAddress,
+        uint256[] memory batchIds,
+        uint256[] memory amountToTransfer
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        require(
+            (batchIds.length != 0) &amp;&amp;
+                (batchIds.length == amountToTransfer.length),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
+        ReleaseDetail storage _releaseDetail = releaseDetails[categoryId][
+            commodityId
+        ][releaseType];
+        for (uint i = 0; i &lt; batchIds.length; ++i) {
+            _releaseDetail.batchIdList.push(batchIds[i]);
+        }
+        _releaseDetail.PCCCredited = true;
+&nbsp;
+        uint256 _pccRealised;
+        for (uint256 i = 0; i &lt; batchIds.length; ++i) {
+            _pccRealised += amountToTransfer[i];
+        }
+        releaseDetails[categoryId][commodityId][releaseType]
+            .amountOfPCCRealised += _pccRealised;
+&nbsp;
+        PCCTokenContract.safeBatchTransferFrom(
+            projectDeveloperAddress,
+            address(this),
+            batchIds,
+            amountToTransfer,
+            "0x00"
+        );
+&nbsp;
+        emit NewPCCBatchAddedToRelease(
+            categoryId,
+            commodityId,
+            releaseType,
+            batchIds,
+            amountToTransfer
+        );
+    }
+&nbsp;
+    /**
+     * @notice enablePCCRedemptionForRelease: Enable PCC Redemption For Release
+     * @param categoryId Project Id
+     * @param commodityId Commodity Id
+     * @param releaseType Release Type
+     */
+    function enableDisablePCCRedemptionForRelease(
+        uint256 categoryId,
+        uint256 commodityId,
+        string memory releaseType,
+        bool redemptionState
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        if (!releaseDetails[categoryId][commodityId][releaseType].PCCCredited) {
+            revert PCC_NOT_YET_CREDITED_FOR_RELEASE();
+        }
+        releaseDetails[categoryId][commodityId][releaseType]
+            .PCCRealised = redemptionState;
+&nbsp;
+        emit PCCRedemptionForReleaseEnabledOrDisabled(
+            categoryId,
+            commodityId,
+            releaseType,
+            redemptionState
+        );
+    }
+&nbsp;
+    /**
+     * _updateInvestorAllocation: Update Investor Allocation
+     * @param _investorDetail Investor Detail
+     * @param _releaseType Release Type
+     * @param _investmentAmount Investment Amount
+     * @param _releaseDetail Release Detail
+     * @param _investorAddress Investor Address
+     */
+    function _updateInvestorAllocation(
+        InvestorDetail storage _investorDetail,
+        string memory _releaseType,
+        uint256 _investmentAmount,
+        ReleaseDetail memory _releaseDetail,
+        address _investorAddress
+    ) internal <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) returns (uint256) {
+        ILiquidityToken lpToken = _releaseDetail.lpTokenContractAddress;
+        _investorDetail.totalInvestment += _investmentAmount;
+&nbsp;
+        uint256 _allocation = (_investmentAmount * 10_000) /
+            _releaseDetail.goalAmountToRaise;
+&nbsp;
+        uint256 _allocationFloor = ((_allocation * (10 ** 2)) / (10 ** 2));
+        uint256 _userCurrentAllocation = (_allocationFloor / 100);
+&nbsp;
+        _investorDetail.releaseBasedLPTokenAllocation[
+                _releaseType
+            ] += _userCurrentAllocation;
+&nbsp;
+        lpToken.mint(_investorAddress, _userCurrentAllocation);
+&nbsp;
+        emit IERC20.Transfer(
+            address(0),
+            _investorAddress,
+            _userCurrentAllocation
+        );
+&nbsp;
+        return _userCurrentAllocation;
+    }
+&nbsp;
+    /**
+     * @notice _transferClaimablePCC: Internal Fn To Transfer Claimable PCC To Investor
+     * @param _categoryId Project Id
+     * @param _commodityId Commodity Id
+     * @param _releaseType Release Type
+     * @param _batchIdListLength Length Of Batch Ids List
+     * @param _claimablePCC Amount Of PCCs Available To Claim
+     * @param _investorAddress Investor Address
+     */
+    function _transferClaimablePCC(
+        uint256 _categoryId,
+        uint256 _commodityId,
+        string memory _releaseType,
+        uint256 _batchIdListLength,
+        uint256 _claimablePCC,
+        address _investorAddress
+    ) internal <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            !investorDetails[_investorAddress].pccClaimedForRelease[
+                _releaseType
+            ],
+            "PCC_ALREADY_CLAIMED"
+        );
+        for (uint i = 0; i &lt; _batchIdListLength; ++i) {
+            uint256 _currentBatchId = releaseDetails[_categoryId][_commodityId][
+                _releaseType
+            ].batchIdList[i];
+&nbsp;
+            uint256 _currentBatchSupply = PCCTokenContract.balanceOf(
+                address(this),
+                _currentBatchId
+            );
+            if (_claimablePCC &gt;= _currentBatchSupply) {
+                PCCTokenContract.safeTransferFrom(
+                    address(this),
+                    _investorAddress,
+                    _currentBatchId,
+                    _currentBatchSupply,
+                    "0x00"
+                );
+                _claimablePCC = _claimablePCC - _currentBatchSupply;
+            } else <span class="missing-if-branch" title="else path not taken" >E</span>if (_claimablePCC &lt;= _currentBatchSupply) {
+                PCCTokenContract.safeTransferFrom(
+                    address(this),
+                    _investorAddress,
+                    _currentBatchId,
+                    _claimablePCC,
+                    "0x00"
+                );
+&nbsp;
+                _claimablePCC = 0;
+            }
+&nbsp;
+            if (_claimablePCC == 0) {
+                investorDetails[_investorAddress].pccClaimedForRelease[
+                    _releaseType
+                ] = true;
+            }
+&nbsp;
+            emit IERC1155Upgradeable.TransferSingle(
+                msg.sender,
+                address(this),
+                _investorAddress,
+                _currentBatchId,
+                _claimablePCC
+            );
+        }
+    }
+&nbsp;
+    /**
+     * @notice _checkForBatchSupply: Internal Fn To Check Batch's PCC Supply
+     * @param _categoryId Project Id
+     * @param _commodityId Commodity Id
+     * @param _releaseType Release Type
+     */
+    function _checkForBatchSupply(
+        uint256 _categoryId,
+        uint256 _commodityId,
+        string memory _releaseType
+    ) internal view returns (uint256) {
+        uint256 _batchIdListLength = releaseDetails[_categoryId][_commodityId][
+            _releaseType
+        ].batchIdList.length;
+        uint256 _sumOfBatchSupply;
+        for (uint256 i = 0; i &lt; _batchIdListLength; ++i) {
+            _sumOfBatchSupply += PCCTokenContract.balanceOf(
+                address(this),
+                releaseDetails[_categoryId][_commodityId][_releaseType]
+                    .batchIdList[i]
+            );
+        }
+&nbsp;
+        return _sumOfBatchSupply;
+    }
+&nbsp;
+    /**
+     * @notice _checkBeforeCreateReleasePool: Checks Before Creating New Release
+     * @dev Checking credibilty of arguments
+     * @param _categoryId Project Id
+     * @param _commodityId Commodity Id
+     * @param _releaseType Release Type
+     */
+    function _checkBeforeForArguments(
+        uint256 _categoryId,
+        uint256 _commodityId,
+        string memory _releaseType
+    ) internal pure {
+        require(
+            _categoryId != 0 &amp;&amp;
+                _commodityId != 0 &amp;&amp;
+                bytes(_releaseType).length != 0,
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
+    }
+&nbsp;
+    /**
+     * @dev Necessary function inheritance for ERC1155Supply
+     * @param interfaceId Interface Id of the contract
+     */
+<span class="fstat-no" title="function not covered" >    function supportsInterface(</span>
+        bytes4 interfaceId
+    )
+        public
+        view
+        virtual
+        override(ERC1155ReceiverUpgradeable, AccessControlUpgradeable)
+        returns (bool)
+    {
+<span class="cstat-no" title="statement not covered" >        return super.supportsInterface(interfaceId);</span>
+    }
+&nbsp;
+    /**
+        @dev function to override _msgsender() for BMT
+     */
+    function _msgSender() internal view virtual override returns (address) {
+        return msgSender();
+    }
+}
+&nbsp;
+contract LiquidityToken is ILiquidityToken, ERC20, AccessControl {
+    bytes32 public constant EVX_LIQUIDITY_MANAGER_ROLE =
+        keccak256("EVX_LIQUIDITY_MANAGER_ROLE");
+&nbsp;
+    /**
+     * @notice Standard ERC20 Constructor
+     * @param _LPTokenName LP Token Name
+     * @param _LPTokenSymbol LP Token Symbol
+     * @param _superAdmin Super Admin Address
+     */
+    constructor(
+        string memory _LPTokenName,
+        string memory _LPTokenSymbol,
+        address _superAdmin
+    ) ERC20(_LPTokenName, _LPTokenSymbol) {
+        _setRoleAdmin(EVX_LIQUIDITY_MANAGER_ROLE, EVX_LIQUIDITY_MANAGER_ROLE);
+        _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
+        _setupRole(EVX_LIQUIDITY_MANAGER_ROLE, _superAdmin);
+    }
+&nbsp;
+    /**
+     * @notice decimals: Override Decimals To Default 0
+     */
+<span class="fstat-no" title="function not covered" >    function decimals() public pure override(ERC20) returns (uint8) {</span>
+<span class="cstat-no" title="statement not covered" >        return 0;</span>
+    }
+&nbsp;
+    /**
+        @notice mint: Standard ERC20's mint
+        @dev Using ERC20's internal _mint function
+        @param account Account where tokens will get minted
+        @param amount Amount of tokens to be minted        
+     */
+    function mint(
+        address account,
+        uint256 amount
+    ) public <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        _mint(account, amount);
+    }
+&nbsp;
+    /**
+        @notice burn: Standard ERC20's burn
+        @dev Using ERC20's internal _mint function
+        @param account Account from where tokens will get burned from
+        @param amount Amount of tokens to be burned
+     */
+    function burn(
+        address account,
+        uint256 amount
+    ) public <span class="missing-if-branch" title="else path not taken" >E</span>onlyRole(EVX_LIQUIDITY_MANAGER_ROLE) {
+        _burn(account, amount);
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Nov 07 2023 13:50:25 GMT+0530 (India Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
