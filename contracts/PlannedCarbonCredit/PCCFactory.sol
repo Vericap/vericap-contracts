@@ -19,6 +19,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/IPCCManager.sol";
 import "../helper/BasicMetaTransaction.sol";
 
+bytes32 constant EVX_MANAGER_ROLE = keccak256("EVX_MANAGER_ROLE");
+
 error ARGUMENT_PASSED_AS_ZERO();
 
 contract PCCFactory is
@@ -42,13 +44,6 @@ contract PCCFactory is
      * @dev Global declaration of PCCManager contract
      */
     IPCCManager public pccManagerContract;
-
-    /**
-            @notice Declaring access based roles
-        */
-    bytes32 public constant EVX_SUPER_ADMIN_ROLE =
-        keccak256("EVX_SUPER_ADMIN_ROLE");
-    bytes32 public constant EVX_MANAGER_ROLE = keccak256("EVX_MANAGER_ROLE");
 
     /**
             @dev projectIds: Storing project Ids in an array
@@ -146,9 +141,8 @@ contract PCCFactory is
         */
     function initialize(address _superAdmin) external initializer {
         __Ownable_init();
-        _setRoleAdmin(EVX_SUPER_ADMIN_ROLE, EVX_SUPER_ADMIN_ROLE);
+        _setRoleAdmin(EVX_MANAGER_ROLE, EVX_MANAGER_ROLE);
         _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
-        _setupRole(EVX_SUPER_ADMIN_ROLE, _superAdmin);
         _setupRole(EVX_MANAGER_ROLE, _superAdmin);
     }
 
@@ -440,7 +434,7 @@ contract PCCFactory is
      */
     function setPCCManagerContract(
         address _pccManagerContract
-    ) external onlyRole(EVX_SUPER_ADMIN_ROLE) {
+    ) external onlyRole(EVX_MANAGER_ROLE) {
         pccManagerContract = IPCCManager(_pccManagerContract);
         grantRole(EVX_MANAGER_ROLE, _pccManagerContract);
     }
@@ -453,7 +447,7 @@ contract PCCFactory is
     function grantManagerRoleForBatch(
         address _batchId,
         address _address
-    ) external onlyRole(EVX_SUPER_ADMIN_ROLE) {
+    ) external onlyRole(EVX_MANAGER_ROLE) {
         PlannedCarbonCredit(_batchId).grantRole(EVX_MANAGER_ROLE, _address);
     }
 
@@ -555,10 +549,6 @@ contract PCCFactory is
  */
 
 contract PlannedCarbonCredit is ERC20, AccessControl {
-    /**
-     * @notice Declaring access based roles
-     */
-    bytes32 public constant EVX_MANAGER_ROLE = keccak256("EVX_MANAGER_ROLE");
 
     /**
             @notice BatchTransfer triggers when tokens are transferred in 
@@ -594,7 +584,7 @@ contract PlannedCarbonCredit is ERC20, AccessControl {
             @return uint8 returns ERC20 decimals
         */
     function decimals() public pure override returns (uint8) {
-        return 0;
+        return 5;
     }
 
     /**
