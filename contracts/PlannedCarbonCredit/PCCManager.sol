@@ -85,32 +85,21 @@ contract PCCManager is
     );
 
     /**
-        @notice BatchDeliveryYearUpdated triggers when a batch's delivery 
+        @notice BatchPlannedDeliveryYearUpdated triggers when a batch's delivery 
                 year is updated
      */
-    event BatchDeliveryYearUpdated(
+    event PlannedDeliveryYearUpdatedForBatch(
         uint256 projectId,
         uint256 commodityId,
         address batchId,
-        uint256 updatedDeliveryYear
+        uint256 updatedPlannedDeliveryYear
     );
 
     /**
-        @notice BatchDeliveryYearUpdated triggers when a batch's delivery 
-                estimate is updated
-     */
-    event BatchDeliveryEstimateUpdated(
-        uint256 projectId,
-        uint256 commodityId,
-        address batchId,
-        string updatedDeliveryEstimate
-    );
-
-    /**
-        @notice BatchDeliveryYearUpdated triggers when a batch's URI is 
+        @notice BatchPlannedDeliveryYearUpdated triggers when a batch's URI is 
                 updated
      */
-    event BatchURIUpdated(
+    event URIUpdatedForBatch(
         uint256 projectId,
         uint256 commodityId,
         address batchId,
@@ -293,31 +282,31 @@ contract PCCManager is
     }
 
     /**
-        @notice updateBatchDeliveryYear: Update delivery year of batch
+        @notice updateBatchPlannedDeliveryYear: Update delivery year of batch
         @param _projectId Project Id 
         @param _commodityId Commodity Id
         @param _batchId Batch Id w.r.t to project Id and commidity Id
-        @param _updatedDeliveryYear Updated delivery year value
+        @param _updatedPlannedDeliveryYear Updated delivery year value
      */
-    function updateBatchDeliveryYear(
+    function updateBatchPlannedDeliveryYear(
         uint256 _projectId,
         uint256 _commodityId,
         address _batchId,
-        uint256 _updatedDeliveryYear
+        uint256 _updatedPlannedDeliveryYear
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
         pccFactoryContract.updateBatchDetailDuringPlannedDeliveryYearChange(
             _projectId,
             _commodityId,
             _batchId,
-            _updatedDeliveryYear
+            _updatedPlannedDeliveryYear
         );
 
-        emit BatchDeliveryYearUpdated(
+        emit PlannedDeliveryYearUpdatedForBatch(
             _projectId,
             _commodityId,
             _batchId,
-            _updatedDeliveryYear
+            _updatedPlannedDeliveryYear
         );
     }
 
@@ -342,7 +331,12 @@ contract PCCManager is
             _updatedURI
         );
 
-        emit BatchURIUpdated(_projectId, _commodityId, _batchId, _updatedURI);
+        emit URIUpdatedForBatch(
+            _projectId,
+            _commodityId,
+            _batchId,
+            _updatedURI
+        );
     }
 
     /**
