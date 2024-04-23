@@ -26,6 +26,7 @@
 		"@openzeppelin/contracts-upgradeable": "^4.9.5",
 		"@openzeppelin/hardhat-upgrades": "^1.22.1",
 		"@openzeppelin/test-helpers": "^0.5.16",
+		"@optionality.io/clone-factory": "^0.2.1",
 		"ascii-art": "^2.8.5",
 		"chai": "^4.3.6",
 		"dotenv": "^16.0.1",
@@ -41,6 +42,7 @@
 		"merkletreejs": "^0.2.32",
 		"npm": "^10.3.0",
 		"solidity-coverage": "^0.8.5",
+		"truffle-flattener": "^1.6.0",
 		"web3": "^4.0.1"
 	}
 }
