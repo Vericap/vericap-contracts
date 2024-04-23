@@ -19,7 +19,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/IPCCManager.sol";
 import "../helper/BasicMetaTransaction.sol";
 
-bytes32 constant EVX_MANAGER_ROLE = keccak256("EVX_MANAGER_ROLE");
+bytes32 constant FACTORY_MANAGER_ROLE = keccak256("FACTORY_MANAGER_ROLE");
 
 error ARGUMENT_PASSED_AS_ZERO();
 
@@ -66,12 +66,12 @@ contract PCCFactory is
     struct BatchDetail {
         address batchId;
         address batchOwner;
-        string deliveryEstimates;
+        string vintage;
         string batchURI;
         uint256 uniqueIdentifier;
         uint256 projectId;
         uint256 commodityId;
-        uint256 deliveryYear;
+        uint256 plannedDeliveryYear;
         uint256 batchSupply;
         uint256 lastUpdated;
     }
@@ -122,8 +122,8 @@ contract PCCFactory is
         address batchId,
         address batchOwner,
         uint256 batchSupply,
-        uint256 deliveryYear,
-        string deliveryEstimate,
+        uint256 plannedDeliveryYear,
+        string vintage,
         string batchURI,
         uint256 uniqueIdentifier,
         uint256 lastUpdated
@@ -141,9 +141,9 @@ contract PCCFactory is
         */
     function initialize(address _superAdmin) external initializer {
         __Ownable_init();
-        _setRoleAdmin(EVX_MANAGER_ROLE, EVX_MANAGER_ROLE);
         _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
-        _setupRole(EVX_MANAGER_ROLE, _superAdmin);
+        _setupRole(FACTORY_MANAGER_ROLE, _superAdmin);
+        _setRoleAdmin(FACTORY_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
     }
 
     /** 
@@ -248,8 +248,8 @@ contract PCCFactory is
             @param _commodityId Commodity Id
             @param _batchOwner Batch owner address
             @param _batchSupply Batch token supply
-            @param _deliveryYear Delivery year
-            @param _deliveryEstimate Delivery estimates
+            @param _plannedDeliveryYear Delivery year
+            @param _vintage Delivery estimates
             @param _batchURI Batch URI
             @param _uniqueIdentifier Unique Identifier, will be used as salt
         */
@@ -258,17 +258,17 @@ contract PCCFactory is
         uint256 _commodityId,
         address _batchOwner,
         uint256 _batchSupply,
-        uint256 _deliveryYear,
-        string calldata _deliveryEstimate,
+        uint256 _plannedDeliveryYear,
+        string calldata _vintage,
         string calldata _batchURI,
         uint256 _uniqueIdentifier
-    ) external onlyRole(EVX_MANAGER_ROLE) {
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeMintNewBatch(
             _projectId,
             _commodityId,
             _batchOwner,
             _batchSupply,
-            _deliveryYear,
+            _plannedDeliveryYear,
             _batchURI,
             _uniqueIdentifier
         );
@@ -277,7 +277,7 @@ contract PCCFactory is
             _uniqueIdentifier,
             string(
                 abi.encodePacked(
-                    "EVXP-",
+                    "PlannedCarbonCredit-",
                     _projectId.toString(),
                     "-",
                     _commodityId.toString(),
@@ -285,7 +285,12 @@ contract PCCFactory is
                     _uniqueIdentifier.toString()
                 )
             ),
-            string(abi.encodePacked("EVXP-", _uniqueIdentifier.toString()))
+            string(
+                abi.encodePacked(
+                    "PlannedCarbonCredit-",
+                    _uniqueIdentifier.toString()
+                )
+            )
         );
 
         PlannedCarbonCredit(_batchAddress).mint(_batchOwner, _batchSupply);
@@ -294,12 +299,12 @@ contract PCCFactory is
             BatchDetail(
                 _batchAddress,
                 _batchOwner,
-                _deliveryEstimate,
+                _vintage,
                 _batchURI,
                 _uniqueIdentifier,
                 _projectId,
                 _commodityId,
-                _deliveryYear,
+                _plannedDeliveryYear,
                 _batchSupply,
                 block.timestamp
             )
@@ -323,8 +328,8 @@ contract PCCFactory is
             _batchAddress,
             _batchOwner,
             _batchSupply,
-            _deliveryYear,
-            _deliveryEstimate,
+            _plannedDeliveryYear,
+            _vintage,
             _batchURI,
             _uniqueIdentifier,
             block.timestamp
@@ -345,7 +350,7 @@ contract PCCFactory is
         address _batchId,
         uint256 _amountToMintOrBurn,
         uint8 _pccBatchAction
-    ) external onlyRole(EVX_MANAGER_ROLE) {
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
         uint256 _batchIndex = batchIndexList[_batchId];
         BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
             _batchId
@@ -370,40 +375,19 @@ contract PCCFactory is
      * @param _projectId Project Id
      * @param _commodityId Commodity Id
      * @param _batchId Batch Id
-     * @param _deliveryYear Updated batch D.Y
+     * @param _plannedDeliveryYear Updated batch D.Y
      */
-    function updateBatchDetailDuringDeliveryYearChange(
+    function updateBatchDetailDuringPlannedDeliveryYearChange(
         uint _projectId,
         uint256 _commodityId,
         address _batchId,
-        uint256 _deliveryYear
-    ) external onlyRole(EVX_MANAGER_ROLE) {
+        uint256 _plannedDeliveryYear
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
         uint256 _batchIndex = batchIndexList[_batchId];
         BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
             _batchId
         ][_batchIndex];
-        _detail.deliveryYear = _deliveryYear;
-        _detail.lastUpdated = block.timestamp;
-    }
-
-    /**
-     * @notice updateBatchDetailDuringURIChange: Update the factory storage
-     * @param _projectId Project Id
-     * @param _commodityId Commodity Id
-     * @param _batchId Batch Id
-     * @param _deliveryEstimate Updated batch D.E
-     */
-    function updateBatchDetailDuringDeliveryEstimateChange(
-        uint _projectId,
-        uint256 _commodityId,
-        address _batchId,
-        string calldata _deliveryEstimate
-    ) external onlyRole(EVX_MANAGER_ROLE) {
-        uint256 _batchIndex = batchIndexList[_batchId];
-        BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
-            _batchId
-        ][_batchIndex];
-        _detail.deliveryEstimates = _deliveryEstimate;
+        _detail.plannedDeliveryYear = _plannedDeliveryYear;
         _detail.lastUpdated = block.timestamp;
     }
 
@@ -419,7 +403,7 @@ contract PCCFactory is
         uint256 _commodityId,
         address _batchId,
         string calldata _batchURI
-    ) external onlyRole(EVX_MANAGER_ROLE) {
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
         uint256 _batchIndex = batchIndexList[_batchId];
         BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
             _batchId
@@ -434,9 +418,9 @@ contract PCCFactory is
      */
     function setPCCManagerContract(
         address _pccManagerContract
-    ) external onlyRole(EVX_MANAGER_ROLE) {
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
         pccManagerContract = IPCCManager(_pccManagerContract);
-        grantRole(EVX_MANAGER_ROLE, _pccManagerContract);
+        grantRole(FACTORY_MANAGER_ROLE, _pccManagerContract);
     }
 
     /**
@@ -447,8 +431,8 @@ contract PCCFactory is
     function grantManagerRoleForBatch(
         address _batchId,
         address _address
-    ) external onlyRole(EVX_MANAGER_ROLE) {
-        PlannedCarbonCredit(_batchId).grantRole(EVX_MANAGER_ROLE, _address);
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        PlannedCarbonCredit(_batchId).grantRole(FACTORY_MANAGER_ROLE, _address);
     }
 
     /**
@@ -458,7 +442,7 @@ contract PCCFactory is
             @param _commodityId Commodity Id
             @param _batchOwner Batch owner address
             @param _batchSupply Batch token supply
-            @param _deliveryYear Delivery year
+            @param _plannedDeliveryYear Delivery year
             @param _batchURI Batch URI
             @param _uniqueIdentifier Unique Identifier, will be used as salt
         */
@@ -467,7 +451,7 @@ contract PCCFactory is
         uint256 _commodityId,
         address _batchOwner,
         uint256 _batchSupply,
-        uint256 _deliveryYear,
+        uint256 _plannedDeliveryYear,
         string calldata _batchURI,
         uint256 _uniqueIdentifier
     ) internal view {
@@ -477,7 +461,7 @@ contract PCCFactory is
             (_projectId != 0) &&
             (_commodityId != 0) &&
             (_batchSupply != 0) &&
-            (_deliveryYear != 0) &&
+            (_plannedDeliveryYear != 0) &&
             (_uniqueIdentifier != 0) &&
             bytes(_batchURI).length != 0
         ) {
@@ -497,7 +481,7 @@ contract PCCFactory is
         uint256 _salt,
         string memory _tokenName,
         string memory _tokenSymbol
-    ) internal onlyRole(EVX_MANAGER_ROLE) returns (address) {
+    ) internal onlyRole(FACTORY_MANAGER_ROLE) returns (address) {
         if (address(pccManagerContract) != address(0)) {
             revert ARGUMENT_PASSED_AS_ZERO();
         }
@@ -518,7 +502,7 @@ contract PCCFactory is
         uint256 _projectId,
         uint256 _commodityId,
         address _batchAddress
-    ) private onlyRole(EVX_MANAGER_ROLE) {
+    ) private onlyRole(FACTORY_MANAGER_ROLE) {
         // Checking for project Id duplication
         if (projectIdExists[_projectId] == false) {
             projectIds.push(_projectId);
@@ -549,7 +533,6 @@ contract PCCFactory is
  */
 
 contract PlannedCarbonCredit is ERC20, AccessControl {
-
     /**
             @notice BatchTransfer triggers when tokens are transferred in 
                     a batch
@@ -573,10 +556,10 @@ contract PlannedCarbonCredit is ERC20, AccessControl {
         address _factoryContract,
         address _managerContract
     ) ERC20(_name, _symbol) {
-        _setRoleAdmin(EVX_MANAGER_ROLE, EVX_MANAGER_ROLE);
+        _setRoleAdmin(FACTORY_MANAGER_ROLE, FACTORY_MANAGER_ROLE);
         _setupRole(DEFAULT_ADMIN_ROLE, _factoryContract);
-        _setupRole(EVX_MANAGER_ROLE, _factoryContract);
-        _setupRole(EVX_MANAGER_ROLE, _managerContract);
+        _setupRole(FACTORY_MANAGER_ROLE, _factoryContract);
+        _setupRole(FACTORY_MANAGER_ROLE, _managerContract);
     }
 
     /**
@@ -596,7 +579,7 @@ contract PlannedCarbonCredit is ERC20, AccessControl {
     function mint(
         address _account,
         uint256 _amount
-    ) public onlyRole(EVX_MANAGER_ROLE) {
+    ) public onlyRole(FACTORY_MANAGER_ROLE) {
         _mint(_account, _amount);
     }
 
@@ -609,7 +592,7 @@ contract PlannedCarbonCredit is ERC20, AccessControl {
     function burn(
         address _account,
         uint256 _amount
-    ) public onlyRole(EVX_MANAGER_ROLE) {
+    ) public onlyRole(FACTORY_MANAGER_ROLE) {
         _burn(_account, _amount);
     }
 

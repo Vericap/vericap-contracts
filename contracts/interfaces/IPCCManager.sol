@@ -42,7 +42,7 @@ interface IPCCManager {
         uint256 _updatedDeliveryYear
     ) external;
 
-    function updateBatchDeliveryEstimate(
+    function updateBatchDetailDuringVinatgeChange(
         uint256 _projectId,
         uint256 _commodityId,
         address _batchId,

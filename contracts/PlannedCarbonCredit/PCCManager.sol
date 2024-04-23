@@ -40,11 +40,7 @@ contract PCCManager is
     /**
         @notice Declaring access based roles
      */
-    bytes32 public constant EVX_SUPER_ADMIN_ROLE =
-        keccak256("EVX_SUPER_ADMIN_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     /**
      * @notice Global declaration of PCCFactory contract
@@ -83,9 +79,9 @@ contract PCCManager is
         @notice ManyToManyBatchTransfer triggers on many-many transfer 
      */
     event ManyToManyBatchTransfer(
-        address[] batchIds,
-        address[] userAddresses,
-        uint256[] amountToTransfer
+        IERC20[] batchIds,
+        address[] _projectDeveloperAddresses,
+        bytes[] batchTransferData
     );
 
     /**
@@ -137,15 +133,9 @@ contract PCCManager is
         address _pccFactoryContract
     ) external initializer {
         __Ownable_init();
-        _setRoleAdmin(EVX_SUPER_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(BURNER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(UPDATER_ROLE, DEFAULT_ADMIN_ROLE);
         _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
-        _setupRole(EVX_SUPER_ADMIN_ROLE, _superAdmin);
-        _setupRole(MINTER_ROLE, _superAdmin);
-        _setupRole(BURNER_ROLE, _superAdmin);
-        _setupRole(UPDATER_ROLE, _superAdmin);
+        _setupRole(MANAGER_ROLE, _superAdmin);
+        _setRoleAdmin(MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
 
         pccFactoryContract = PCCFactory(_pccFactoryContract);
     }
@@ -174,7 +164,7 @@ contract PCCManager is
         address _batchId,
         uint256 _amountToMint,
         address _batchOwner
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeMintMoreAndBurnMore(
             _projectId,
             _commodityId,
@@ -224,7 +214,7 @@ contract PCCManager is
         address _batchId,
         uint256 _amountToBurn,
         address _batchOwner
-    ) external onlyRole(BURNER_ROLE) {
+    ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeMintMoreAndBurnMore(
             _projectId,
             _commodityId,
@@ -261,36 +251,44 @@ contract PCCManager is
     /**
         @notice manyToManyBatchTransfer: Perform PCC transfer from diferent batches 
                 to different user
-        @param _batchIds List of batch Ids
-        @param _userAddresses List of batch Ids
-        @param _amountToTransfer List of amount to be transferred
+        @param _batchTokenIds List of batch Ids
+        @param _batchTransferData receiver addresses and amounts to be converted into bytes
+        @dev Project developers needs to approve the PCCManager. 
+             As, PCCManager will trigger the transfer function in PCCBatch contract
      */
     function manyToManyBatchTransfer(
-        address[] calldata _batchIds,
-        address[] calldata _userAddresses,
-        uint256[] calldata _amountToTransfer
-    ) external onlyRole(EVX_SUPER_ADMIN_ROLE) {
+        IERC20[] calldata _batchTokenIds,
+        address[] calldata _projectDeveloperAddresses,
+        bytes[] calldata _batchTransferData
+    ) external onlyRole(MANAGER_ROLE) {
         require(
-            _batchIds.length == _userAddresses.length &&
-                _userAddresses.length == _amountToTransfer.length,
+            _batchTokenIds.length == _projectDeveloperAddresses.length,
             "UNEVEN_ARGUMENTS_PASSED"
         );
-
-        for (uint256 i = 0; i < _batchIds.length; ) {
-            IERC20(_batchIds[i]).safeTransferFrom(
-                _msgSender(),
-                _userAddresses[i],
-                _amountToTransfer[i]
+        for (uint256 i = 0; i < _batchTokenIds.length; i++) {
+            (
+                address[] memory _receiverAddresses,
+                uint256[] memory _amountToTransfer
+            ) = abi.decode(_batchTransferData[i], (address[], uint256[]));
+            require(
+                _receiverAddresses.length == _amountToTransfer.length,
+                "UNEVEN_ARGUMENTS_PASSED"
             );
-            unchecked {
-                ++i;
+
+            for (uint256 j = 0; j < _receiverAddresses.length; j++) {
+                IERC20 batch = _batchTokenIds[i];
+                batch.safeTransferFrom(
+                    _projectDeveloperAddresses[i],
+                    _receiverAddresses[j],
+                    _amountToTransfer[j]
+                );
             }
         }
 
         emit ManyToManyBatchTransfer(
-            _batchIds,
-            _userAddresses,
-            _amountToTransfer
+            _batchTokenIds,
+            _projectDeveloperAddresses,
+            _batchTransferData
         );
     }
 
@@ -306,9 +304,9 @@ contract PCCManager is
         uint256 _commodityId,
         address _batchId,
         uint256 _updatedDeliveryYear
-    ) external onlyRole(UPDATER_ROLE) {
+    ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
-        pccFactoryContract.updateBatchDetailDuringDeliveryYearChange(
+        pccFactoryContract.updateBatchDetailDuringPlannedDeliveryYearChange(
             _projectId,
             _commodityId,
             _batchId,
@@ -324,35 +322,6 @@ contract PCCManager is
     }
 
     /**
-        @notice updateBatchDeliveryEstimate: Update delivery estimates of batch
-        @param _projectId Project Id 
-        @param _commodityId Commodity Id
-        @param _batchId Batch Id w.r.t to project Id and commidity Id
-        @param _updatedDeliveryEstimate Updated delivery estimates value
-     */
-    function updateBatchDeliveryEstimate(
-        uint256 _projectId,
-        uint256 _commodityId,
-        address _batchId,
-        string calldata _updatedDeliveryEstimate
-    ) external onlyRole(UPDATER_ROLE) {
-        _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
-        pccFactoryContract.updateBatchDetailDuringDeliveryEstimateChange(
-            _projectId,
-            _commodityId,
-            _batchId,
-            _updatedDeliveryEstimate
-        );
-
-        emit BatchDeliveryEstimateUpdated(
-            _projectId,
-            _commodityId,
-            _batchId,
-            _updatedDeliveryEstimate
-        );
-    }
-
-    /**
         @notice updateBatchURI: Update Batch URI for a batch
         @param _projectId Project Id 
         @param _commodityId Commodity Id
@@ -364,7 +333,7 @@ contract PCCManager is
         uint256 _commodityId,
         address _batchId,
         string calldata _updatedURI
-    ) external onlyRole(UPDATER_ROLE) {
+    ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
         pccFactoryContract.updateBatchDetailDuringURIChange(
             _projectId,
@@ -389,12 +358,14 @@ contract PCCManager is
         address _batchId,
         uint256 _amountToMintOrBurn
     ) internal pure {
-        require(
-            (_projectId != 0) && (_commodityId != 0),
-            "ARGUMENT_PASSED_AS_ZERO"
-        );
-        require(_amountToMintOrBurn != 0, "ARGUMENT_PASSED_AS_ZERO");
-        require(_batchId != address(0), "ARGUMENT_PASSED_AS_ZERO");
+        if (
+            (_projectId != 0) &&
+            (_commodityId != 0) &&
+            (_amountToMintOrBurn != 0) &&
+            (_batchId != address(0))
+        ) {
+            revert ARGUMENT_PASSED_AS_ZERO();
+        }
     }
 
     /**
@@ -408,11 +379,11 @@ contract PCCManager is
         uint256 _commodityId,
         address _batchId
     ) internal pure {
-        require(
-            (_projectId != 0) && (_commodityId != 0),
-            "ARGUMENT_PASSED_AS_ZERO"
-        );
-        require(_batchId != address(0), "ARGUMENT_PASSED_AS_ZERO");
+        if (
+            (_projectId != 0) && (_commodityId != 0) && (_batchId != address(0))
+        ) {
+            revert ARGUMENT_PASSED_AS_ZERO();
+        }
     }
 
     /**
