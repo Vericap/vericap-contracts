@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.8.22;
+pragma solidity >=0.8.22;
 
 /**
- * @title EnverX: PCCManager smart contract
- * @author EnverX Blockchain Engineering Team
- * @notice This Contract Is Used For Managing PCCFactory And PCCBatch
+ * @title Planned Carbon Credit Manager Contract
+ * @author Team @vericap
+ * @notice Manager is a upgradeable contract used for mananing PCC Batch related actions
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -352,14 +352,13 @@ contract PCCManager is
         address _batchId,
         uint256 _amountToMintOrBurn
     ) internal pure {
-        if (
+        require(
             (_projectId != 0) &&
-            (_commodityId != 0) &&
-            (_amountToMintOrBurn != 0) &&
-            (_batchId != address(0))
-        ) {
-            revert ARGUMENT_PASSED_AS_ZERO();
-        }
+                (_commodityId != 0) &&
+                (_amountToMintOrBurn != 0) &&
+                (_batchId != address(0)),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
     }
 
     /**
@@ -373,11 +372,12 @@ contract PCCManager is
         uint256 _commodityId,
         address _batchId
     ) internal pure {
-        if (
-            (_projectId != 0) && (_commodityId != 0) && (_batchId != address(0))
-        ) {
-            revert ARGUMENT_PASSED_AS_ZERO();
-        }
+        require(
+            (_projectId != 0) &&
+                (_commodityId != 0) &&
+                (_batchId != address(0)),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
     }
 
     /**

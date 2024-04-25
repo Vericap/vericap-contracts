@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.8.22;
+pragma solidity >=0.8.22;
 
 /**
- * @title Planned Carbon Credit Factory
+ * @title Planned Carbon Credit Factory Smart Contract
  * @author Team @vericap
  * @notice Factory is a upgradeable contract used for deploying new PCC contracts
  */
@@ -18,8 +18,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/IPCCManager.sol";
 import "../helper/BasicMetaTransaction.sol";
-
-bytes32 constant FACTORY_MANAGER_ROLE = keccak256("FACTORY_MANAGER_ROLE");
 
 error ARGUMENT_PASSED_AS_ZERO();
 
@@ -49,6 +47,9 @@ contract PCCFactory is
             @dev projectIds: Storing project Ids in an array
         */
     uint256[] internal projectIds;
+
+    bytes32 public constant FACTORY_MANAGER_ROLE =
+        keccak256("FACTORY_MANAGER_ROLE");
 
     /**
      * @dev Creating ENUM for handling PCC batch actions
@@ -455,18 +456,17 @@ contract PCCFactory is
         string calldata _batchURI,
         uint256 _uniqueIdentifier
     ) internal view {
-        if (
+        require(
             (address(pccManagerContract) != address(0)) &&
-            (_batchOwner != address(0)) &&
-            (_projectId != 0) &&
-            (_commodityId != 0) &&
-            (_batchSupply != 0) &&
-            (_plannedDeliveryYear != 0) &&
-            (_uniqueIdentifier != 0) &&
-            bytes(_batchURI).length != 0
-        ) {
-            revert ARGUMENT_PASSED_AS_ZERO();
-        }
+                (_batchOwner != address(0)) &&
+                (_projectId != 0) &&
+                (_commodityId != 0) &&
+                (_batchSupply != 0) &&
+                (_plannedDeliveryYear != 0) &&
+                (_uniqueIdentifier != 0) &&
+                bytes(_batchURI).length != 0,
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
     }
 
     /**
@@ -482,9 +482,10 @@ contract PCCFactory is
         string memory _tokenName,
         string memory _tokenSymbol
     ) internal onlyRole(FACTORY_MANAGER_ROLE) returns (address) {
-        if (address(pccManagerContract) != address(0)) {
-            revert ARGUMENT_PASSED_AS_ZERO();
-        }
+        require(
+            address(pccManagerContract) != address(0),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
         PlannedCarbonCredit _newChildBatch = new PlannedCarbonCredit{
             salt: bytes32(_salt)
         }(_tokenName, _tokenSymbol, address(this), address(pccManagerContract));
@@ -533,6 +534,9 @@ contract PCCFactory is
  */
 
 contract PlannedCarbonCredit is ERC20, AccessControl {
+    bytes32 public constant FACTORY_MANAGER_ROLE =
+        keccak256("FACTORY_MANAGER_ROLE");
+
     /**
             @notice BatchTransfer triggers when tokens are transferred in 
                     a batch
