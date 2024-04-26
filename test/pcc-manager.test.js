@@ -4,14 +4,30 @@
 const fs = require("fs");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const batchABIPath =
-  "artifacts/contracts/PlannedCarbonCredit/PCCFactory.sol/PlannedCarbonCredit.json";
+const plannedCarbonCreditABI = require("../testABI/plannedCarbonCreditABI.json");
+const { Web3 } = require("web3");
+
+console.log(plannedCarbonCreditABI);
 
 /**
  * @global Initializing Global Variables
  */
 const fsPromises = fs.promises;
 const ZERO_ADDRESS = ethers.constants.AddressZero;
+let plannedCarbonCreditContractInstance;
+const provider = new Web3.providers.HttpProvider(
+  process.env.ETHERSCAN_TESTNET_RPC_URL
+);
+const web3 = new Web3(provider);
+
+/**
+ * @description Fetching Batch Contract ABI
+ */
+let getBatchABI = async () => {
+  const data = await fsPromises.readFile(batchABIPath, "utf-8");
+  const abi = JSON.parse(data)["abi"];
+  return abi;
+};
 
 /**
  * @global Parent Describe Test Block
@@ -26,7 +42,16 @@ describe("PCC Manager Smart Contract", () => {
    * @global Triggers before each describe block
    */
   beforeEach(async () => {
-    [owner, add1, add2] = await ethers.getSigners();
+    [
+      owner,
+      projectDeveloperOne,
+      projectDeveloperTwo,
+      investorOne,
+      investorTwo,
+      investorThree,
+      investorFour,
+      investorFive,
+    ] = await ethers.getSigners();
 
     PCCFactory = await hre.ethers.getContractFactory("PCCFactory");
     pccFactory = await upgrades.deployProxy(PCCFactory, [owner.address], {
@@ -41,6 +66,10 @@ describe("PCC Manager Smart Contract", () => {
       { kind: "uups" }
     );
     await pccManager.deployed();
+
+    const CONTRACT_ADDRESS = pccManager.address;
+
+    contractInstance = new web3.eth.Contract(plannedCarbonCreditABI, CONTRACT_ADDRESS);
   });
 
   /**
@@ -459,8 +488,12 @@ describe("PCC Manager Smart Contract", () => {
    */
   describe("Many To Many PCC Transfer", async () => {
     let batchList;
-    let balanceBeforeTransfer;
-    let balanceAfterTransfer;
+    let dataToTransfer = [];
+    let investorOneBal;
+    let investorTwoBal;
+    let investorThreeBal;
+    let investorFourBal;
+    let investorFiveBal;
 
     /**
      * @description Call Web3 Function In Before Block
@@ -480,64 +513,101 @@ describe("PCC Manager Smart Contract", () => {
         .createNewBatch(
           1,
           1,
-          owner.address,
+          projectDeveloperOne.address,
           1000,
           2024,
           "Quarter-3",
           "https://project-1.com/1",
-          123
+          130
         );
+
       await pccFactory
         .connect(owner)
         .createNewBatch(
           1,
           1,
-          owner.address,
+          projectDeveloperTwo.address,
           1000,
           2024,
           "Quarter-3",
-          "https://project-1.com/1",
-          124
+          "https://project-2.com/2",
+          131
         );
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInABatch
+       * @function getBatchListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInABatch(1, 1);
-
-      /**
-       * @description Fetching Batch Contract ABI
-       */
-      let getBatchABI = async () => {
-        const data = await fsPromises.readFile(batchABIPath, "utf-8");
-        const abi = JSON.parse(data)["abi"];
-        return abi;
-      };
-
-      let batchABI = await getBatchABI();
+      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description Creating Batch Instance For Both Batches Created Above
        */
-      let batchContractOne = new ethers.Contract(batchList[0], batchABI, owner);
-      let batchContractTwo = new ethers.Contract(batchList[1], batchABI, owner);
-
-      /**
-       * @description Fetching Balance Of User Address Before Transfer
-       * @function balanceOf
-       * @param add1
-       */
-      balanceBeforeTransfer = await batchContractOne.balanceOf(add1.address);
+      let batchContractOne = new ethers.Contract(
+        batchList[0],
+        plannedCarbonCreditABI,
+        owner
+      );
+      let batchContractTwo = new ethers.Contract(
+        batchList[1],
+        plannedCarbonCreditABI,
+        owner
+      );
 
       /**
        * @description Approving PCC Smart Contract To Perform Transfer
        * @param pccToken.address
        * @param amountToApprove
        */
-      await batchContractOne.connect(owner).approve(pccManager.address, 1000);
-      await batchContractTwo.connect(owner).approve(pccManager.address, 1000);
+      await batchContractOne
+        .connect(projectDeveloperOne)
+        .approve(pccManager.address, 10000000);
+      await batchContractTwo
+        .connect(projectDeveloperTwo)
+        .approve(pccManager.address, 10000000);
+
+      let transferDataOne = [
+        [[investorOne.address], [10]],
+        [
+          [investorTwo.address, investorThree.address],
+          [20, 30],
+        ],
+        [
+          [investorFour.address, investorFive.address],
+          [40, 50],
+        ],
+      ];
+
+      let transferDataTwo = [
+        [[investorOne.address], [10]],
+        [
+          [investorTwo.address, investorThree.address],
+          [20, 30],
+        ],
+        [
+          [investorFour.address, investorFive.address],
+          [40, 50],
+        ],
+      ];
+
+      const encodedDataOne = web3.eth.abi.encodeParameters(
+        ["address[]", "uint256[]"],
+        transferDataOne
+      );
+
+      const encodeDataTwo = wen3.eth.abi.encodeParameters(
+        ["address[]", "uint256[]"],
+        transferDataTwo
+      );
+
+      dataToTransfer.push(encodedDataOne, encodeDataTwo);
+
+      console.log("Batch List: ", batchList);
+      console.log("Data To Transfer", dataToTransfer);
+      console.log(`Project Developer One:  ${projectDeveloperOne}
+	  			   Project Developer Two: ${projectDeveloperTwo}
+	  `);
 
       /**
        * @description Web3 Function Call
@@ -549,17 +619,19 @@ describe("PCC Manager Smart Contract", () => {
       await pccManager
         .connect(owner)
         .manyToManyBatchTransfer(
-          [batchList[0], batchList[0]],
-          [add1.address, add2.address],
-          [50, 50]
+          [batchList[0], batchList[1]],
+          [projectDeveloperOne.address, projectDeveloperTwo.address],
+          dataToTransfer
         );
 
       /**
        * @description Fetching Balance Of User Address Before Transfer
        * @function balanceOf
-       * @param add1
+       * @param projectDeveloperOne
        */
-      balanceAfterTransfer = await batchContractOne.balanceOf(add1.address);
+      balanceAfterTransfer = await batchContractOne.balanceOf(
+        projectDeveloperOne.address
+      );
     });
 
     /**
@@ -571,7 +643,7 @@ describe("PCC Manager Smart Contract", () => {
           .connect(owner)
           .manyToManyBatchTransfer(
             [batchList[0], batchList[1]],
-            [add1.address, add2.address],
+            [projectDeveloperOne.address, projectDeveloperTwo.address],
             [50]
           )
       ).to.be.revertedWith("UNEVEN_ARGUMENTS_PASSED");
