@@ -26,7 +26,7 @@ module.exports = {
       url: "http://127.0.0.1:8545",
     },
     sepolia: {
-      url: process.env.ETHERSCAN_TESTNET_RPC_URL || "",
+      url: process.env.ETHEREUM_TESTNET_RPC_URL || "",
       accounts:
         process.env.ADMIN_WALLET_PRIVATE_KEY !== undefined
           ? [process.env.ADMIN_WALLET_PRIVATE_KEY]
@@ -62,7 +62,7 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      sepolia: process.env.ETHERSCAN_API_KEY,
+      sepolia: process.env.ETHEREUM_API_KEY,
       polygonAmoy: process.env.POLYGON_API_KEY,
       polygon: process.env.POLYGON_API_KEY,
     },

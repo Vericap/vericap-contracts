@@ -7,8 +7,6 @@ const { ethers, upgrades } = require("hardhat");
 const plannedCarbonCreditABI = require("../testABI/plannedCarbonCreditABI.json");
 const { Web3 } = require("web3");
 
-console.log(plannedCarbonCreditABI);
-
 /**
  * @global Initializing Global Variables
  */
@@ -16,18 +14,9 @@ const fsPromises = fs.promises;
 const ZERO_ADDRESS = ethers.constants.AddressZero;
 let plannedCarbonCreditContractInstance;
 const provider = new Web3.providers.HttpProvider(
-  process.env.ETHERSCAN_TESTNET_RPC_URL
+  process.env.ETHEREUM_TESTNET_RPC_URL
 );
 const web3 = new Web3(provider);
-
-/**
- * @description Fetching Batch Contract ABI
- */
-let getBatchABI = async () => {
-  const data = await fsPromises.readFile(batchABIPath, "utf-8");
-  const abi = JSON.parse(data)["abi"];
-  return abi;
-};
 
 /**
  * @global Parent Describe Test Block
@@ -69,7 +58,10 @@ describe("PCC Manager Smart Contract", () => {
 
     const CONTRACT_ADDRESS = pccManager.address;
 
-    contractInstance = new web3.eth.Contract(plannedCarbonCreditABI, CONTRACT_ADDRESS);
+    contractInstance = new web3.eth.Contract(
+      plannedCarbonCreditABI,
+      CONTRACT_ADDRESS
+    );
   });
 
   /**
@@ -567,7 +559,9 @@ describe("PCC Manager Smart Contract", () => {
         .connect(projectDeveloperTwo)
         .approve(pccManager.address, 10000000);
 
-      let transferDataOne = [
+      let finalDataToUpload = [];
+
+      let dataToEncode_1 = [
         [[investorOne.address], [10]],
         [
           [investorTwo.address, investorThree.address],
@@ -579,7 +573,7 @@ describe("PCC Manager Smart Contract", () => {
         ],
       ];
 
-      let transferDataTwo = [
+      let dataToEncode_2 = [
         [[investorOne.address], [10]],
         [
           [investorTwo.address, investorThree.address],
@@ -591,23 +585,53 @@ describe("PCC Manager Smart Contract", () => {
         ],
       ];
 
-      const encodedDataOne = web3.eth.abi.encodeParameters(
-        ["address[]", "uint256[]"],
-        transferDataOne
-      );
+      const convertEncodedDataToReadableStream_1 = async () => {
+        const encodedArguments = [];
+        for (let i = 0; i < dataToEncode_1.length; i++) {
+          const encodedDataToTransfer =
+            await encodeFunctionArgumentsForManyToManyTransfer_1(
+              dataToEncode_1[i]
+            );
+          encodedArguments.push(encodedDataToTransfer);
+        }
+        return encodedArguments;
+      };
 
-      const encodeDataTwo = wen3.eth.abi.encodeParameters(
-        ["address[]", "uint256[]"],
-        transferDataTwo
-      );
+      const encodeFunctionArgumentsForManyToManyTransfer_1 = async (data) => {
+        const encodedData = web3.eth.abi.encodeParameters(
+          ["address[]", "uint256[]"],
+          data
+        );
+        return encodedData;
+      };
 
-      dataToTransfer.push(encodedDataOne, encodeDataTwo);
+      const encodedData_1 = await convertEncodedDataToReadableStream_1();
 
-      console.log("Batch List: ", batchList);
-      console.log("Data To Transfer", dataToTransfer);
-      console.log(`Project Developer One:  ${projectDeveloperOne}
-	  			   Project Developer Two: ${projectDeveloperTwo}
-	  `);
+      const convertEncodedDataToReadableStream_2 = async () => {
+        const encodedArguments = [];
+        for (let i = 0; i < dataToEncode_2.length; i++) {
+          const encodedDataToTransfer =
+            await encodeFunctionArgumentsForManyToManyTransfer_2(
+              dataToEncode_2[i]
+            );
+          encodedArguments.push(encodedDataToTransfer);
+        }
+        return encodedArguments;
+      };
+
+      const encodeFunctionArgumentsForManyToManyTransfer_2 = async (data) => {
+        const encodedData = web3.eth.abi.encodeParameters(
+          ["address[]", "uint256[]"],
+          data
+        );
+        return encodedData;
+      };
+
+      const encodedData_2 = await convertEncodedDataToReadableStream_2();
+
+      finalDataToUpload.push(encodedData_1);
+
+      console.log(finalDataToUpload);
 
       /**
        * @description Web3 Function Call
@@ -619,9 +643,9 @@ describe("PCC Manager Smart Contract", () => {
       await pccManager
         .connect(owner)
         .manyToManyBatchTransfer(
-          [batchList[0], batchList[1]],
-          [projectDeveloperOne.address, projectDeveloperTwo.address],
-          dataToTransfer
+          [batchList[0]],
+          [projectDeveloperOne.address],
+          finalDataToUpload
         );
 
       /**
