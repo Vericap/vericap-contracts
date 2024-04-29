@@ -251,9 +251,7 @@ contract PCCManager is
         bytes[] calldata _batchTransferData
     ) external onlyRole(MANAGER_ROLE) {
         require(
-            (_batchTokenIds.length == _projectDeveloperAddresses.length) &&
-                (_projectDeveloperAddresses.length ==
-                    _batchTransferData.length),
+            (_batchTokenIds.length == _projectDeveloperAddresses.length),
             "UNEVEN_ARGUMENTS_PASSED"
         );
         for (uint256 i = 0; i < _batchTokenIds.length; i++) {
