@@ -571,18 +571,6 @@ describe("PCC Manager Smart Contract", () => {
         ],
       ];
 
-      let dataToEncode_2 = [
-        [[investorOne.address], [10]],
-        [
-          [investorTwo.address, investorThree.address],
-          [20, 30],
-        ],
-        [
-          [investorFour.address, investorFive.address],
-          [40, 50],
-        ],
-      ];
-
       const convertEncodedDataToReadableStream_1 = async () => {
         const encodedArguments = [];
         for (let i = 0; i < dataToEncode_1.length; i++) {
@@ -604,7 +592,7 @@ describe("PCC Manager Smart Contract", () => {
       };
 
       const encodedData_1 = await convertEncodedDataToReadableStream_1();
-      
+
       finalDataToUpload = encodedData_1;
 
       /**

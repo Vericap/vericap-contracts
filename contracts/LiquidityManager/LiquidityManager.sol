@@ -2,8 +2,8 @@
 pragma solidity 0.8.22;
 
 /**
- * @title EnverX: LiquidityManager smart contract
- * @author EnverX Blockchain Engineering Team
+ * @title Vericap: LiquidityManager smart contract
+ * @author Vericap Blockchain Engineering Team
  * @notice This Contract Is Used For Managing Liquidity For Pre-PDD
  */
 

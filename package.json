@@ -1,5 +1,5 @@
 {
-	"name": "enverx-smart-contracts",
+	"name": "vericap-smart-contracts",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
@@ -8,15 +8,15 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/SoluLab/enverx-smart-contracts.git"
+		"url": "git+https://github.com/Vericap/vericap-contracts.git"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/SoluLab/enverx-smart-contracts/issues"
+		"url": "https://github.com/Vericap/vericap-contracts/issues"
 	},
-	"homepage": "https://github.com/SoluLab/enverx-smart-contracts#readme",
+	"homepage": "https://github.com/Vericap/vericap-contracts#readme",
 	"dependencies": {
 		"@nomiclabs/hardhat-ethers": "^2.1.0",
 		"@nomiclabs/hardhat-etherscan": "^3.1.0",
