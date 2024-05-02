@@ -5,7 +5,7 @@ const fs = require("fs");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 const batchABIPath =
-  "artifacts/contracts/PlannedCarbonCredit/PCCFactory.sol/PlannedCarbonCredit.json";
+  "artifacts/contracts/PlannedCredit/PlannedCreditFactory.sol/PlannedCredit.json";
 
 /**
  * @global Initializing Global Variables
@@ -16,11 +16,17 @@ const ZERO_ADDRESS = ethers.constants.AddressZero;
 /**
  * @global Parent Describe Test Block
  */
-describe("PCC Factory Smart Contract", () => {
+describe("Planned Credit Factory Smart Contract", () => {
   /**
    * @public Block Scoped Variable Declaration
    */
-  let PCCFactory, pccFactory, PCCManager, pccManager, owner, add1, add2;
+  let PlannedCreditFactory,
+    plannedCreditFactory,
+    PlannedCreditManager,
+    plannedCreditManager,
+    owner,
+    add1,
+    add2;
 
   /**
    * @global Triggers before each describe block
@@ -28,29 +34,37 @@ describe("PCC Factory Smart Contract", () => {
   beforeEach(async () => {
     [owner, add1, add2] = await ethers.getSigners();
 
-    PCCFactory = await hre.ethers.getContractFactory("PCCFactory");
-    pccFactory = await upgrades.deployProxy(PCCFactory, [owner.address], {
-      kind: "uups",
-    });
-    await pccFactory.deployed();
+    PlannedCreditFactory = await hre.ethers.getContractFactory(
+      "PlannedCreditFactory"
+    );
+    plannedCreditFactory = await upgrades.deployProxy(
+      PlannedCreditFactory,
+      [owner.address],
+      {
+        kind: "uups",
+      }
+    );
+    await plannedCreditFactory.deployed();
 
-    PCCManager = await hre.ethers.getContractFactory("PCCManager");
-    pccManager = await upgrades.deployProxy(
-      PCCManager,
-      [owner.address, pccFactory.address],
+    PlannedCreditManager = await hre.ethers.getContractFactory(
+      "PlannedCreditManager"
+    );
+    plannedCreditManager = await upgrades.deployProxy(
+      PlannedCreditManager,
+      [owner.address, plannedCreditFactory.address],
       { kind: "uups" }
     );
-    await pccManager.deployed();
+    await plannedCreditManager.deployed();
   });
 
   /**
-   * @description Setup PCC Manager Address
-   * @function setPCCManagerContract
-   * @param pccManagerContract
+   * @description Setup Planned Credit Manager Address
+   * @function setPlannedCreditManagerContract
+   * @param plannedCreditManagerContract
    */
-  describe("Setting Up PCC Manager Contract Address", async () => {
+  describe("Setting Up Planned Credit Manager Contract Address", async () => {
     /**
-		 * @description Case: Check For PCC Manager Address
+		 * @description Case: Check For Planned Credit Manager Address
 		 *          uint256 _projectId,
 					uint256 _commodityId,
 					address _batchOwner,
@@ -62,7 +76,7 @@ describe("PCC Factory Smart Contract", () => {
 		 */
     it("Should fail if manager contract address is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -79,11 +93,13 @@ describe("PCC Factory Smart Contract", () => {
     /**
      * @description Case: Successful Call To Web3 Function
      */
-    it("Should set pcc manager contract address successfully", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      expect(await pccFactory.pccManagerContract()).to.equal(
-        pccManager.address
-      );
+    it("Should set planned credit manager contract address successfully", async () => {
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      expect(
+        await plannedCreditFactory.plannedCreditManagerContract()
+      ).to.equal(plannedCreditManager.address);
     });
   });
 
@@ -101,17 +117,22 @@ describe("PCC Factory Smart Contract", () => {
    */
   describe("Creating A New Batch", () => {
     /**
-     * @description Case: Setting PCCManager Address Before Every IT Block
+     * @description Case: Setting PlannedCreditManager Address Before Every IT Block
      */
-    beforeEach("Should update pcc manager contract address", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-    });
+    beforeEach(
+      "Should update planned credit manager contract address",
+      async () => {
+        await plannedCreditFactory
+          .connect(owner)
+          .setPlannedCreditManagerContract(plannedCreditManager.address);
+      }
+    );
     /**
      * @description Case: Check For Project Id
      */
     it("Should fail if project Id is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             0,
@@ -131,7 +152,7 @@ describe("PCC Factory Smart Contract", () => {
      */
     it("Should fail if commodity Id is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -151,7 +172,7 @@ describe("PCC Factory Smart Contract", () => {
      */
     it("Should fail if batch owner address is a zero address", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -171,7 +192,7 @@ describe("PCC Factory Smart Contract", () => {
      */
     it("Should fail If batch supply is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -191,7 +212,7 @@ describe("PCC Factory Smart Contract", () => {
      */
     it("Should fail if delivery year is empty", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -211,7 +232,7 @@ describe("PCC Factory Smart Contract", () => {
      */
     it("Should fail if batch URI is empty", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(1, 1, owner.address, 1000, 2024, "Quarter-3", "", 123)
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
@@ -222,7 +243,7 @@ describe("PCC Factory Smart Contract", () => {
      */
     it("Should fail if salt is not an integer value", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -241,7 +262,7 @@ describe("PCC Factory Smart Contract", () => {
      * @description Case: Successful Call To Web3 Function
      */
     it("Should create new batch successfully", async () => {
-      const createNewBatch = await pccFactory
+      const createNewBatch = await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -255,7 +276,7 @@ describe("PCC Factory Smart Contract", () => {
         );
 
       expect(createNewBatch)
-        .to.emit(pccFactory, "NewBatchCreated")
+        .to.emit(plannedCreditFactory, "NewBatchCreated")
         .withArgs(
           1,
           1,
@@ -298,10 +319,11 @@ describe("PCC Factory Smart Contract", () => {
          * @param projectId
          * @param commodityId
          */
-        await pccFactory
+        await plannedCreditFactory
           .connect(owner)
-          .setPCCManagerContract(pccManager.address);
-        batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+          .setPlannedCreditManagerContract(plannedCreditManager.address);
+        batchList =
+          await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
         batchAddress = batchList[0];
 
         /**
@@ -311,7 +333,7 @@ describe("PCC Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailBeforeMint = await pccFactory.getBatchDetails(
+        batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
           1,
           1,
           batchAddress
@@ -321,7 +343,7 @@ describe("PCC Factory Smart Contract", () => {
         /**
          * @description updateBatchDetailDuringMintOrBurnMore Function Call
          */
-        await pccFactory.updateBatchDetailDuringMintOrBurnMore(
+        await plannedCreditFactory.updateBatchDetailDuringMintOrBurnMore(
           1,
           1,
           batchAddress,
@@ -336,7 +358,7 @@ describe("PCC Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailAfterMint = await pccFactory.getBatchDetails(
+        batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
           1,
           1,
           batchAddress
@@ -384,11 +406,11 @@ describe("PCC Factory Smart Contract", () => {
          * @param projectId
          * @param commodityId
          */
-        await pccFactory
+        await plannedCreditFactory
           .connect(owner)
-          .setPCCManagerContract(pccManager.address);
+          .setPlannedCreditManagerContract(plannedCreditManager.address);
 
-        await pccFactory
+        await plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -401,10 +423,11 @@ describe("PCC Factory Smart Contract", () => {
             123
           );
 
-        await pccFactory
+        await plannedCreditFactory
           .connect(owner)
-          .setPCCManagerContract(pccManager.address);
-        batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+          .setPlannedCreditManagerContract(plannedCreditManager.address);
+        batchList =
+          await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
         batchAddress = batchList[0];
 
         /**
@@ -414,7 +437,7 @@ describe("PCC Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailBeforeMint = await pccFactory.getBatchDetails(
+        batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
           1,
           1,
           batchAddress
@@ -424,7 +447,7 @@ describe("PCC Factory Smart Contract", () => {
         /**
          * @description updateBatchDetailDuringMintOrBurnMore Function Call
          */
-        await pccFactory.updateBatchDetailDuringMintOrBurnMore(
+        await plannedCreditFactory.updateBatchDetailDuringMintOrBurnMore(
           1,
           1,
           batchAddress,
@@ -439,7 +462,7 @@ describe("PCC Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailAfterMint = await pccFactory.getBatchDetails(
+        batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
           1,
           1,
           batchAddress
@@ -478,8 +501,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to updateBatchDeliveryYear", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -498,7 +523,8 @@ describe("PCC Factory Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description updateBatchDetailDuringDeliveryYearChange Update Batch's Delivery Year
@@ -508,7 +534,7 @@ describe("PCC Factory Smart Contract", () => {
        * @param batchId
        * @param updatedDeliveryYear
        */
-      await pccFactory.updateBatchDetailDuringPlannedDeliveryYearChange(
+      await plannedCreditFactory.updateBatchDetailDuringPlannedDeliveryYearChange(
         1,
         1,
         batchList[0],
@@ -522,7 +548,7 @@ describe("PCC Factory Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterUpdate = await pccFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchList[0]
@@ -557,8 +583,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to updateBatchURI", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -577,7 +605,8 @@ describe("PCC Factory Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description updateBatchDetailDuringURIChange Update Batch's Delivery Estimate
@@ -587,13 +616,13 @@ describe("PCC Factory Smart Contract", () => {
        * @param batchId
        * @param updatedBatchURI
        */
-      await pccFactory.updateBatchDetailDuringURIChange(
+      await plannedCreditFactory.updateBatchDetailDuringURIChange(
         1,
         1,
         batchList[0],
         "https://project-1.com/updatedSlug"
       );
-      batchDetailAfterUpdate = await pccFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchList[0]
@@ -612,14 +641,14 @@ describe("PCC Factory Smart Contract", () => {
   });
 
   /**
-   * @description Grant Manager Role For A PCCBatch Contract
+   * @description Grant Manager Role For A PlannedCredit Batch Contract
    */
   describe("Grant MANAGER_ROLE", async () => {
     let batchList;
     let batchAddress;
     let batchABI;
     let batchContractInstance;
-    let MANAGER_ROLE = await pccFactory.connect(owner).MANAGER_ROLE();
+    let MANAGER_ROLE = await plannedCreditFactory.connect(owner).MANAGER_ROLE();
     /**
      * @description Call Web3 Function Before Each Block
      * @function createNewBatch
@@ -632,8 +661,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to updateBatchURI", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -652,7 +683,10 @@ describe("PCC Factory Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInABatch(1, 1);
+      batchList = await plannedCreditFactory.getBatchListForACommodityInABatch(
+        1,
+        1
+      );
       batchAddress = batchList[0];
 
       /**
@@ -661,7 +695,10 @@ describe("PCC Factory Smart Contract", () => {
        * @param batchId
        * @param userAddress
        */
-      await pccFactory.grantManagerRoleForBatch(batchAddress, add1.address);
+      await plannedCreditFactory.grantManagerRoleForBatch(
+        batchAddress,
+        add1.address
+      );
 
       /**
        * @description Fetching Batch Contract ABI
@@ -710,8 +747,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to getProjectList", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -724,7 +763,7 @@ describe("PCC Factory Smart Contract", () => {
           126
         );
       projectListLength += 1;
-      await pccFactory
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           15,
@@ -742,7 +781,7 @@ describe("PCC Factory Smart Contract", () => {
        * @description Fetch Project List
        * @function getProjectList
        */
-      projectList = await pccFactory.connect(owner).getProjectList();
+      projectList = await plannedCreditFactory.connect(owner).getProjectList();
     });
 
     /**
@@ -771,8 +810,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to getCommodityListForAProject", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -784,7 +825,7 @@ describe("PCC Factory Smart Contract", () => {
           "https://project-1.com/1",
           123
         );
-      await pccFactory
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -802,7 +843,7 @@ describe("PCC Factory Smart Contract", () => {
        * @function getCommodityListForAProject
        * @param projectId
        */
-      commodityList = await pccFactory.getCommodityListForAProject(1);
+      commodityList = await plannedCreditFactory.getCommodityListForAProject(1);
     });
 
     /**
@@ -831,8 +872,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to getCommodityListForAProject", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -844,7 +887,7 @@ describe("PCC Factory Smart Contract", () => {
           "https://project-1.com/1",
           123
         );
-      await pccFactory
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -862,7 +905,10 @@ describe("PCC Factory Smart Contract", () => {
        * @function getProjectCommodityTotalSupply
        * @param projectId
        */
-      currentSupply = await pccFactory.getProjectCommodityTotalSupply(1, 1);
+      currentSupply = await plannedCreditFactory.getProjectCommodityTotalSupply(
+        1,
+        1
+      );
     });
 
     /**
@@ -894,8 +940,10 @@ describe("PCC Factory Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to decimals", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -914,7 +962,8 @@ describe("PCC Factory Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description Fetch Batch Details
@@ -923,7 +972,11 @@ describe("PCC Factory Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetail = await pccFactory.getBatchDetails(1, 1, batchList[0]);
+      batchDetail = await plannedCreditFactory.getBatchDetails(
+        1,
+        1,
+        batchList[0]
+      );
       batchAddress = batchDetail[0];
 
       /**
