@@ -480,12 +480,10 @@ describe("PCC Manager Smart Contract", () => {
    */
   describe("Many To Many PCC Transfer", async () => {
     let batchList;
-    let finalDataToUpload = [];
+    let encodedData_1;
     let investorOneBal;
     let investorTwoBal;
     let investorThreeBal;
-    let investorFourBal;
-    let investorFiveBal;
 
     /**
      * @description Call Web3 Function In Before Block
@@ -560,14 +558,13 @@ describe("PCC Manager Smart Contract", () => {
         .approve(pccManager.address, 10000000);
 
       let dataToEncode_1 = [
-        [[investorOne.address], [10]],
         [
-          [investorTwo.address, investorThree.address],
-          [20, 30],
+          [investorOne.address, investorTwo.address, investorThree.address],
+          [10, 20, 30],
         ],
         [
-          [investorFour.address],
-          [40],
+          [investorOne.address, investorTwo.address, investorThree.address],
+          [10, 20, 30],
         ],
       ];
 
@@ -591,9 +588,7 @@ describe("PCC Manager Smart Contract", () => {
         return encodedData;
       };
 
-      const encodedData_1 = await convertEncodedDataToReadableStream_1();
-
-      finalDataToUpload = encodedData_1;
+      encodedData_1 = await convertEncodedDataToReadableStream_1();
 
       /**
        * @description Web3 Function Call
@@ -605,8 +600,8 @@ describe("PCC Manager Smart Contract", () => {
       await pccManager
         .connect(owner)
         .manyToManyBatchTransfer(
-          [batchList[0]],
-          [projectDeveloperOne.address],
+          [batchList[0], batchList[1]],
+          [projectDeveloperOne.address, projectDeveloperTwo.address],
           encodedData_1
         );
 
@@ -615,27 +610,15 @@ describe("PCC Manager Smart Contract", () => {
        * @function balanceOf
        * @param projectDeveloperOne
        */
-      investorOneBal = await batchContractOne.balanceOf(investorOne.address);
-      console.log(
-        "Investor-1 Balance",
-        await batchContractOne.balanceOf(investorOne.address)
-      );
-      console.log(
-        "Investor-2 Balance",
-        await batchContractOne.balanceOf(investorTwo.address)
-      );
-      console.log(
-        "Investor-3 Balance",
-        await batchContractOne.balanceOf(investorThree.address)
-      );
-      console.log(
-        "Investor-4 Balance",
-        await batchContractOne.balanceOf(investorFour.address)
-      );
-      console.log(
-        "Investor-5 Balance",
-        await batchContractOne.balanceOf(investorFive.address)
-      );
+      investorOneBal =
+        parseInt(await batchContractOne.balanceOf(investorOne.address)) +
+        parseInt(await batchContractTwo.balanceOf(investorOne.address));
+      investorTwoBal =
+        parseInt(await batchContractOne.balanceOf(investorTwo.address)) +
+        parseInt(await batchContractTwo.balanceOf(investorTwo.address));
+      investorThreeBal =
+        parseInt(await batchContractOne.balanceOf(investorThree.address)) +
+        parseInt(await batchContractTwo.balanceOf(investorThree.address));
     });
 
     /**
@@ -648,7 +631,7 @@ describe("PCC Manager Smart Contract", () => {
           .manyToManyBatchTransfer(
             [batchList[0]],
             [projectDeveloperOne.address, projectDeveloperTwo.address],
-            finalDataToUpload
+            encodedData_1
           )
       ).to.be.revertedWith("UNEVEN_ARGUMENTS_PASSED");
     });
@@ -657,7 +640,15 @@ describe("PCC Manager Smart Contract", () => {
      * @description Case: Successful Call To Web3 Function
      */
     it("Should perform many-to-many transfer of PCC successfully", async () => {
-      expect(investorOneBal).to.equal(10);
+      console.log(`
+      Investor One Balance - ${investorOneBal}
+      Investor Two Balance - ${investorTwoBal}
+      Investor Three Balance - ${investorThreeBal}
+    `);
+
+      expect(investorOneBal).to.equal(parseInt(20));
+      expect(investorTwoBal).to.equal(parseInt(40));
+      expect(investorThreeBal).to.equal(parseInt(60));
     });
   });
 
