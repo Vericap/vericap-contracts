@@ -2,9 +2,9 @@
 pragma solidity >=0.8.22;
 
 /**
- * @title Planned Carbon Credit Factory Smart Contract
+ * @title Planned Credit Factory Smart Contract
  * @author Team @vericap
- * @notice Factory is a upgradeable contract used for deploying new PCC contracts
+ * @notice Factory is a upgradeable contract used for deploying new PlannedCredit contracts
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -16,17 +16,14 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../interfaces/IPCCManager.sol";
-import "../helper/BasicMetaTransaction.sol";
 
 error ARGUMENT_PASSED_AS_ZERO();
 
-contract PCCFactory is
+contract PlannedCreditFactory is
     Initializable,
     UUPSUpgradeable,
     OwnableUpgradeable,
-    AccessControlUpgradeable,
-    BasicMetaTransaction
+    AccessControlUpgradeable
 {
     /**
             @dev Inheriting SafeERC20 for IERC20
@@ -39,9 +36,9 @@ contract PCCFactory is
     using StringsUpgradeable for uint256;
 
     /**
-     * @dev Global declaration of PCCManager contract
+     * @dev Global declaration of plannedCreditManager contract
      */
-    IPCCManager public pccManagerContract;
+    address public plannedCreditManagerContract;
 
     /**
             @dev projectIds: Storing project Ids in an array
@@ -52,11 +49,11 @@ contract PCCFactory is
         keccak256("FACTORY_MANAGER_ROLE");
 
     /**
-     * @dev Creating ENUM for handling PCC batch actions
+     * @dev Creating ENUM for handling PlannedCredit batch actions
      * @dev Mint - 0
      * @dev Burn - 1
      */
-    enum PCCTokenActions {
+    enum PlannedCreditTokenActions {
         Mint,
         Burn
     }
@@ -278,7 +275,7 @@ contract PCCFactory is
             _uniqueIdentifier,
             string(
                 abi.encodePacked(
-                    "PlannedCarbonCredit-",
+                    "PlannedCredit-",
                     _projectId.toString(),
                     "-",
                     _commodityId.toString(),
@@ -287,14 +284,14 @@ contract PCCFactory is
                 )
             ),
             string(
-                abi.encodePacked(
-                    "PlannedCarbonCredit-",
-                    _uniqueIdentifier.toString()
-                )
+                abi.encodePacked("PlannedCredit-", _uniqueIdentifier.toString())
             )
         );
 
-        PlannedCarbonCredit(_batchAddress).mint(_batchOwner, _batchSupply);
+        PlannedCredit(_batchAddress).mintPlannedCredits(
+            _batchOwner,
+            _batchSupply
+        );
 
         batchDetails[_projectId][_commodityId][_batchAddress].push(
             BatchDetail(
@@ -338,31 +335,33 @@ contract PCCFactory is
     }
 
     /**
-     * @notice updateBatchDetailDuringMintOrBurnMore Updates batch details when ever PCCs are minted/burned
+     * @notice updateBatchDetailDuringMintOrBurnMore Updates batch details when ever Planned Credits are minted/burned
      * @param _projectId Project Id
      * @param _commodityId Commodity Id
      * @param _batchId Batch Id
      * @param _amountToMintOrBurn Amount of tokens to mint/burn
-     * @param _pccBatchAction PCC batch actions
+     * @param _plannedCreditBatchAction Planned Credit batch actions
      */
     function updateBatchDetailDuringMintOrBurnMore(
         uint _projectId,
         uint256 _commodityId,
         address _batchId,
         uint256 _amountToMintOrBurn,
-        uint8 _pccBatchAction
+        uint8 _plannedCreditBatchAction
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         uint256 _batchIndex = batchIndexList[_batchId];
         BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
             _batchId
         ][_batchIndex];
-        if (_pccBatchAction == uint(PCCTokenActions.Mint)) {
+        if (_plannedCreditBatchAction == uint(PlannedCreditTokenActions.Mint)) {
             _detail.batchSupply = _detail.batchSupply + _amountToMintOrBurn;
             _detail.lastUpdated = block.timestamp;
             projectCommodityTotalSupply[_projectId][
                 _commodityId
             ] += _amountToMintOrBurn;
-        } else if (_pccBatchAction == uint(PCCTokenActions.Burn)) {
+        } else if (
+            _plannedCreditBatchAction == uint(PlannedCreditTokenActions.Burn)
+        ) {
             _detail.batchSupply = _detail.batchSupply - _amountToMintOrBurn;
             _detail.lastUpdated = block.timestamp;
             projectCommodityTotalSupply[_projectId][
@@ -414,18 +413,18 @@ contract PCCFactory is
     }
 
     /**
-     * @notice setPCCManagerContract Set's PCC manager contract
-     * @param _pccManagerContract PCC contract address
+     * @notice setPlannedCreditManagerContract Set's PlannedCreditManager contract
+     * @param _plannedCreditManagerContract PlannedCredit contract address
      */
-    function setPCCManagerContract(
-        address _pccManagerContract
+    function setPlannedCreditManagerContract(
+        address _plannedCreditManagerContract
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        pccManagerContract = IPCCManager(_pccManagerContract);
-        grantRole(FACTORY_MANAGER_ROLE, _pccManagerContract);
+        plannedCreditManagerContract = _plannedCreditManagerContract;
+        grantRole(FACTORY_MANAGER_ROLE, _plannedCreditManagerContract);
     }
 
     /**
-     * @notice grantRoleForBatch manager Roles For PCC Batch
+     * @notice grantRoleForBatch manager Roles For PlannedCredit Batch
      * @param _batchId Batch contract address
      * @param _address Address to grant role to
      */
@@ -433,7 +432,7 @@ contract PCCFactory is
         address _batchId,
         address _address
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        PlannedCarbonCredit(_batchId).grantRole(FACTORY_MANAGER_ROLE, _address);
+        PlannedCredit(_batchId).grantRole(FACTORY_MANAGER_ROLE, _address);
     }
 
     /**
@@ -457,7 +456,7 @@ contract PCCFactory is
         uint256 _uniqueIdentifier
     ) internal view {
         require(
-            (address(pccManagerContract) != address(0)) &&
+            (address(plannedCreditManagerContract) != address(0)) &&
                 (_batchOwner != address(0)) &&
                 (_projectId != 0) &&
                 (_commodityId != 0) &&
@@ -483,12 +482,15 @@ contract PCCFactory is
         string memory _tokenSymbol
     ) internal onlyRole(FACTORY_MANAGER_ROLE) returns (address) {
         require(
-            address(pccManagerContract) != address(0),
+            address(plannedCreditManagerContract) != address(0),
             "ARGUMENT_PASSED_AS_ZERO"
         );
-        PlannedCarbonCredit _newChildBatch = new PlannedCarbonCredit{
-            salt: bytes32(_salt)
-        }(_tokenName, _tokenSymbol, address(this), address(pccManagerContract));
+        PlannedCredit _newChildBatch = new PlannedCredit{salt: bytes32(_salt)}(
+            _tokenName,
+            _tokenSymbol,
+            address(this),
+            address(plannedCreditManagerContract)
+        );
         return address(_newChildBatch);
     }
 
@@ -518,22 +520,15 @@ contract PCCFactory is
 
         batchList[_projectId][_commodityId].push(_batchAddress);
     }
-
-    /**
-            @dev function to override _msgsender()  for BMT
-        */
-    function _msgSender() internal view virtual override returns (address) {
-        return msgSender();
-    }
 }
 
 /**
- * @title Planned Carbon Credit
+ * @title Planned Credit
  * @author Team @vericap
- * @notice Planned Carbon Credits are ERC20 based future credits for carbon as a commodity
+ * @notice Planned Credits are ERC20 based future credits for multiple commodities
  */
 
-contract PlannedCarbonCredit is ERC20, AccessControl {
+contract PlannedCredit is ERC20, AccessControl {
     bytes32 public constant FACTORY_MANAGER_ROLE =
         keccak256("FACTORY_MANAGER_ROLE");
 
@@ -580,7 +575,7 @@ contract PlannedCarbonCredit is ERC20, AccessControl {
             @param _account Account where tokens will get minted
             @param _amount Amount of tokens to be minted        
         */
-    function mint(
+    function mintPlannedCredits(
         address _account,
         uint256 _amount
     ) public onlyRole(FACTORY_MANAGER_ROLE) {
@@ -593,36 +588,10 @@ contract PlannedCarbonCredit is ERC20, AccessControl {
             @param _account Account from where tokens will get burned from
             @param _amount Amount of tokens to be burned
         */
-    function burn(
+    function burnPlannedCredits(
         address _account,
         uint256 _amount
     ) public onlyRole(FACTORY_MANAGER_ROLE) {
         _burn(_account, _amount);
-    }
-
-    /**
-            @notice batchTransfer: tokens are transferred in 
-                    a batch
-            @dev Performing token transfer in a loop
-            @param _addressList List of addresses to which tokens needs to be 
-                    transferred
-            @param _amountList List of amount w.r.t addresses
-        */
-    function batchTransfer(
-        address[] memory _addressList,
-        uint256[] memory _amountList
-    ) public {
-        require(
-            _addressList.length == _amountList.length,
-            "UNEVEN_ARGUMENTS_PASSED"
-        );
-        for (uint256 i = 0; i < _addressList.length; ) {
-            super.transfer(_addressList[i], _amountList[i]);
-            unchecked {
-                ++i;
-            }
-        }
-
-        emit BatchTransfer(_addressList, _amountList);
     }
 }

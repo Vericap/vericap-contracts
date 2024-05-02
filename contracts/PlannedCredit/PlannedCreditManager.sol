@@ -2,9 +2,9 @@
 pragma solidity >=0.8.22;
 
 /**
- * @title Planned Carbon Credit Manager Contract
+ * @title Planned Credit Manager Contract
  * @author Team @vericap
- * @notice Manager is a upgradeable contract used for mananing PCC Batch related actions
+ * @notice Manager is a upgradeable contract used for mananing Planned Credit Batch related actions
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -16,16 +16,14 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../helper/BasicMetaTransaction.sol";
-import "../interfaces/IPlannedCarbonCredit.sol";
-import "./PCCFactory.sol";
+import "../interfaces/IPlannedCredit.sol";
+import "./PlannedCreditFactory.sol";
 
-contract PCCManager is
+contract PlannedCreditManager is
     Initializable,
     UUPSUpgradeable,
     OwnableUpgradeable,
-    AccessControlUpgradeable,
-    BasicMetaTransaction
+    AccessControlUpgradeable
 {
     /**
         @dev Inheriting SafeERC20 for IERC20
@@ -43,9 +41,9 @@ contract PCCManager is
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     /**
-     * @notice Global declaration of PCCFactory contract
+     * @notice Global declaration of PlannedCreditFactory contract
      */
-    PCCFactory public pccFactoryContract;
+    PlannedCreditFactory public plannedCreditFactoryContract;
 
     /**
         @notice MintedMoreInABatch triggers when a more tokens are minted in a 
@@ -115,18 +113,20 @@ contract PCCManager is
         @notice Initialize: Initialize a smart contract
         @dev Works as a constructor for proxy contracts
         @param _superAdmin Admin wallet address
-        @param _pccFactoryContract PCCFactory contract address
+        @param _plannedCreditFactoryContract PlannedCreditFactory contract address
      */
     function initialize(
         address _superAdmin,
-        address _pccFactoryContract
+        address _plannedCreditFactoryContract
     ) external initializer {
         __Ownable_init();
         _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
         _setupRole(MANAGER_ROLE, _superAdmin);
         _setRoleAdmin(MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
 
-        pccFactoryContract = PCCFactory(_pccFactoryContract);
+        plannedCreditFactoryContract = PlannedCreditFactory(
+            _plannedCreditFactoryContract
+        );
     }
 
     /** 
@@ -160,20 +160,20 @@ contract PCCManager is
             _batchId,
             _amountToMint
         );
-        pccFactoryContract.updateBatchDetailDuringMintOrBurnMore(
+        plannedCreditFactoryContract.updateBatchDetailDuringMintOrBurnMore(
             _projectId,
             _commodityId,
             _batchId,
             _amountToMint,
             0
         );
-        IPlannedCarbonCredit(_batchId).mint(_batchOwner, _amountToMint);
+        IPlannedCredit(_batchId).mintPlannedCredits(_batchOwner, _amountToMint);
 
-        uint256 _currentBatchSupply = pccFactoryContract
+        uint256 _currentBatchSupply = plannedCreditFactoryContract
             .getBatchDetails(_projectId, _commodityId, _batchId)
             .batchSupply;
 
-        uint256 _currentTotalSupply = pccFactoryContract
+        uint256 _currentTotalSupply = plannedCreditFactoryContract
             .getProjectCommodityTotalSupply(_projectId, _commodityId);
 
         emit MintedMoreInABatch(
@@ -210,20 +210,20 @@ contract PCCManager is
             _batchId,
             _amountToBurn
         );
-        pccFactoryContract.updateBatchDetailDuringMintOrBurnMore(
+        plannedCreditFactoryContract.updateBatchDetailDuringMintOrBurnMore(
             _projectId,
             _commodityId,
             _batchId,
             _amountToBurn,
             1
         );
-        IPlannedCarbonCredit(_batchId).burn(_batchOwner, _amountToBurn);
+        IPlannedCredit(_batchId).burnPlannedCredits(_batchOwner, _amountToBurn);
 
-        uint256 _currentBatchSupply = pccFactoryContract
+        uint256 _currentBatchSupply = plannedCreditFactoryContract
             .getBatchDetails(_projectId, _commodityId, _batchId)
             .batchSupply;
 
-        uint256 _currentTotalSupply = pccFactoryContract
+        uint256 _currentTotalSupply = plannedCreditFactoryContract
             .getProjectCommodityTotalSupply(_projectId, _commodityId);
 
         emit BurnedFromABatch(
@@ -238,12 +238,12 @@ contract PCCManager is
     }
 
     /**
-        @notice manyToManyBatchTransfer: Perform PCC transfer from diferent batches 
+        @notice manyToManyBatchTransfer: Perform PlannedCredit transfer from diferent batches 
                 to different user
         @param _batchTokenIds List of batch Ids
         @param _batchTransferData receiver addresses and amounts to be converted into bytes
-        @dev Project developers needs to approve the PCCManager. 
-             As, PCCManager will trigger the transfer function in PCCBatch contract
+        @dev Project developers needs to approve the PlannedCreditManager. 
+             As, PlannedCreditManager will trigger the transfer function in PlannedCreditBatch contract
      */
     function manyToManyBatchTransfer(
         IERC20[] calldata _batchTokenIds,
@@ -295,12 +295,13 @@ contract PCCManager is
         uint256 _updatedPlannedDeliveryYear
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
-        pccFactoryContract.updateBatchDetailDuringPlannedDeliveryYearChange(
-            _projectId,
-            _commodityId,
-            _batchId,
-            _updatedPlannedDeliveryYear
-        );
+        plannedCreditFactoryContract
+            .updateBatchDetailDuringPlannedDeliveryYearChange(
+                _projectId,
+                _commodityId,
+                _batchId,
+                _updatedPlannedDeliveryYear
+            );
 
         emit PlannedDeliveryYearUpdatedForBatch(
             _projectId,
@@ -324,7 +325,7 @@ contract PCCManager is
         string calldata _updatedURI
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
-        pccFactoryContract.updateBatchDetailDuringURIChange(
+        plannedCreditFactoryContract.updateBatchDetailDuringURIChange(
             _projectId,
             _commodityId,
             _batchId,
@@ -378,12 +379,5 @@ contract PCCManager is
                 (_batchId != address(0)),
             "ARGUMENT_PASSED_AS_ZERO"
         );
-    }
-
-    /**
-        @dev function to override _msgsender()  for BMT
-     */
-    function _msgSender() internal view virtual override returns (address) {
-        return msgSender();
     }
 }
