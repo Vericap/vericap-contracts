@@ -1,4 +1,4 @@
-[<image src="https://iili.io/Hi9giog.png" width="300" height="100">](https://www.vericap.io/)
+<img src = "https://i.postimg.cc/15ZnnGrT/favicon-256x256.png" width="80" height="80">
 
 Vericap offers a simple and convenient platform to fund early stage projects
 and trade future carbon credits.
