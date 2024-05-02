@@ -1,19 +1,19 @@
-[<image src="https://iili.io/Hi9giog.png" width="300" height="100">](https://www.enverx.com/)
+<img src = "https://i.postimg.cc/15ZnnGrT/favicon-256x256.png" width="80" height="80">
 
-EnverX offers a simple and convenient platform to fund early stage projects
+Vericap offers a simple and convenient platform to fund early stage projects
 and trade future carbon credits.
 
 #### Clone repository
 ```bash
-git clone https://github.com/SoluLab/enverx-smart-contracts.git
+git clone https://github.com/Vericap/vericap-contracts.git
 ```
 ```bash
-git checkout dev
+git checkout development
 ```
 ***
 #### Installation
 ```bash
-cd enverx-smart-contracts
+cd vericap-contracts
 npm install
 ```
 ***

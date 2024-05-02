@@ -12,29 +12,29 @@ async function main() {
 
 	// If this script is run directly using `node` you may want to call compile
 	// manually to make sure everything is compiled
-	let PCCManagerV2
-	let pccManagerV2
+	let PCCFactory
+	let pccFactory
 	try {
 		await hre.run('compile')
-		PCCManagerV2 = await hre.ethers.getContractFactory('PCCManagerV2')
-		pccManagerV2 = await upgrades.deployProxy(
-			PCCManagerV2,
+		PCCFactory = await hre.ethers.getContractFactory('PCCFactory')
+		pccFactory = await upgrades.deployProxy(
+			PCCFactory,
 			[process.env.ADMIN_WALLET_ADDRESS],
 			{ kind: 'uups' }
 		)
-		await pccManagerV2.deployed()
+		await pccFactory.deployed()
 	} catch (err) {
 		console.log('Contract deployment failed', err)
 	}
 
 	const waitForDeployment = (seconds) => {
 		console.log(
-			`\n\x1b[33m${'[waiting]'}\x1b[0m Preparing PCCManager smart contract deployment. Just a moment... \n`
+			`\n\x1b[33m${'[waiting]'}\x1b[0m Preparing PCCFactory smart contract deployment. Just a moment... \n`
 		)
 		setTimeout(() => {
 			console.log(
-				`\x1b[1m\x1b[32m${'[success]'}\x1b[0m PCCManager smart contrat deployed successfully to: \x1b[4mhttps://polygonscan.com//address/${
-					pccManagerV2.address
+				`\x1b[1m\x1b[32m${'[success]'}\x1b[0m PCCFactory smart contrat deployed successfully to: \x1b[4mhttps://mumbai.polygonscan.com/address/${
+					pccFactory.address
 				}#code\x1b[0m \n`
 			)
 		}, seconds)

@@ -12,41 +12,37 @@ async function main() {
 
 	// If this script is run directly using `node` you may want to call compile
 	// manually to make sure everything is compiled
-	let LiquidityManager
-	let liquidityManager
+	let PCCManager
+	let pccManager
 	try {
 		await hre.run('compile')
-		LiquidityManager = await hre.ethers.getContractFactory(
-			'LiquidityManager'
-		)
-		liquidityManager = await upgrades.deployProxy(
-			LiquidityManager,
+		PCCManager = await hre.ethers.getContractFactory('PCCManager')
+		pccManager = await upgrades.deployProxy(
+			PCCManager,
 			[
 				process.env.ADMIN_WALLET_ADDRESS,
-				process.env.PCC_MANAGER_V2_CONTRACT_ADDRESS,
+				process.env.PCC_FACTORY_CONTRACT_ADDRESS,
 			],
 			{ kind: 'uups' }
 		)
-		await liquidityManager.deployed()
-
-		console.log(liquidityManager.address)
+		await pccManager.deployed()
 	} catch (err) {
 		console.log('Contract deployment failed', err)
 	}
 
-	// const waitForDeployment = (seconds) => {
-	// 	console.log(
-	// 		`\n\x1b[33m${'[waiting]'}\x1b[0m Preparing Liquidity Manager smart contract deployment. Just a moment... \n`
-	// 	)
-	// 	setTimeout(() => {
-	// 		console.log(
-	// 			`\x1b[1m\x1b[32m${'[success]'}\x1b[0m Liquidity Manager smart contrat deployed successfully to: \x1b[4mhttps://mumbai.polygonscan.com/address/${
-	// 				liquidityManager.address
-	// 			}#code\x1b[0m \n`
-	// 		)
-	// 	}, seconds)
-	// }
-	// waitForDeployment(3000)
+	const waitForDeployment = (seconds) => {
+		console.log(
+			`\n\x1b[33m${'[waiting]'}\x1b[0m Preparing PCCManager smart contract deployment. Just a moment... \n`
+		)
+		setTimeout(() => {
+			console.log(
+				`\x1b[1m\x1b[32m${'[success]'}\x1b[0m PCCManager smart contrat deployed successfully to: \x1b[4mhttps://mumbai.polygonscan.com/address/${
+					pccManager.address
+				}#code\x1b[0m \n`
+			)
+		}, seconds)
+	}
+	waitForDeployment(3000)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

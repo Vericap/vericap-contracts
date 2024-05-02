@@ -1,5 +1,5 @@
 {
-	"name": "enverx-smart-contracts",
+	"name": "vericap-smart-contracts",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
@@ -8,15 +8,15 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/SoluLab/enverx-smart-contracts.git"
+		"url": "git+https://github.com/Vericap/vericap-contracts.git"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/SoluLab/enverx-smart-contracts/issues"
+		"url": "https://github.com/Vericap/vericap-contracts/issues"
 	},
-	"homepage": "https://github.com/SoluLab/enverx-smart-contracts#readme",
+	"homepage": "https://github.com/Vericap/vericap-contracts#readme",
 	"dependencies": {
 		"@nomiclabs/hardhat-ethers": "^2.1.0",
 		"@nomiclabs/hardhat-etherscan": "^3.1.0",
@@ -26,6 +26,7 @@
 		"@openzeppelin/contracts-upgradeable": "^4.9.5",
 		"@openzeppelin/hardhat-upgrades": "^1.22.1",
 		"@openzeppelin/test-helpers": "^0.5.16",
+		"@optionality.io/clone-factory": "^0.2.1",
 		"ascii-art": "^2.8.5",
 		"chai": "^4.3.6",
 		"dotenv": "^16.0.1",
@@ -41,6 +42,7 @@
 		"merkletreejs": "^0.2.32",
 		"npm": "^10.3.0",
 		"solidity-coverage": "^0.8.5",
+		"truffle-flattener": "^1.6.0",
 		"web3": "^4.0.1"
 	}
 }
