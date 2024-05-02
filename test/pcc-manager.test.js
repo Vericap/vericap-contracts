@@ -4,7 +4,7 @@
 const fs = require("fs");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const plannedCarbonCreditABI = require("../testABI/plannedCarbonCreditABI.json");
+const plannedCreditABI = require("../testABI/plannedCreditABI.json");
 const { Web3 } = require("web3");
 
 /**
@@ -12,7 +12,6 @@ const { Web3 } = require("web3");
  */
 const fsPromises = fs.promises;
 const ZERO_ADDRESS = ethers.constants.AddressZero;
-let plannedCarbonCreditContractInstance;
 const provider = new Web3.providers.HttpProvider(
   process.env.ETHEREUM_TESTNET_RPC_URL
 );
@@ -21,11 +20,15 @@ const web3 = new Web3(provider);
 /**
  * @global Parent Describe Test Block
  */
-describe("PCC Manager Smart Contract", () => {
+describe("Planned Credit Manager Smart Contract", () => {
   /**
    * @public Block Scoped Variable Declaration
    */
-  let PCCFactory, pccFactory, PCCManager, pccManager, owner;
+  let PlannedCreditFactory,
+    plannedCreditFactory,
+    PlannedCreditManager,
+    plannedCreditManager,
+    owner;
 
   /**
    * @global Triggers before each describe block
@@ -42,24 +45,32 @@ describe("PCC Manager Smart Contract", () => {
       investorFive,
     ] = await ethers.getSigners();
 
-    PCCFactory = await hre.ethers.getContractFactory("PCCFactory");
-    pccFactory = await upgrades.deployProxy(PCCFactory, [owner.address], {
-      kind: "uups",
-    });
-    await pccFactory.deployed();
+    PlannedCreditFactory = await hre.ethers.getContractFactory(
+      "PlannedCreditFactory"
+    );
+    plannedCreditFactory = await upgrades.deployProxy(
+      PlannedCreditFactory,
+      [owner.address],
+      {
+        kind: "uups",
+      }
+    );
+    await plannedCreditFactory.deployed();
 
-    PCCManager = await hre.ethers.getContractFactory("PCCManager");
-    pccManager = await upgrades.deployProxy(
-      PCCManager,
-      [owner.address, pccFactory.address],
+    PlannedCreditManager = await hre.ethers.getContractFactory(
+      "PlannedCreditManager"
+    );
+    plannedCreditManager = await upgrades.deployProxy(
+      PlannedCreditManager,
+      [owner.address, plannedCreditFactory.address],
       { kind: "uups" }
     );
-    await pccManager.deployed();
+    await plannedCreditManager.deployed();
 
-    const CONTRACT_ADDRESS = pccManager.address;
+    const CONTRACT_ADDRESS = plannedCreditManager.address;
 
     contractInstance = new web3.eth.Contract(
-      plannedCarbonCreditABI,
+      plannedCreditABI,
       CONTRACT_ADDRESS
     );
   });
@@ -78,17 +89,22 @@ describe("PCC Manager Smart Contract", () => {
    */
   describe("Creating A New Batch", () => {
     /**
-     * @description Case: Setting PCCManager Address Before Every IT Block
+     * @description Case: Setting Planned Credit Manager Address Before Every IT Block
      */
-    beforeEach("Should update pcc manager contract address", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-    });
+    beforeEach(
+      "Should update planned credit manager contract address",
+      async () => {
+        await plannedCreditFactory
+          .connect(owner)
+          .setPlannedCreditManagerContract(plannedCreditManager.address);
+      }
+    );
     /**
      * @description Case: Check For Project Id
      */
     it("Should fail if project Id is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             0,
@@ -108,7 +124,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail if commodity Id is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -128,7 +144,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail if batch owner address is a zero address", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -148,7 +164,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If batch supply is zero", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -168,7 +184,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail if delivery year is empty", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -188,7 +204,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail if batch URI is empty", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(1, 1, owner.address, 1000, 2024, "Quarter-3", "", 123)
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
@@ -199,7 +215,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail if salt is not an integer value", async () => {
       await expect(
-        pccFactory
+        plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             1,
@@ -218,7 +234,7 @@ describe("PCC Manager Smart Contract", () => {
      * @description Case: Successful Call To Web3 Function
      */
     it("Should create new batch successfully", async () => {
-      const createNewBatch = await pccFactory
+      const createNewBatch = await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -232,7 +248,7 @@ describe("PCC Manager Smart Contract", () => {
         );
 
       expect(createNewBatch)
-        .to.emit(pccFactory, "mintNewBatch")
+        .to.emit(plannedCreditFactory, "mintNewBatch")
         .withArgs(
           1,
           1,
@@ -273,7 +289,8 @@ describe("PCC Manager Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
       batchAddress = batchList[0];
 
       /**
@@ -283,7 +300,7 @@ describe("PCC Manager Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailBeforeMint = await pccFactory.getBatchDetails(
+      batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchAddress
@@ -293,7 +310,13 @@ describe("PCC Manager Smart Contract", () => {
       /**
        * @description mintMoreInABatch Function Call
        */
-      await pccManager.mintMoreInABatch(1, 1, batchAddress, 50, owner.address);
+      await plannedCreditManager.mintMoreInABatch(
+        1,
+        1,
+        batchAddress,
+        50,
+        owner.address
+      );
 
       /**
        * @description Fetch Batch Detail After Minting More
@@ -302,7 +325,7 @@ describe("PCC Manager Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterMint = await pccFactory.getBatchDetails(
+      batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchAddress
@@ -315,7 +338,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If project Id is zero", async () => {
       await expect(
-        pccManager.mintMoreInABatch(0, 1, batchAddress, 50, owner.address)
+        plannedCreditManager.mintMoreInABatch(
+          0,
+          1,
+          batchAddress,
+          50,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -324,7 +353,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If commodity Id is zero", async () => {
       await expect(
-        pccManager.mintMoreInABatch(1, 0, batchAddress, 50, owner.address)
+        plannedCreditManager.mintMoreInABatch(
+          1,
+          0,
+          batchAddress,
+          50,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -333,7 +368,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If amount is zero", async () => {
       await expect(
-        pccManager.mintMoreInABatch(1, 1, batchAddress, 0, owner.address)
+        plannedCreditManager.mintMoreInABatch(
+          1,
+          1,
+          batchAddress,
+          0,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -342,7 +383,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If batch Id is zero", async () => {
       await expect(
-        pccManager.mintMoreInABatch(1, 1, ZERO_ADDRESS, 50, owner.address)
+        plannedCreditManager.mintMoreInABatch(
+          1,
+          1,
+          ZERO_ADDRESS,
+          50,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -377,8 +424,10 @@ describe("PCC Manager Smart Contract", () => {
      * @param batchOwnerAddress
      */
     before("web3 call to burnFromABatch", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -396,7 +445,8 @@ describe("PCC Manager Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
       batchAddress = batchList[0];
 
       /**
@@ -406,13 +456,19 @@ describe("PCC Manager Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailBeforeBurn = await pccFactory.getBatchDetails(
+      batchDetailBeforeBurn = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchAddress
       );
       batchSupplyBeforeBurn = batchDetailBeforeBurn[8];
-      await pccManager.burnFromABatch(1, 1, batchAddress, 50, owner.address);
+      await plannedCreditManager.burnFromABatch(
+        1,
+        1,
+        batchAddress,
+        50,
+        owner.address
+      );
 
       /**
        * @description Fetch Batch Detail After Burning
@@ -421,7 +477,7 @@ describe("PCC Manager Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterBurn = await pccFactory.getBatchDetails(
+      batchDetailAfterBurn = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchAddress
@@ -434,7 +490,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If project Id is zero", async () => {
       await expect(
-        pccManager.burnFromABatch(0, 1, batchAddress, 50, owner.address)
+        plannedCreditManager.burnFromABatch(
+          0,
+          1,
+          batchAddress,
+          50,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -443,7 +505,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If commodity Id is zero", async () => {
       await expect(
-        pccManager.burnFromABatch(1, 0, batchAddress, 50, owner.address)
+        plannedCreditManager.burnFromABatch(
+          1,
+          0,
+          batchAddress,
+          50,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -452,7 +520,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If amount is zero", async () => {
       await expect(
-        pccManager.burnFromABatch(1, 1, batchAddress, 0, owner.address)
+        plannedCreditManager.burnFromABatch(
+          1,
+          1,
+          batchAddress,
+          0,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -461,7 +535,13 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If batch Id is zero", async () => {
       await expect(
-        pccManager.burnFromABatch(1, 1, ZERO_ADDRESS, 50, owner.address)
+        plannedCreditManager.burnFromABatch(
+          1,
+          1,
+          ZERO_ADDRESS,
+          50,
+          owner.address
+        )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -476,9 +556,9 @@ describe("PCC Manager Smart Contract", () => {
   });
 
   /**
-   * @description Many To Many PCC Transfer
+   * @description Many To Many Planned Credit Transfer
    */
-  describe("Many To Many PCC Transfer", async () => {
+  describe("Many To Many Planned Credit Transfer", async () => {
     let batchList;
     let encodedData_1;
     let investorOneBal;
@@ -497,8 +577,10 @@ describe("PCC Manager Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to manyToManyTransfer", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -511,7 +593,7 @@ describe("PCC Manager Smart Contract", () => {
           130
         );
 
-      await pccFactory
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -529,33 +611,34 @@ describe("PCC Manager Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description Creating Batch Instance For Both Batches Created Above
        */
       let batchContractOne = new ethers.Contract(
         batchList[0],
-        plannedCarbonCreditABI,
+        plannedCreditABI,
         owner
       );
       let batchContractTwo = new ethers.Contract(
         batchList[1],
-        plannedCarbonCreditABI,
+        plannedCreditABI,
         owner
       );
 
       /**
-       * @description Approving PCC Smart Contract To Perform Transfer
-       * @param pccToken.address
+       * @description Approving Planned Credit Smart Contract To Perform Transfer
+       * @param plannedCreditToken.address
        * @param amountToApprove
        */
       await batchContractOne
         .connect(projectDeveloperOne)
-        .approve(pccManager.address, 10000000);
+        .approve(plannedCreditManager.address, 10000000);
       await batchContractTwo
         .connect(projectDeveloperTwo)
-        .approve(pccManager.address, 10000000);
+        .approve(plannedCreditManager.address, 10000000);
 
       let dataToEncode_1 = [
         [
@@ -597,7 +680,7 @@ describe("PCC Manager Smart Contract", () => {
        * @param addressList[]
        * @param amount[]
        */
-      await pccManager
+      await plannedCreditManager
         .connect(owner)
         .manyToManyBatchTransfer(
           [batchList[0], batchList[1]],
@@ -626,7 +709,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If uneven args length", async () => {
       await expect(
-        pccManager
+        plannedCreditManager
           .connect(owner)
           .manyToManyBatchTransfer(
             [batchList[0]],
@@ -639,13 +722,7 @@ describe("PCC Manager Smart Contract", () => {
     /**
      * @description Case: Successful Call To Web3 Function
      */
-    it("Should perform many-to-many transfer of PCC successfully", async () => {
-      console.log(`
-      Investor One Balance - ${investorOneBal}
-      Investor Two Balance - ${investorTwoBal}
-      Investor Three Balance - ${investorThreeBal}
-    `);
-
+    it("Should perform many-to-many transfer of Planned Credit successfully", async () => {
       expect(investorOneBal).to.equal(parseInt(20));
       expect(investorTwoBal).to.equal(parseInt(40));
       expect(investorThreeBal).to.equal(parseInt(60));
@@ -672,8 +749,10 @@ describe("PCC Manager Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to updateBatchDeliveryYear", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -692,7 +771,8 @@ describe("PCC Manager Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description Updating Batch's Delivery Year
@@ -702,7 +782,7 @@ describe("PCC Manager Smart Contract", () => {
        * @param batchId
        * @param updatedDeliveryYear
        */
-      await pccManager
+      await plannedCreditManager
         .connect(owner)
         .updateBatchPlannedDeliveryYear(1, 1, batchList[0], 2025);
 
@@ -713,7 +793,7 @@ describe("PCC Manager Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterUpdate = await pccFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchList[0]
@@ -726,7 +806,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If projectId is zero", async () => {
       await expect(
-        pccManager
+        plannedCreditManager
           .connect(owner)
           .updateBatchPlannedDeliveryYear(0, 1, batchList[0], 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
@@ -737,7 +817,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If commodityId is zero", async () => {
       await expect(
-        pccManager
+        plannedCreditManager
           .connect(owner)
           .updateBatchPlannedDeliveryYear(1, 0, batchList[0], 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
@@ -748,7 +828,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If batchId is zero", async () => {
       await expect(
-        pccManager
+        plannedCreditManager
           .connect(owner)
           .updateBatchPlannedDeliveryYear(1, 1, ZERO_ADDRESS, 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
@@ -782,8 +862,10 @@ describe("PCC Manager Smart Contract", () => {
      * @param uniqueIdentifier
      */
     before("web3 call to updateBatchURI", async () => {
-      await pccFactory.connect(owner).setPCCManagerContract(pccManager.address);
-      await pccFactory
+      await plannedCreditFactory
+        .connect(owner)
+        .setPlannedCreditManagerContract(plannedCreditManager.address);
+      await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
           1,
@@ -802,7 +884,8 @@ describe("PCC Manager Smart Contract", () => {
        * @param projectId
        * @param commodityId
        */
-      batchList = await pccFactory.getBatchListForACommodityInAProject(1, 1);
+      batchList =
+        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
 
       /**
        * @description Updating Batch's Delivery Estimate
@@ -812,13 +895,13 @@ describe("PCC Manager Smart Contract", () => {
        * @param batchId
        * @param updatedBatchURI
        */
-      await pccManager.updateBatchURI(
+      await plannedCreditManager.updateBatchURI(
         1,
         1,
         batchList[0],
         "https://project-1.com/updatedSlug"
       );
-      batchDetailAfterUpdate = await pccFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
         1,
         1,
         batchList[0]
@@ -831,7 +914,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If projectId is zero", async () => {
       await expect(
-        pccManager.updateBatchURI(
+        plannedCreditManager.updateBatchURI(
           0,
           1,
           batchList[0],
@@ -845,7 +928,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If commodityId is zero", async () => {
       await expect(
-        pccManager.updateBatchURI(
+        plannedCreditManager.updateBatchURI(
           1,
           0,
           batchList[0],
@@ -859,7 +942,7 @@ describe("PCC Manager Smart Contract", () => {
      */
     it("Should fail If batchId is zero", async () => {
       await expect(
-        pccManager.updateBatchURI(
+        plannedCreditManager.updateBatchURI(
           1,
           1,
           ZERO_ADDRESS,
