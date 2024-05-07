@@ -51,14 +51,14 @@ npx hardhat coverage
 #### Deployment
 
 Create a .env file in the root directory and add the following variables\
-|`POLYGON_API_KEY = ""`\
-|`ETHEREUM_API_KEY = ""`\
-|`ETHEREUM_TESTNET_RPC_URL = ""`\
-|`POLYGON_TESTNET_RPC_URL = ""`\
-|`POLYGON_MAINNET_RPC_URL = ""`\
-|`ADMIN_WALLET_PRIVATE_KEY = ""`\
-|`ADMIN_WALLET_ADDRESS = ""`\
-|`PLANNED_CREDIT_FACTORY_CONTRACT_ADDRESS = ""`\
+- `POLYGON_API_KEY = ""`
+- `ETHEREUM_API_KEY = ""`
+- `ETHEREUM_TESTNET_RPC_URL = ""`
+- `POLYGON_TESTNET_RPC_URL = ""`
+- `POLYGON_MAINNET_RPC_URL = ""`
+- `ADMIN_WALLET_PRIVATE_KEY = ""`
+- `ADMIN_WALLET_ADDRESS = ""`
+- `PLANNED_CREDIT_FACTORY_CONTRACT_ADDRESS = ""`
 
 Supported networks for deployment
 
