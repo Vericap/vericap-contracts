@@ -3,6 +3,20 @@
 Vericap offers a simple and convenient platform to fund early stage projects
 and trade future carbon credits.
 
+---
+
+#### Contract structure
+<h5> Planned Credits </h5>
+
+- <h6> PlannedCredit.sol </h6>
+<small> Standard ERC20 based token smart contract which is served as a planned credit </small>
+- <h6> PlannedCreditFactory.sol </h6>
+<small> Follows `CREATE2` opcode based factory-child pattern which is then used to deploy new PlannedCredit contracts for each vintage/delivery-year pair </small>
+- <h6> PlannedCreditManager.sol </h6>
+<small> Manages the supply and metadata for a PlannedCredit </small>
+
+---
+
 #### Clone repository
 
 ```bash
