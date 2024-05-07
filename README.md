@@ -51,6 +51,7 @@ npx hardhat coverage
 #### Deployment
 
 Create a .env file in the root directory and add the following variables\
+
 - `POLYGON_API_KEY = ""`
 - `ETHEREUM_API_KEY = ""`
 - `ETHEREUM_TESTNET_RPC_URL = ""`
