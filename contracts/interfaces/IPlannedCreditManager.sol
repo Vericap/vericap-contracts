@@ -1,24 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IPCCManager {
-    function mintNewBatch(
-        uint256 _projectId,
-        uint256 _commodityId,
-        address _batchOwner,
-        uint256 _batchSupply,
-        uint256 _deliveryYear,
-        string calldata _deliveryEstimate,
-        string calldata _batchURI,
-        uint256 _uniqueIdentifier
-    ) external;
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+interface IPlannedCreditManager {
 
     function mintMoreInABatch(
         uint256 _projectId,
         uint256 _commodityId,
         address _batchId,
         uint256 _amountToMint,
-        address _receiverAddress
+        address _batchOwner
     ) external;
 
     function burnFromABatch(
@@ -26,27 +18,20 @@ interface IPCCManager {
         uint256 _commodityId,
         address _batchId,
         uint256 _amountToBurn,
-        address _ownerAddress
+        address _batchOwner
     ) external;
 
     function manyToManyBatchTransfer(
-        address[] calldata _batchIds,
-        address[] calldata _userAddresses,
-        uint256[] calldata _amountToTransfer
+        IERC20[] calldata _batchTokenIds,
+        address[] calldata _projectDeveloperAddresses,
+        bytes[] calldata _batchTransferData
     ) external;
 
-    function updateBatchDeliveryYear(
+    function updateBatchPlannedDeliveryYear(
         uint256 _projectId,
         uint256 _commodityId,
         address _batchId,
-        uint256 _updatedDeliveryYear
-    ) external;
-
-    function updateBatchDetailDuringVinatgeChange(
-        uint256 _projectId,
-        uint256 _commodityId,
-        address _batchId,
-        string calldata _updatedDeliveryEstimate
+        uint256 _updatedPlannedDeliveryYear
     ) external;
 
     function updateBatchURI(

@@ -31,11 +31,11 @@ async function main() {
 
   const waitForDeployment = (seconds) => {
     console.log(
-      `\n\x1b[33m${"[waiting]"}\x1b[0m Preparing PCCFactory smart contract deployment. Just a moment... \n`
+      `\n\x1b[33m${"[waiting]"}\x1b[0m Preparing Planned Credit Factory smart contract deployment. Just a moment... \n`
     );
     setTimeout(() => {
       console.log(
-        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m PCCFactory smart contrat deployed successfully to: \x1b[4mhttps://sepolia.etherscan.io/address/${
+        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Planned Credit Factory smart contrat deployed successfully to: \x1b[4mhttps://sepolia.etherscan.io/address/${
           plannedCreditFactory.address
         }#code\x1b[0m \n`
       );
