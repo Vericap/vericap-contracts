@@ -130,7 +130,7 @@ describe("Planned Credit Factory Smart Contract", () => {
     /**
      * @description Case: Check For Project Id
      */
-    it("Should fail if project Id is zero", async () => {
+    it("Should fail if project Id is empty", async () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
@@ -150,7 +150,7 @@ describe("Planned Credit Factory Smart Contract", () => {
     /**
      * @description Case: Check For Commodity Id
      */
-    it("Should fail if commodity Id is zero", async () => {
+    it("Should fail if commodity Id is empty", async () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
