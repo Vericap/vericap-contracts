@@ -33,7 +33,7 @@ contract PlannedCreditFactory is
     /**
             @dev Inheriting StringsUpgradeable library for uint256
         */
-    using StringsUpgradeable for uint256;
+    using StringsUpgradeable for uint64;
 
     /**
      * @dev Global declaration of plannedCreditManager contract
@@ -64,12 +64,11 @@ contract PlannedCreditFactory is
     struct BatchDetail {
         string projectId;
         string commodityId;
-        string vintage;
         string batchURI;
-        string uniqueIdentifier;
         uint256 plannedDeliveryYear;
         uint256 batchSupply;
         uint256 lastUpdated;
+        uint64 vintage;
         address batchId;
         address batchOwner;
     }
@@ -104,12 +103,18 @@ contract PlannedCreditFactory is
     /**
      * @dev commodityIdExists: Checking for duplication of commodityId::projectId
      */
-    mapping(string => mapping(string => bool)) internal commodityIdExists;
+    mapping(string => mapping(string => bool)) internal commodityExists;
 
     /**
      * @dev projectIdExists: Checking for duplication of projectId
      */
-    mapping(string => bool) internal projectIdExists;
+    mapping(string => bool) internal projectExists;
+
+    /**
+     * @dev vintageExists: This vinatge already exists for the P.Id <> C.Id Pair
+     */
+    mapping(string => mapping(string => mapping(uint64 => bool)))
+        internal vintageExists;
 
     /**
             @notice NewBatchCreated triggers when a new batch is created
@@ -117,12 +122,11 @@ contract PlannedCreditFactory is
     event NewBatchCreated(
         string projectId,
         string commodityId,
-        string vintage,
         string batchURI,
-        string uniqueIdentifier,
         uint256 plannedDeliveryYear,
         uint256 batchSupply,
         uint256 lastUpdated,
+        uint64 vintage,
         address batchId,
         address batchOwner
     );
@@ -244,35 +248,37 @@ contract PlannedCreditFactory is
                     Child contract is going to be ERC20 compatible smart contract
             @param _projectId Project Id
             @param _commodityId Commodity Id
-            @param _vintage Project vintage
             @param _batchURI Batch URI
-            @param _uniqueIdentifier Unique identifer for salt
             @param _plannedDeliveryYear Planned delivery year of the batch
             @param _batchSupply Batch intial supply
+            @param _vintage Project vintage
             @param _batchOwner Batch owner address
         */
     function createNewBatch(
         string calldata _projectId,
         string calldata _commodityId,
-        string calldata _vintage,
         string calldata _batchURI,
-        string calldata _uniqueIdentifier,
         uint256 _plannedDeliveryYear,
         uint256 _batchSupply,
+        uint64 _vintage,
         address _batchOwner
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeMintNewBatch(
             _projectId,
             _commodityId,
             _batchURI,
-            _uniqueIdentifier,
             _batchSupply,
             _plannedDeliveryYear,
+            _vintage,
             _batchOwner
         );
 
+        require(
+            vintageExists[_projectId][_commodityId][_vintage] == false,
+            "VINTAGE_ALREADY_EXIST"
+        );
+
         address _batchAddress = _createNewBatch(
-            _uniqueIdentifier,
             string(
                 abi.encodePacked(
                     "VPC-",
@@ -280,9 +286,7 @@ contract PlannedCreditFactory is
                     "-",
                     _commodityId,
                     "-",
-                    _vintage,
-                    "-",
-                    _uniqueIdentifier
+                    _vintage
                 )
             ),
             string(
@@ -290,11 +294,13 @@ contract PlannedCreditFactory is
                     "VPC",
                     _projectId,
                     _commodityId,
-                    _vintage,
-                    _uniqueIdentifier
+                    _vintage.toString()
                 )
-            )
+            ),
+            _vintage
         );
+
+        vintageExists[_projectId][_commodityId][_vintage] = true;
 
         PlannedCredit(_batchAddress).mintPlannedCredits(
             _batchOwner,
@@ -305,12 +311,11 @@ contract PlannedCreditFactory is
             BatchDetail(
                 _projectId,
                 _commodityId,
-                _vintage,
                 _batchURI,
-                _uniqueIdentifier,
                 _plannedDeliveryYear,
                 _batchSupply,
                 block.timestamp,
+                _vintage,
                 _batchAddress,
                 _batchOwner
             )
@@ -331,12 +336,11 @@ contract PlannedCreditFactory is
         emit NewBatchCreated(
             _projectId,
             _commodityId,
-            _vintage,
             _batchURI,
-            _uniqueIdentifier,
             _plannedDeliveryYear,
             _batchSupply,
             block.timestamp,
+            _vintage,
             _batchAddress,
             _batchOwner
         );
@@ -448,19 +452,19 @@ contract PlannedCreditFactory is
             @dev Checking credibilty of arguments
             @param _projectId Project Id
             @param _commodityId Commodity Id
-                        @param _batchURI Batch URI
-                        @param _uniqueIdentifier Unique Identifier, will be used as salt
-                                    @param _batchSupply Batch token supply
+            @param _batchURI Batch URI
+            @param _batchSupply Batch token supply
             @param _plannedDeliveryYear Delivery year
+            @param _vintage Vintage
             @param _batchOwner Batch owner address
         */
     function _checkBeforeMintNewBatch(
         string memory _projectId,
         string memory _commodityId,
         string calldata _batchURI,
-        string calldata _uniqueIdentifier,
         uint256 _batchSupply,
         uint256 _plannedDeliveryYear,
+        uint64 _vintage,
         address _batchOwner
     ) internal view {
         require(
@@ -468,10 +472,10 @@ contract PlannedCreditFactory is
                 (_batchOwner != address(0)) &&
                 (bytes(_projectId).length != 0) &&
                 (bytes(_commodityId).length != 0) &&
+                (bytes(_batchURI).length != 0) &&
                 (_batchSupply != 0) &&
                 (_plannedDeliveryYear != 0) &&
-                (bytes(_uniqueIdentifier).length != 0) &&
-                bytes(_batchURI).length != 0,
+                (_vintage != 0),
             "ARGUMENT_PASSED_AS_ZERO"
         );
     }
@@ -480,33 +484,24 @@ contract PlannedCreditFactory is
             @notice createNewBatch: Create a new batch w.r.t projectId and commodityId
             @dev Follows factory-child pattern for creating batches using CREATE2 opcode
                     Child contract is going to be ERC20 compatible smart contract
-            @param _salt Salt for CREATE2 opcode at assembly level
             @param _tokenName ERC20 based token name
             @param _tokenSymbol ERC20 based token symbol
+            @param _vintage Batch vintage to be served as unique salt
         */
     function _createNewBatch(
-        string calldata _salt,
         string memory _tokenName,
-        string memory _tokenSymbol
+        string memory _tokenSymbol,
+        uint64 _vintage
     ) internal onlyRole(FACTORY_MANAGER_ROLE) returns (address) {
         require(
             address(plannedCreditManagerContract) != address(0),
             "ARGUMENT_PASSED_AS_ZERO"
         );
-        require(bytes(_salt).length <= 32, "SALT_TOO_LONG");
-        bytes32 _convertedSalt;
-        bytes memory tempBytes = bytes(_salt);
-        bytes32 tempResult;
 
-        assembly {
-            tempResult := mload(add(tempBytes, 32))
-        }
+        uint256 _vintage256 = uint256(_vintage);
+        bytes32 _salt = bytes32(_vintage256);
 
-        _convertedSalt = tempResult;
-
-        PlannedCredit _newChildBatch = new PlannedCredit{
-            salt: bytes32(_convertedSalt)
-        }(
+        PlannedCredit _newChildBatch = new PlannedCredit{salt: bytes32(_salt)}(
             _tokenName,
             _tokenSymbol,
             address(this),
@@ -528,15 +523,15 @@ contract PlannedCreditFactory is
         address _batchAddress
     ) private onlyRole(FACTORY_MANAGER_ROLE) {
         // Checking for project Id duplication
-        if (projectIdExists[_projectId] == false) {
+        if (projectExists[_projectId] == false) {
             projectIds.push(_projectId);
-            projectIdExists[_projectId] = true;
+            projectExists[_projectId] = true;
         }
 
         // Checking for commodity Id duplication
-        if (commodityIdExists[_projectId][_commodityId] == false) {
+        if (commodityExists[_projectId][_commodityId] == false) {
             commodityList[_projectId].push(_commodityId);
-            commodityIdExists[_projectId][_commodityId] = true;
+            commodityExists[_projectId][_commodityId] = true;
         }
 
         batchList[_projectId][_commodityId].push(_batchAddress);

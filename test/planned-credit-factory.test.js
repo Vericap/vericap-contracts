@@ -72,7 +72,6 @@ describe("Planned Credit Factory Smart Contract", () => {
 					uint256 _plannedDeliveryYear,
 					string calldata _vintage,
 					string calldata _batchURI,
-					uint256 _uniqueIdentifier
 		 */
     it("Should fail if manager contract address is zero", async () => {
       await expect(
@@ -81,9 +80,8 @@ describe("Planned Credit Factory Smart Contract", () => {
           .createNewBatch(
             "PZC",
             "CC",
-            "Quarter-3",
             "https://project-1.com/1",
-            "CY7",
+            2028,
             1000,
             2024,
             owner.address
@@ -108,12 +106,11 @@ describe("Planned Credit Factory Smart Contract", () => {
    * @function createNewBatch
    * @param projectId
    * @param commodityId
-   * @param batchOwnerAddress
-   * @param amountToMint
-   * @param deliveryYear
-   * @param deliveryEstimate
    * @param batchURI
-   * @param uniqueIdentifier
+   * @param deliveryYear
+   * @param batchSupply
+   * @param vintage
+   * @param batchOwner
    */
   describe("Creating A New Batch", () => {
     /**
@@ -125,8 +122,21 @@ describe("Planned Credit Factory Smart Contract", () => {
         await plannedCreditFactory
           .connect(owner)
           .setPlannedCreditManagerContract(plannedCreditManager.address);
+
+        await plannedCreditFactory
+          .connect(owner)
+          .createNewBatch(
+            "PZC",
+            "CC",
+            "https://project-1.com/1",
+            2028,
+            1000,
+            2025,
+            owner.address
+          );
       }
     );
+
     /**
      * @description Case: Check For Project Id
      */
@@ -137,11 +147,10 @@ describe("Planned Credit Factory Smart Contract", () => {
           .createNewBatch(
             "",
             "CC",
-            "Quarter-3",
             "https://project-1.com/1",
-            "CY7",
-            2024,
+            2028,
             1000,
+            2024,
             owner.address
           )
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
@@ -157,32 +166,41 @@ describe("Planned Credit Factory Smart Contract", () => {
           .createNewBatch(
             "PZC",
             "",
-            "Quarter-3",
             "https://project-1.com/1",
-            "CY7",
-            2024,
+            2028,
             1000,
+            2024,
             owner.address
           )
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
     /**
-     * @description Case: Check For Batch Owner Address
+     * @description Case: Check For Batch URI
      */
-    it("Should fail if batch owner address is a zero address", async () => {
+    it("Should fail if batch URI is empty", async () => {
+      await expect(
+        plannedCreditFactory
+          .connect(owner)
+          .createNewBatch("PZC", "CC", "", 2028, 1000, 2024, owner.address)
+      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
+    });
+
+    /**
+     * @description Case: Check For Delivery Year
+     */
+    it("Should fail if delivery year is empty", async () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             "PZC",
             "CC",
-            "Quarter-3",
             "https://project-1.com/1",
-            "CY7",
-            2024,
+            0,
             1000,
-            ZERO_ADDRESS
+            2024,
+            owner.address
           )
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -197,72 +215,49 @@ describe("Planned Credit Factory Smart Contract", () => {
           .createNewBatch(
             "PZC",
             "CC",
-            "Quarter-3",
             "https://project-1.com/1",
-            "CY7",
-            2024,
+            2028,
             0,
-            owner.address
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Delivery Year
-     */
-    it("Should fail if delivery year is empty", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            "PZC",
-            "CC",
-            "Quarter-3",
-            "https://project-1.com/1",
-            "CY7",
-            0,
-            1000,
-            owner.address
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Batch URI
-     */
-    it("Should fail if batch URI is empty", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            "PZC",
-            "CC",
-            "Quarter-3",
-            "",
-            "CY7",
             2024,
-            1000,
             owner.address
           )
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
     /**
-     * @description Case: Check For Salt/UniqueIdentifier
+     * @description Case: Check For Batch Owner Address
      */
-    it("Should fail if salt is empty", async () => {
+    it("Should fail if duplicate vintage is passed", async () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
           .createNewBatch(
             "PZC",
             "CC",
-            "Quarter-3",
             "https://project-1.com/1",
-            "",
-            2024,
+            2028,
             1000,
+            2025,
             owner.address
+          )
+      ).to.be.revertedWith("VINTAGE_ALREADY_EXIST");
+    });
+
+    /**
+     * @description Case: Check For Duplicate Vintage
+     */
+    it("Should fail if batch owner address is a zero address", async () => {
+      await expect(
+        plannedCreditFactory
+          .connect(owner)
+          .createNewBatch(
+            "PZC",
+            "CC",
+            "https://project-1.com/1",
+            2028,
+            1000,
+            2024,
+            ZERO_ADDRESS
           )
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -276,11 +271,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CY7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
 
@@ -289,12 +283,11 @@ describe("Planned Credit Factory Smart Contract", () => {
         .withArgs(
           "PZC",
           "CC",
-          owner.address,
+          "https://project-1.com/1",
+          2028,
           1000,
           2024,
-          "Quarter-3",
-          "https://project-1.com/1",
-          "CY7"
+          owner.address
         );
     });
   });
@@ -341,7 +334,7 @@ describe("Planned Credit Factory Smart Contract", () => {
           "CC",
           batchAddress
         );
-        batchSupplyBeforeMint = batchDetailBeforeMint[6];
+        batchSupplyBeforeMint = batchDetailBeforeMint[4];
         /**
          * @description updateBatchDetailDuringMintOrBurnMore Function Call
          */
@@ -365,7 +358,7 @@ describe("Planned Credit Factory Smart Contract", () => {
           "CC",
           batchAddress
         );
-        batchSupplyAfterMint = batchDetailAfterMint[6];
+        batchSupplyAfterMint = batchDetailAfterMint[4];
       }
     );
 
@@ -417,11 +410,10 @@ describe("Planned Credit Factory Smart Contract", () => {
           .createNewBatch(
             "PZC",
             "CC",
-            "Quarter-3",
             "https://project-1.com/1",
-            "Cx7",
-            2024,
+            2028,
             1000,
+            2024,
             owner.address
           );
 
@@ -447,7 +439,7 @@ describe("Planned Credit Factory Smart Contract", () => {
           "CC",
           batchAddress
         );
-        batchSupplyBeforeMint = batchDetailBeforeMint[8];
+        batchSupplyBeforeMint = batchDetailBeforeMint[4];
         /**
          * @description updateBatchDetailDuringMintOrBurnMore Function Call
          */
@@ -471,7 +463,7 @@ describe("Planned Credit Factory Smart Contract", () => {
           "CC",
           batchAddress
         );
-        batchSupplyAfterMint = batchDetailAfterMint[8];
+        batchSupplyAfterMint = batchDetailAfterMint[4];
       }
     );
 
@@ -513,11 +505,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CQ7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
 
@@ -560,7 +551,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         "CC",
         batchList[0]
       );
-      deliveryYearAfterUpdate = batchDetailAfterUpdate[5];
+      deliveryYearAfterUpdate = batchDetailAfterUpdate[3];
     });
     /**
      * @description Case: Successful Call To Web3 Function
@@ -598,11 +589,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CD7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
 
@@ -637,7 +627,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         "CC",
         batchList[0]
       );
-      batchURIAfterUpdate = batchDetailAfterUpdate[3];
+      batchURIAfterUpdate = batchDetailAfterUpdate[2];
     });
 
     /**
@@ -679,11 +669,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CG7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
 
@@ -765,11 +754,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CF7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
       projectListLength += 1;
@@ -778,11 +766,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "CBC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/2",
-          "CI7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
       projectListLength += 1;
@@ -828,11 +815,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CE7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
       await plannedCreditFactory
@@ -840,11 +826,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "PWR",
-          "Quarter-3",
           "https://project-1.com/2",
-          "CH7",
-          2024,
+          2028,
           1000,
+          2025,
           owner.address
         );
 
@@ -892,11 +877,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CL7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
       await plannedCreditFactory
@@ -904,11 +888,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-4",
           "https://project-1.com/2",
-          "CB7",
-          2024,
+          2028,
           1000,
+          2025,
           owner.address
         );
 
@@ -960,11 +943,10 @@ describe("Planned Credit Factory Smart Contract", () => {
         .createNewBatch(
           "PZC",
           "CC",
-          "Quarter-3",
           "https://project-1.com/1",
-          "CK7",
-          2024,
+          2028,
           1000,
+          2024,
           owner.address
         );
 
