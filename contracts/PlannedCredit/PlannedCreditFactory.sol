@@ -114,7 +114,7 @@ contract PlannedCreditFactory is
      * @dev vintageExists: This vinatge already exists for the P.Id <> C.Id Pair
      */
     mapping(string => mapping(string => mapping(uint64 => bool)))
-        internal vintageExists;
+        public vintageExists;
 
     /**
             @notice NewBatchCreated triggers when a new batch is created
@@ -128,7 +128,8 @@ contract PlannedCreditFactory is
         uint256 lastUpdated,
         uint64 vintage,
         address batchId,
-        address batchOwner
+        address batchOwner,
+        string name
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -333,6 +334,8 @@ contract PlannedCreditFactory is
 
         projectCommodityTotalSupply[_projectId][_commodityId] += _batchSupply;
 
+        string memory name = PlannedCredit(_batchAddress).name();
+
         emit NewBatchCreated(
             _projectId,
             _commodityId,
@@ -342,7 +345,8 @@ contract PlannedCreditFactory is
             block.timestamp,
             _vintage,
             _batchAddress,
-            _batchOwner
+            _batchOwner,
+            name
         );
     }
 
