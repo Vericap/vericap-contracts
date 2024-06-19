@@ -60,6 +60,26 @@
       "address": "0x03741Ae55C3B0168D353cC869B8CFFbf14e3fb3C",
       "txHash": "0xbc112ce1840aa5e9247345863e0378e09a2e9b32ee36dff09a96e0be2533777f",
       "kind": "uups"
+    },
+    {
+      "address": "0x54eE0f03E5Aed37F72D73811BBA7f47DD0CcFdfE",
+      "txHash": "0x446e6ee3e950c355a6346f04769d005cee51e9c9ca1ee32d0a528777ca0f3356",
+      "kind": "uups"
+    },
+    {
+      "address": "0xb0a231067675E0AeF903F122B093e1d654eCd251",
+      "txHash": "0x868fe6b1b0bc7063e08e922a748d498f35452638b9585a6bb7ce2c8148e6004b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x5b89B29627E7A67722F94D7212D1857cd919e2fc",
+      "txHash": "0xdf2555045321d373a910024db867f434e34a596d2fed24c078c4e66fb28b6d0b",
+      "kind": "uups"
+    },
+    {
+      "address": "0xef145A069c96d460e9674762C6dC3ebfaa02EF9a",
+      "txHash": "0x685cdd3c3f9d833cfe573e07ef4844808b2f71b6276a4e7d05018905510e5304",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -2554,6 +2574,740 @@
             "numberOfBytes": "32"
           },
           "t_struct(BatchDetail)6417_storage": {
+            "label": "struct PlannedCreditFactory.BatchDetail",
+            "members": [
+              {
+                "label": "projectId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "commodityId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "batchURI",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "plannedDeliveryYear",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "batchSupply",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "lastUpdated",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "vintage",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "batchId",
+                "type": "t_address",
+                "offset": 8,
+                "slot": "6"
+              },
+              {
+                "label": "batchOwner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(RoleData)23_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    },
+    "cf03266de3948f0e08f5a8ecdd3d408d1015f891c868e6f09e1905d8edf3a9a9": {
+      "address": "0xD60c354905975B3f3e686dd748B630Ce1BB80401",
+      "txHash": "0xe6ebe6f0216a7e48df6e8c4068f2ba0a2d80a5c198787511b992e3d8d3131c61",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)23_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:57"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:260"
+          },
+          {
+            "label": "plannedCreditManagerContract",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_address",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:41"
+          },
+          {
+            "label": "projectIds",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_array(t_string_storage)dyn_storage",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:46"
+          },
+          {
+            "label": "batchDetails",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage)))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:79"
+          },
+          {
+            "label": "commodityList",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:85"
+          },
+          {
+            "label": "batchIndexList",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:90"
+          },
+          {
+            "label": "batchList",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:95"
+          },
+          {
+            "label": "projectCommodityTotalSupply",
+            "offset": 0,
+            "slot": "307",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:100"
+          },
+          {
+            "label": "commodityExists",
+            "offset": 0,
+            "slot": "308",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_bool))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:106"
+          },
+          {
+            "label": "projectExists",
+            "offset": 0,
+            "slot": "309",
+            "type": "t_mapping(t_string_memory_ptr,t_bool)",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:111"
+          },
+          {
+            "label": "vintageExists",
+            "offset": 0,
+            "slot": "310",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint64,t_bool)))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:116"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_string_storage)dyn_storage": {
+            "label": "string[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(BatchDetail)6105_storage)dyn_storage": {
+            "label": "struct PlannedCreditFactory.BatchDetail[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage)": {
+            "label": "mapping(address => struct PlannedCreditFactory.BatchDetail[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)23_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage)": {
+            "label": "mapping(string => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)": {
+            "label": "mapping(string => string[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_bool)": {
+            "label": "mapping(string => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage))": {
+            "label": "mapping(string => mapping(address => struct PlannedCreditFactory.BatchDetail[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))": {
+            "label": "mapping(string => mapping(string => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_bool))": {
+            "label": "mapping(string => mapping(string => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage)))": {
+            "label": "mapping(string => mapping(string => mapping(address => struct PlannedCreditFactory.BatchDetail[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint64,t_bool)))": {
+            "label": "mapping(string => mapping(string => mapping(uint64 => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))": {
+            "label": "mapping(string => mapping(string => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_uint64,t_bool))": {
+            "label": "mapping(string => mapping(uint64 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_uint256)": {
+            "label": "mapping(string => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint64,t_bool)": {
+            "label": "mapping(uint64 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BatchDetail)6105_storage": {
+            "label": "struct PlannedCreditFactory.BatchDetail",
+            "members": [
+              {
+                "label": "projectId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "commodityId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "batchURI",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "plannedDeliveryYear",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "batchSupply",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "lastUpdated",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "vintage",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "batchId",
+                "type": "t_address",
+                "offset": 8,
+                "slot": "6"
+              },
+              {
+                "label": "batchOwner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(RoleData)23_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    },
+    "2368e56b60809d11d74148523411f524bb1dc34a2a0e9bdf83efe653376ec9c3": {
+      "address": "0x7C0dfAA289E16E3e33499a44b03BEDfC3a7249Ed",
+      "txHash": "0x1253b11519ecea0f49c4c4af40ced0a9b2829ef062326151b58b7467f26b8ba8",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)23_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:57"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:260"
+          },
+          {
+            "label": "plannedCreditManagerContract",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_address",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:41"
+          },
+          {
+            "label": "projectIds",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_array(t_string_storage)dyn_storage",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:46"
+          },
+          {
+            "label": "batchDetails",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage)))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:79"
+          },
+          {
+            "label": "commodityList",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:85"
+          },
+          {
+            "label": "batchIndexList",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:90"
+          },
+          {
+            "label": "batchList",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:95"
+          },
+          {
+            "label": "projectCommodityTotalSupply",
+            "offset": 0,
+            "slot": "307",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:100"
+          },
+          {
+            "label": "commodityExists",
+            "offset": 0,
+            "slot": "308",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_bool))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:106"
+          },
+          {
+            "label": "projectExists",
+            "offset": 0,
+            "slot": "309",
+            "type": "t_mapping(t_string_memory_ptr,t_bool)",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:111"
+          },
+          {
+            "label": "vintageExists",
+            "offset": 0,
+            "slot": "310",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint64,t_bool)))",
+            "contract": "PlannedCreditFactory",
+            "src": "contracts/PlannedCredit/PlannedCreditFactory.sol:116"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_string_storage)dyn_storage": {
+            "label": "string[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(BatchDetail)6105_storage)dyn_storage": {
+            "label": "struct PlannedCreditFactory.BatchDetail[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage)": {
+            "label": "mapping(address => struct PlannedCreditFactory.BatchDetail[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)23_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage)": {
+            "label": "mapping(string => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)": {
+            "label": "mapping(string => string[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_bool)": {
+            "label": "mapping(string => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage))": {
+            "label": "mapping(string => mapping(address => struct PlannedCreditFactory.BatchDetail[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))": {
+            "label": "mapping(string => mapping(string => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_bool))": {
+            "label": "mapping(string => mapping(string => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_address,t_array(t_struct(BatchDetail)6105_storage)dyn_storage)))": {
+            "label": "mapping(string => mapping(string => mapping(address => struct PlannedCreditFactory.BatchDetail[])))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint64,t_bool)))": {
+            "label": "mapping(string => mapping(string => mapping(uint64 => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))": {
+            "label": "mapping(string => mapping(string => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_uint64,t_bool))": {
+            "label": "mapping(string => mapping(uint64 => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_uint256)": {
+            "label": "mapping(string => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint64,t_bool)": {
+            "label": "mapping(uint64 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BatchDetail)6105_storage": {
             "label": "struct PlannedCreditFactory.BatchDetail",
             "members": [
               {

@@ -4,7 +4,7 @@ pragma solidity >=0.8.22;
 /**
  * @title Planned Credit Manager Contract
  * @author Team @vericap
- * @notice Manager is a upgradeable contract used for mananing Planned Credit Batch related actions
+ * @notice Planned Credit Manager is a upgradeable contract used for mananing Planned Credit Batch related actions
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -36,7 +36,7 @@ contract PlannedCreditManager is
     using StringsUpgradeable for uint256;
 
     /**
-        @notice Declaring access based roles
+        @notice Defining MANAGER_ROLE
      */
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
@@ -46,7 +46,7 @@ contract PlannedCreditManager is
     PlannedCreditFactory public plannedCreditFactoryContract;
 
     /**
-        @notice MintedMoreInABatch triggers when a more tokens are minted in a 
+        @notice MintedMoreInABatch: Triggers when a more tokens are minted in a 
                 batch
      */
     event MintedMoreInABatch(
@@ -60,7 +60,7 @@ contract PlannedCreditManager is
     );
 
     /**
-        @notice MintedMoreInABatch triggers when a some tokens are burned 
+        @notice BurnedFromABatch: Triggers when a some tokens are burned 
                 from a batch
      */
     event BurnedFromABatch(
@@ -74,7 +74,7 @@ contract PlannedCreditManager is
     );
 
     /**
-        @notice ManyToManyBatchTransfer triggers on many-many transfer 
+        @notice ManyToManyBatchTransfer: Triggers on many-many transfer 
      */
     event ManyToManyBatchTransfer(
         IERC20[] batchIds,
@@ -83,7 +83,7 @@ contract PlannedCreditManager is
     );
 
     /**
-        @notice BatchPlannedDeliveryYearUpdated triggers when a batch's delivery 
+        @notice BatchPlannedDeliveryYearUpdated: Triggers when a batch's delivery 
                 year is updated
      */
     event PlannedDeliveryYearUpdatedForBatch(
@@ -94,7 +94,7 @@ contract PlannedCreditManager is
     );
 
     /**
-        @notice BatchPlannedDeliveryYearUpdated triggers when a batch's URI is 
+        @notice BatchPlannedDeliveryYearUpdated: Triggers when a batch's URI is 
                 updated
      */
     event URIUpdatedForBatch(
@@ -104,7 +104,7 @@ contract PlannedCreditManager is
         string updatedBatchURI
     );
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
+    /// @custom:oz-upgrades-unsafe-allow UUPS constructor
     constructor() {
         _disableInitializers();
     }
@@ -138,7 +138,7 @@ contract PlannedCreditManager is
     ) internal override onlyOwner {}
 
     /**
-        @notice mintMoreInABatch: Create a new batch w.r.t projectId and commodityId
+        @notice mintMoreInABatch: Increase supply of a PlannedCredit batch by minting
         @dev Calls child batch for minting more in a batch
                 This will basically increase the supply of ERC20 contract
         @param _projectId Project Id
@@ -188,7 +188,7 @@ contract PlannedCreditManager is
     }
 
     /**
-        @notice burnFromABatch: Create a new batch w.r.t projectId and commodityId
+        @notice burnFromABatch: Decreasing supply of a PlannedCredit batch by burning more
         @dev Calls child batch for burning from a batch
                 This will basically increase the supply of ERC20 contract
         @param _projectId Project Id
@@ -238,8 +238,9 @@ contract PlannedCreditManager is
     }
 
     /**
-        @notice manyToManyBatchTransfer: Perform PlannedCredit transfer from diferent batches 
-                to different user
+        @notice manyToManyBatchTransfer: Perform M2M PlannedCredit transfer from diferent batches 
+                to different user from different project developers.
+                Note: Approval mechanism should be performed prior to this functionality
         @param _batchTokenIds List of batch Ids
         @param _batchTransferData receiver addresses and amounts to be converted into bytes
         @dev Project developers needs to approve the PlannedCreditManager. 
@@ -282,7 +283,7 @@ contract PlannedCreditManager is
     }
 
     /**
-        @notice updateBatchPlannedDeliveryYear: Update delivery year of batch
+        @notice updateBatchPlannedDeliveryYear: Update delivery year of PlannedCredit batch
         @param _projectId Project Id 
         @param _commodityId Commodity Id
         @param _batchId Batch Id w.r.t to project Id and commidity Id
@@ -312,7 +313,7 @@ contract PlannedCreditManager is
     }
 
     /**
-        @notice updateBatchURI: Update Batch URI for a batch
+        @notice updateBatchURI: Update Batch URI for a PlannedCredit batch
         @param _projectId Project Id 
         @param _commodityId Commodity Id
         @param _batchId Batch Id w.r.t to project Id and commidity Id
@@ -337,6 +338,22 @@ contract PlannedCreditManager is
             _commodityId,
             _batchId,
             _updatedURI
+        );
+    }
+
+    /**
+     * @notice setFactoryManagerContract: Set's PlannedCreditFactory contract
+     * @param _plannedCreditFactoryContract PlannedCreditFactory contract address
+     */
+    function setFactoryManagerContract(
+        address _plannedCreditFactoryContract
+    ) external onlyRole(MANAGER_ROLE) {
+        require(
+            _plannedCreditFactoryContract != address(0),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
+        plannedCreditFactoryContract = PlannedCreditFactory(
+            _plannedCreditFactoryContract
         );
     }
 

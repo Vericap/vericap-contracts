@@ -4,7 +4,7 @@ pragma solidity >=0.8.22;
 /**
  * @title Planned Credit Factory Smart Contract
  * @author Team @vericap
- * @notice Factory is a upgradeable contract used for deploying new PlannedCredit contracts
+ * @notice Planned Credit Factory is a upgradeable contract used for deploying new PlannedCredit contracts
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -31,7 +31,7 @@ contract PlannedCreditFactory is
     using SafeERC20 for IERC20;
 
     /**
-            @dev Inheriting StringsUpgradeable library for uint256
+            @dev Inheriting StringsUpgradeable library for uint64
         */
     using StringsUpgradeable for uint64;
 
@@ -44,6 +44,10 @@ contract PlannedCreditFactory is
             @dev projectIds: Storing project Ids in an array
         */
     string[] internal projectIds;
+
+    /**
+     * @notice Define FACTORY_MANAGER_ROLE
+     */
 
     bytes32 public constant FACTORY_MANAGER_ROLE =
         keccak256("FACTORY_MANAGER_ROLE");
@@ -59,7 +63,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @dev BatchDetail: holds the properties for a batch
+            @dev BatchDetail: Holds the properties for a batch
         */
     struct BatchDetail {
         string projectId;
@@ -101,23 +105,23 @@ contract PlannedCreditFactory is
         internal projectCommodityTotalSupply;
 
     /**
-     * @dev commodityIdExists: Checking for duplication of commodityId::projectId
+     * @dev commodityIdExists: Checks for duplication of commodityId::projectId
      */
     mapping(string => mapping(string => bool)) internal commodityExists;
 
     /**
-     * @dev projectIdExists: Checking for duplication of projectId
+     * @dev projectIdExists: Checks for duplication of projectId
      */
     mapping(string => bool) internal projectExists;
 
     /**
-     * @dev vintageExists: This vinatge already exists for the P.Id <> C.Id Pair
+     * @dev vintageExists: Check for vintage duplication for a project::commodity pair
      */
     mapping(string => mapping(string => mapping(uint64 => bool)))
         public vintageExists;
 
     /**
-            @notice NewBatchCreated triggers when a new batch is created
+            @notice NewBatchCreated: Triggers when a new batch contract is created
         */
     event NewBatchCreated(
         string projectId,
@@ -132,7 +136,7 @@ contract PlannedCreditFactory is
         string name
     );
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
+    /// @custom:oz-upgrades-unsafe-allow UUPS constructor
     constructor() {
         _disableInitializers();
     }
@@ -203,7 +207,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @notice getBatchListForACommodityInABatch: View function to fetch 
+            @notice getBatchListForACommodityInAProject: View function to fetch 
                     list of batches w.r.t projectId & commodityId
             @param _projectId Project Id
             @param _commodityId Commodity Id
@@ -244,7 +248,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @notice mintNewBatch: Create a new batch w.r.t projectId and commodityId
+            @notice createNewBatch: Create a new batch w.r.t projectId and commodityId
             @dev Follows factory-child pattern for creating batches using CREATE2 opcode
                     Child contract is going to be ERC20 compatible smart contract
             @param _projectId Project Id
@@ -287,7 +291,7 @@ contract PlannedCreditFactory is
                     "-",
                     _commodityId,
                     "-",
-                    _vintage
+                    _vintage.toString()
                 )
             ),
             string(
@@ -334,7 +338,7 @@ contract PlannedCreditFactory is
 
         projectCommodityTotalSupply[_projectId][_commodityId] += _batchSupply;
 
-        string memory name = PlannedCredit(_batchAddress).name();
+        string memory _name = PlannedCredit(_batchAddress).name();
 
         emit NewBatchCreated(
             _projectId,
@@ -346,12 +350,12 @@ contract PlannedCreditFactory is
             _vintage,
             _batchAddress,
             _batchOwner,
-            name
+            _name
         );
     }
 
     /**
-     * @notice updateBatchDetailDuringMintOrBurnMore Updates batch details when ever Planned Credits are minted/burned
+     * @notice updateBatchDetailDuringMintOrBurnMore: Updates batch details when a Planned Credit's supply is updated
      * @param _projectId Project Id
      * @param _commodityId Commodity Id
      * @param _amountToMintOrBurn Amount of tokens to mint/burn
@@ -387,7 +391,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-     * @notice updateBatchDetailDuringURIChange: Update the factory storage
+     * @notice updateBatchDetailDuringURIChange: Updates batch details when a Planned Credit's storage is updated
      * @param _projectId Project Id
      * @param _commodityId Commodity Id
      * @param _plannedDeliveryYear Updated batch delivery year
@@ -408,7 +412,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-     * @notice updateBatchDetailDuringURIChange: Update the factory storage
+     * @notice updateBatchDetailDuringURIChange: Updates batch details when a Planned Credit's URI is updated
      * @param _projectId Project Id
      * @param _commodityId Commodity Id
      * @param _batchURI Updated batch URI
@@ -429,20 +433,24 @@ contract PlannedCreditFactory is
     }
 
     /**
-     * @notice setPlannedCreditManagerContract Set's PlannedCreditManager contract
-     * @param _plannedCreditManagerContract PlannedCredit contract address
+     * @notice setPlannedCreditManagerContract: Set's PlannedCreditManager contract
+     * @param _plannedCreditManagerContract PlannedCreditManager contract address
      */
     function setPlannedCreditManagerContract(
         address _plannedCreditManagerContract
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        require(
+            _plannedCreditManagerContract != address(0),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
         plannedCreditManagerContract = _plannedCreditManagerContract;
         grantRole(FACTORY_MANAGER_ROLE, _plannedCreditManagerContract);
     }
 
     /**
-     * @notice grantRoleForBatch manager Roles For PlannedCredit Batch
+     * @notice grantRoleForBatch: manager Roles For PlannedCredit Batch
      * @param _batchId Batch contract address
-     * @param _address Address to grant role to
+     * @param _address Address to grant role for
      */
     function grantManagerRoleForBatch(
         address _batchId,
@@ -485,7 +493,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @notice createNewBatch: Create a new batch w.r.t projectId and commodityId
+            @notice _createNewBatch: Create a new batch w.r.t projectId and commodityId
             @dev Follows factory-child pattern for creating batches using CREATE2 opcode
                     Child contract is going to be ERC20 compatible smart contract
             @param _tokenName ERC20 based token name
@@ -515,7 +523,7 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @notice updateProjectCommodityBatchStorage: Updating batch storage for a 
+            @notice _updateProjectCommodityBatchStorage: Updating batch storage for a 
                     project and commodity
             @param _projectId Project Id
             @param _commodityId Commodity Id
@@ -549,11 +557,15 @@ contract PlannedCreditFactory is
  */
 
 contract PlannedCredit is ERC20, AccessControl {
+
+    /**
+     * @notice Define FACTORY_MANAGER_ROLE
+     */
     bytes32 public constant FACTORY_MANAGER_ROLE =
         keccak256("FACTORY_MANAGER_ROLE");
 
     /**
-            @notice BatchTransfer triggers when tokens are transferred in 
+            @notice BatchTransfer: triggers when tokens are transferred in 
                     a batch
         */
     event BatchTransfer(
@@ -565,8 +577,8 @@ contract PlannedCredit is ERC20, AccessControl {
             @notice Building up the constructor
             @param _name Token name
             @param _symbol Token symbol
-            @param _factoryContract Factory contract address
-            @param _managerContract Manager contract address
+            @param _factoryContract PlannedCreditFactory contract address
+            @param _managerContract PlannedCreditManager contract address
             
         */
     constructor(
@@ -592,7 +604,7 @@ contract PlannedCredit is ERC20, AccessControl {
     /**
             @notice mint: Standard ERC20's mint
             @dev Using ERC20's internal _mint function
-            @param _account Account where tokens will get minted
+            @param _account Account for which tokens will get minted
             @param _amount Amount of tokens to be minted        
         */
     function mintPlannedCredits(
@@ -604,8 +616,8 @@ contract PlannedCredit is ERC20, AccessControl {
 
     /**
             @notice burn: Standard ERC20's burn
-            @dev Using ERC20's internal _mint function
-            @param _account Account from where tokens will get burned from
+            @dev Using ERC20's internal _burn function
+            @param _account Account from where tokens will get burned
             @param _amount Amount of tokens to be burned
         */
     function burnPlannedCredits(
