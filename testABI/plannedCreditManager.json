@@ -41,15 +41,15 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
@@ -59,15 +59,15 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "amountToBurn",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "batchOwnerAddress",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountToBurn",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -128,15 +128,15 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
@@ -146,15 +146,15 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "amountToMint",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "batchOwnerAddress",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountToMint",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -196,15 +196,15 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
@@ -302,15 +302,15 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
@@ -370,14 +370,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "internalType": "address",
@@ -385,14 +385,14 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "_amountToBurn",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
         "name": "_batchOwner",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amountToBurn",
+        "type": "uint256"
       }
     ],
     "name": "burnFromABatch",
@@ -505,14 +505,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "internalType": "address",
@@ -520,14 +520,14 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "_amountToMint",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
         "name": "_batchOwner",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amountToMint",
+        "type": "uint256"
       }
     ],
     "name": "mintMoreInABatch",
@@ -652,14 +652,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "internalType": "address",
@@ -680,14 +680,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "internalType": "address",

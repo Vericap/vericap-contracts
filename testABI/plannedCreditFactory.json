@@ -54,39 +54,15 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "commodityId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "batchId",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "batchOwner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "batchSupply",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "plannedDeliveryYear",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "indexed": false,
@@ -102,8 +78,20 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "uniqueIdentifier",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "plannedDeliveryYear",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "batchSupply",
         "type": "uint256"
       },
       {
@@ -111,6 +99,18 @@
         "internalType": "uint256",
         "name": "lastUpdated",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "batchId",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "batchOwner",
+        "type": "address"
       }
     ],
     "name": "NewBatchCreated",
@@ -252,29 +252,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_batchOwner",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_batchSupply",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_plannedDeliveryYear",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "internalType": "string",
@@ -287,9 +272,24 @@
         "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_uniqueIdentifier",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_plannedDeliveryYear",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_batchSupply",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_batchOwner",
+        "type": "address"
       }
     ],
     "name": "createNewBatch",
@@ -300,14 +300,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       },
       {
         "internalType": "address",
@@ -320,14 +320,14 @@
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "batchId",
-            "type": "address"
+            "internalType": "string",
+            "name": "projectId",
+            "type": "string"
           },
           {
-            "internalType": "address",
-            "name": "batchOwner",
-            "type": "address"
+            "internalType": "string",
+            "name": "commodityId",
+            "type": "string"
           },
           {
             "internalType": "string",
@@ -340,19 +340,9 @@
             "type": "string"
           },
           {
-            "internalType": "uint256",
+            "internalType": "string",
             "name": "uniqueIdentifier",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "projectId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "commodityId",
-            "type": "uint256"
+            "type": "string"
           },
           {
             "internalType": "uint256",
@@ -368,6 +358,16 @@
             "internalType": "uint256",
             "name": "lastUpdated",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "batchId",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "batchOwner",
+            "type": "address"
           }
         ],
         "internalType": "struct PlannedCreditFactory.BatchDetail",
@@ -381,14 +381,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       }
     ],
     "name": "getBatchListForACommodityInAProject",
@@ -405,17 +405,17 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       }
     ],
     "name": "getCommodityListForAProject",
     "outputs": [
       {
-        "internalType": "uint256[]",
+        "internalType": "string[]",
         "name": "",
-        "type": "uint256[]"
+        "type": "string[]"
       }
     ],
     "stateMutability": "view",
@@ -424,14 +424,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
+        "type": "string"
       }
     ],
     "name": "getProjectCommodityTotalSupply",
@@ -450,9 +450,9 @@
     "name": "getProjectList",
     "outputs": [
       {
-        "internalType": "uint256[]",
+        "internalType": "string[]",
         "name": "",
-        "type": "uint256[]"
+        "type": "string[]"
       }
     ],
     "stateMutability": "view",
@@ -680,19 +680,14 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_batchId",
-        "type": "address"
+        "type": "string"
       },
       {
         "internalType": "uint256",
@@ -703,6 +698,11 @@
         "internalType": "uint8",
         "name": "_plannedCreditBatchAction",
         "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "_batchId",
+        "type": "address"
       }
     ],
     "name": "updateBatchDetailDuringMintOrBurnMore",
@@ -713,24 +713,24 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_commodityId",
+        "type": "string"
       },
       {
         "internalType": "uint256",
-        "name": "_commodityId",
+        "name": "_plannedDeliveryYear",
         "type": "uint256"
       },
       {
         "internalType": "address",
         "name": "_batchId",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_plannedDeliveryYear",
-        "type": "uint256"
       }
     ],
     "name": "updateBatchDetailDuringPlannedDeliveryYearChange",
@@ -741,24 +741,24 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_projectId",
-        "type": "uint256"
+        "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "string",
         "name": "_commodityId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_batchId",
-        "type": "address"
+        "type": "string"
       },
       {
         "internalType": "string",
         "name": "_batchURI",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "_batchId",
+        "type": "address"
       }
     ],
     "name": "updateBatchDetailDuringURIChange",

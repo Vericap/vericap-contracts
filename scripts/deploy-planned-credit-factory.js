@@ -25,23 +25,25 @@ async function main() {
       { kind: "uups" }
     );
     await plannedCreditFactory.deployed();
+
+    console.log(plannedCreditFactory.address);
   } catch (err) {
     console.log("Contract deployment failed", err);
   }
 
-  const waitForDeployment = (seconds) => {
-    console.log(
-      `\n\x1b[33m${"[waiting]"}\x1b[0m Preparing Planned Credit Factory smart contract deployment. Just a moment... \n`
-    );
-    setTimeout(() => {
-      console.log(
-        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Planned Credit Factory smart contrat deployed successfully to: \x1b[4mhttps://sepolia.etherscan.io/address/${
-          plannedCreditFactory.address
-        }#code\x1b[0m \n`
-      );
-    }, seconds);
-  };
-  waitForDeployment(3000);
+  // const waitForDeployment = (seconds) => {
+  //   console.log(
+  //     `\n\x1b[33m${"[waiting]"}\x1b[0m Preparing Planned Credit Factory smart contract deployment. Just a moment... \n`
+  //   );
+  //   setTimeout(() => {
+  //     console.log(
+  //       `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Planned Credit Factory smart contrat deployed successfully to: \x1b[4mhttps://sepolia.etherscan.io/address/${
+  //         plannedCreditFactory.address
+  //       }#code\x1b[0m \n`
+  //     );
+  //   }, seconds);
+  // };
+  // waitForDeployment(3000);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

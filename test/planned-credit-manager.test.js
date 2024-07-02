@@ -99,165 +99,31 @@ describe("Planned Credit Manager Smart Contract", () => {
           .setPlannedCreditManagerContract(plannedCreditManager.address);
       }
     );
-    /**
-     * @description Case: Check For Project Id
-     */
-    it("Should fail if project Id is zero", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            0,
-            1,
-            owner.address,
-            1000,
-            2024,
-            "Quarter-3",
-            "https://project-1.com/1",
-            123
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Commodity Id
-     */
-    it("Should fail if commodity Id is zero", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            1,
-            0,
-            owner.address,
-            1000,
-            2024,
-            "Quarter-3",
-            "https://project-1.com/1",
-            123
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Batch Owner Address
-     */
-    it("Should fail if batch owner address is a zero address", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            1,
-            1,
-            ZERO_ADDRESS,
-            1000,
-            2024,
-            "Quarter-3",
-            "https://project-1.com/1",
-            123
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Batch Supply
-     */
-    it("Should fail If batch supply is zero", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            1,
-            1,
-            owner.address,
-            0,
-            2024,
-            "Quarter-3",
-            "https://project-1.com/1",
-            123
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Delivery Year
-     */
-    it("Should fail if delivery year is empty", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            1,
-            1,
-            owner.address,
-            1000,
-            0,
-            "Quarter-3",
-            "https://project-1.com/1",
-            123
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Batch URI
-     */
-    it("Should fail if batch URI is empty", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(1, 1, owner.address, 1000, 2024, "Quarter-3", "", 123)
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
-
-    /**
-     * @description Case: Check For Salt/UniqueIdentifier
-     */
-    it("Should fail if salt is not an integer value", async () => {
-      await expect(
-        plannedCreditFactory
-          .connect(owner)
-          .createNewBatch(
-            1,
-            1,
-            owner.address,
-            1000,
-            2024,
-            "Quarter-3",
-            "https://project-1.com/1",
-            0
-          )
-      ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
-    });
 
     /**
      * @description Case: Successful Call To Web3 Function
      */
     it("Should create new batch successfully", async () => {
-      const createNewBatch = await plannedCreditFactory
-        .connect(owner)
-        .createNewBatch(
-          1,
-          1,
-          owner.address,
-          1000,
-          2024,
-          "Quarter-3",
-          "https://project-1.com/1",
-          123
-        );
+      const createNewBatch = await plannedCreditFactory.createNewBatch(
+        "PZC",
+        "CC",
+        "https://project-1.com/1",
+        2028,
+        1000,
+        2024,
+        owner.address
+      );
 
       expect(createNewBatch)
         .to.emit(plannedCreditFactory, "mintNewBatch")
         .withArgs(
-          1,
-          1,
-          owner.address,
+          "PZC",
+          "CC",
+          "https://project-1.com/1",
+          2028,
           1000,
           2024,
-          "Quarter-3",
-          "https://project-1.com/1",
-          123
+          owner.address
         );
     });
   });
@@ -290,7 +156,10 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
+        await plannedCreditFactory.getBatchListForACommodityInAProject(
+          "PZC",
+          "CC"
+        );
       batchAddress = batchList[0];
 
       /**
@@ -301,8 +170,8 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param batchId
        */
       batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchAddress
       );
       batchSupplyBeforeMint = batchDetailBeforeMint[8];
@@ -311,11 +180,11 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @description mintMoreInABatch Function Call
        */
       await plannedCreditManager.mintMoreInABatch(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchAddress,
-        50,
-        owner.address
+        owner.address,
+        50
       );
 
       /**
@@ -326,8 +195,8 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param batchId
        */
       batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchAddress
       );
       batchSupplyAfterMint = batchDetailAfterMint[8];
@@ -336,14 +205,14 @@ describe("Planned Credit Manager Smart Contract", () => {
     /**
      * @description Case: Check For Project Id
      */
-    it("Should fail If project Id is zero", async () => {
+    it("Should fail If project Id is empty", async () => {
       await expect(
         plannedCreditManager.mintMoreInABatch(
-          0,
-          1,
+          "",
+          "CC",
           batchAddress,
-          50,
-          owner.address
+          owner.address,
+          50
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -351,14 +220,14 @@ describe("Planned Credit Manager Smart Contract", () => {
     /**
      * @description Case: Check For Commodity Id
      */
-    it("Should fail If commodity Id is zero", async () => {
+    it("Should fail If commodity Id is empty", async () => {
       await expect(
         plannedCreditManager.mintMoreInABatch(
-          1,
-          0,
+          "PZC",
+          "",
           batchAddress,
-          50,
-          owner.address
+          owner.address,
+          50
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -369,11 +238,11 @@ describe("Planned Credit Manager Smart Contract", () => {
     it("Should fail If amount is zero", async () => {
       await expect(
         plannedCreditManager.mintMoreInABatch(
-          1,
-          1,
+          "PZC",
+          "CC",
           batchAddress,
-          0,
-          owner.address
+          owner.address,
+          0
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -384,11 +253,11 @@ describe("Planned Credit Manager Smart Contract", () => {
     it("Should fail If batch Id is zero", async () => {
       await expect(
         plannedCreditManager.mintMoreInABatch(
-          1,
-          1,
+          "PZC",
+          "CC",
           ZERO_ADDRESS,
-          50,
-          owner.address
+          owner.address,
+          50
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -430,14 +299,13 @@ describe("Planned Credit Manager Smart Contract", () => {
       await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
-          1,
-          1,
-          owner.address,
+          "PZC",
+          "CC",
+          "https://project-1.com/1",
+          2028,
           1000,
           2024,
-          "Quarter-3",
-          "https://project-1.com/1",
-          123
+          owner.address
         );
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
@@ -446,7 +314,10 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
+        await plannedCreditFactory.getBatchListForACommodityInAProject(
+          "PZC",
+          "CC"
+        );
       batchAddress = batchList[0];
 
       /**
@@ -457,17 +328,17 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param batchId
        */
       batchDetailBeforeBurn = await plannedCreditFactory.getBatchDetails(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchAddress
       );
       batchSupplyBeforeBurn = batchDetailBeforeBurn[8];
       await plannedCreditManager.burnFromABatch(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchAddress,
-        50,
-        owner.address
+        owner.address,
+        50
       );
 
       /**
@@ -478,8 +349,8 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param batchId
        */
       batchDetailAfterBurn = await plannedCreditFactory.getBatchDetails(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchAddress
       );
       batchSupplyAfterBurn = batchDetailAfterBurn[8];
@@ -488,14 +359,14 @@ describe("Planned Credit Manager Smart Contract", () => {
     /**
      * @description Case: Check For Project Id
      */
-    it("Should fail If project Id is zero", async () => {
+    it("Should fail If project Id is empty", async () => {
       await expect(
         plannedCreditManager.burnFromABatch(
-          0,
-          1,
+          "",
+          "CC",
           batchAddress,
-          50,
-          owner.address
+          owner.address,
+          50
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -503,14 +374,14 @@ describe("Planned Credit Manager Smart Contract", () => {
     /**
      * @description Case: Check For Commodity Id
      */
-    it("Should fail If commodity Id is zero", async () => {
+    it("Should fail If commodity Id is empty", async () => {
       await expect(
         plannedCreditManager.burnFromABatch(
-          1,
-          0,
+          "PZC",
+          "",
           batchAddress,
-          50,
-          owner.address
+          owner.address,
+          50
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -521,11 +392,11 @@ describe("Planned Credit Manager Smart Contract", () => {
     it("Should fail If amount is zero", async () => {
       await expect(
         plannedCreditManager.burnFromABatch(
-          1,
-          1,
+          "PZC",
+          "CC",
           batchAddress,
-          0,
-          owner.address
+          owner.address,
+          0
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -536,11 +407,11 @@ describe("Planned Credit Manager Smart Contract", () => {
     it("Should fail If batch Id is zero", async () => {
       await expect(
         plannedCreditManager.burnFromABatch(
-          1,
-          1,
+          "PZC",
+          "CC",
           ZERO_ADDRESS,
-          50,
-          owner.address
+          owner.address,
+          50
         )
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
@@ -583,27 +454,25 @@ describe("Planned Credit Manager Smart Contract", () => {
       await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
-          1,
-          1,
-          projectDeveloperOne.address,
-          1000,
-          2024,
-          "Quarter-3",
+          "PZC",
+          "CC",
           "https://project-1.com/1",
-          130
+          2028,
+          1000,
+          2022,
+          projectDeveloperOne.address
         );
 
       await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
-          1,
-          1,
-          projectDeveloperTwo.address,
+          "PZC",
+          "CC",
+          "https://project-1.com/1",
+          2028,
           1000,
-          2024,
-          "Quarter-3",
-          "https://project-2.com/2",
-          131
+          2023,
+          projectDeveloperTwo.address
         );
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
@@ -612,7 +481,10 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
+        await plannedCreditFactory.getBatchListForACommodityInAProject(
+          "PZC",
+          "CC"
+        );
 
       /**
        * @description Creating Batch Instance For Both Batches Created Above
@@ -755,14 +627,13 @@ describe("Planned Credit Manager Smart Contract", () => {
       await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
-          1,
-          1,
-          owner.address,
-          1000,
-          2024,
-          "Quarter-3",
+          "PZC",
+          "CC",
           "https://project-1.com/1",
-          128
+          2028,
+          1000,
+          2021,
+          owner.address
         );
 
       /**
@@ -772,7 +643,10 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
+        await plannedCreditFactory.getBatchListForACommodityInAProject(
+          "PZC",
+          "CC"
+        );
 
       /**
        * @description Updating Batch's Delivery Year
@@ -784,7 +658,7 @@ describe("Planned Credit Manager Smart Contract", () => {
        */
       await plannedCreditManager
         .connect(owner)
-        .updateBatchPlannedDeliveryYear(1, 1, batchList[0], 2025);
+        .updateBatchPlannedDeliveryYear("PZC", "CC", batchList[0], 2025);
 
       /**
        * @description Getting Batch Details After Update
@@ -794,32 +668,32 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param batchId
        */
       batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchList[0]
       );
-      deliveryYearAfterUpdate = batchDetailAfterUpdate[7];
+      deliveryYearAfterUpdate = batchDetailAfterUpdate[3];
     });
 
     /**
      * @description Case: Check For ProjectId
      */
-    it("Should fail If projectId is zero", async () => {
+    it("Should fail If projectId is empty", async () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .updateBatchPlannedDeliveryYear(0, 1, batchList[0], 2025)
+          .updateBatchPlannedDeliveryYear("", "CC", batchList[0], 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
     /**
      * @description Case: Check For CommodityId
      */
-    it("Should fail If commodityId is zero", async () => {
+    it("Should fail If commodityId is empty", async () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .updateBatchPlannedDeliveryYear(1, 0, batchList[0], 2025)
+          .updateBatchPlannedDeliveryYear("PZC", "", batchList[0], 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -830,7 +704,7 @@ describe("Planned Credit Manager Smart Contract", () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .updateBatchPlannedDeliveryYear(1, 1, ZERO_ADDRESS, 2025)
+          .updateBatchPlannedDeliveryYear("PZC", "CC", ZERO_ADDRESS, 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -868,14 +742,13 @@ describe("Planned Credit Manager Smart Contract", () => {
       await plannedCreditFactory
         .connect(owner)
         .createNewBatch(
-          1,
-          1,
-          owner.address,
-          1000,
-          2024,
-          "Quarter-3",
+          "PZC",
+          "CC",
           "https://project-1.com/1",
-          123
+          2028,
+          1000,
+          2020,
+          owner.address
         );
 
       /**
@@ -885,7 +758,10 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(1, 1);
+        await plannedCreditFactory.getBatchListForACommodityInAProject(
+          "PZC",
+          "CC"
+        );
 
       /**
        * @description Updating Batch's Delivery Estimate
@@ -896,27 +772,27 @@ describe("Planned Credit Manager Smart Contract", () => {
        * @param updatedBatchURI
        */
       await plannedCreditManager.updateBatchURI(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchList[0],
         "https://project-1.com/updatedSlug"
       );
       batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
-        1,
-        1,
+        "PZC",
+        "CC",
         batchList[0]
       );
-      batchURIAfterUpdate = batchDetailAfterUpdate[3];
+      batchURIAfterUpdate = batchDetailAfterUpdate[2];
     });
 
     /**
      * @description Case: Check For ProjectId
      */
-    it("Should fail If projectId is zero", async () => {
+    it("Should fail If projectId is empty", async () => {
       await expect(
         plannedCreditManager.updateBatchURI(
-          0,
-          1,
+          "",
+          "CC",
           batchList[0],
           "https://project-1.com/updatedSlug"
         )
@@ -926,11 +802,11 @@ describe("Planned Credit Manager Smart Contract", () => {
     /**
      * @description Case: Check For CommodityId
      */
-    it("Should fail If commodityId is zero", async () => {
+    it("Should fail If commodityId is empty", async () => {
       await expect(
         plannedCreditManager.updateBatchURI(
-          1,
-          0,
+          "PZC",
+          "",
           batchList[0],
           "https://project-1.com/updatedSlug"
         )
@@ -943,8 +819,8 @@ describe("Planned Credit Manager Smart Contract", () => {
     it("Should fail If batchId is zero", async () => {
       await expect(
         plannedCreditManager.updateBatchURI(
-          1,
-          1,
+          "PZC",
+          "CC",
           ZERO_ADDRESS,
           "https://project-1.com/updatedSlug"
         )
