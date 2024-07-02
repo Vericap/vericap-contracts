@@ -4,7 +4,7 @@ pragma solidity >=0.8.22;
 /**
  * @title Planned Credit Manager Contract
  * @author Team @vericap
- * @notice Manager is a upgradeable contract used for mananing Planned Credit Batch related actions
+ * @notice Planned Credit Manager is a upgradeable contract used for mananing Planned Credit Batch related actions
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -36,7 +36,7 @@ contract PlannedCreditManager is
     using StringsUpgradeable for uint256;
 
     /**
-        @notice Declaring access based roles
+        @notice Defining MANAGER_ROLE
      */
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
@@ -46,35 +46,35 @@ contract PlannedCreditManager is
     PlannedCreditFactory public plannedCreditFactoryContract;
 
     /**
-        @notice MintedMoreInABatch triggers when a more tokens are minted in a 
+        @notice MintedMoreInABatch: Triggers when a more tokens are minted in a 
                 batch
      */
     event MintedMoreInABatch(
-        uint256 projectId,
-        uint256 commodityId,
+        string projectId,
+        string commodityId,
         address batchId,
-        uint256 amountToMint,
         address batchOwnerAddress,
+        uint256 amountToMint,
         uint256 batchSupply,
         uint256 projectCommodityTokenSupply
     );
 
     /**
-        @notice MintedMoreInABatch triggers when a some tokens are burned 
+        @notice BurnedFromABatch: Triggers when a some tokens are burned 
                 from a batch
      */
     event BurnedFromABatch(
-        uint256 projectId,
-        uint256 commodityId,
+        string projectId,
+        string commodityId,
         address batchId,
-        uint256 amountToBurn,
         address batchOwnerAddress,
+        uint256 amountToBurn,
         uint256 batchSupply,
         uint256 projectCommodityTokenSupply
     );
 
     /**
-        @notice ManyToManyBatchTransfer triggers on many-many transfer 
+        @notice ManyToManyBatchTransfer: Triggers on many-many transfer 
      */
     event ManyToManyBatchTransfer(
         IERC20[] batchIds,
@@ -83,23 +83,23 @@ contract PlannedCreditManager is
     );
 
     /**
-        @notice BatchPlannedDeliveryYearUpdated triggers when a batch's delivery 
+        @notice BatchPlannedDeliveryYearUpdated: Triggers when a batch's delivery 
                 year is updated
      */
     event PlannedDeliveryYearUpdatedForBatch(
-        uint256 projectId,
-        uint256 commodityId,
+        string projectId,
+        string commodityId,
         address batchId,
         uint256 updatedPlannedDeliveryYear
     );
 
     /**
-        @notice BatchPlannedDeliveryYearUpdated triggers when a batch's URI is 
+        @notice BatchPlannedDeliveryYearUpdated: Triggers when a batch's URI is 
                 updated
      */
     event URIUpdatedForBatch(
-        uint256 projectId,
-        uint256 commodityId,
+        string projectId,
+        string commodityId,
         address batchId,
         string updatedBatchURI
     );
@@ -138,21 +138,21 @@ contract PlannedCreditManager is
     ) internal override onlyOwner {}
 
     /**
-        @notice mintMoreInABatch: Create a new batch w.r.t projectId and commodityId
+        @notice mintMoreInABatch: Increase supply of a PlannedCredit batch by minting
         @dev Calls child batch for minting more in a batch
                 This will basically increase the supply of ERC20 contract
         @param _projectId Project Id
         @param _commodityId Commodity Id
         @param _batchId Batch owner address
-        @param _amountToMint Amount to minting more
         @param _batchOwner Receiver address where tokens will get mint
+        @param _amountToMint Amount to minting more
      */
     function mintMoreInABatch(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
-        uint256 _amountToMint,
-        address _batchOwner
+        address _batchOwner,
+        uint256 _amountToMint
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeMintMoreAndBurnMore(
             _projectId,
@@ -163,9 +163,9 @@ contract PlannedCreditManager is
         plannedCreditFactoryContract.updateBatchDetailDuringMintOrBurnMore(
             _projectId,
             _commodityId,
-            _batchId,
             _amountToMint,
-            0
+            0,
+            _batchId
         );
         IPlannedCredit(_batchId).mintPlannedCredits(_batchOwner, _amountToMint);
 
@@ -180,29 +180,29 @@ contract PlannedCreditManager is
             _projectId,
             _commodityId,
             _batchId,
-            _amountToMint,
             _batchOwner,
+            _amountToMint,
             _currentBatchSupply,
             _currentTotalSupply
         );
     }
 
     /**
-        @notice burnFromABatch: Create a new batch w.r.t projectId and commodityId
+        @notice burnFromABatch: Decreasing supply of a PlannedCredit batch by burning more
         @dev Calls child batch for burning from a batch
                 This will basically increase the supply of ERC20 contract
         @param _projectId Project Id
         @param _commodityId Commodity Id
         @param _batchId Batch owner address
-        @param _amountToBurn Amount to burn
         @param _batchOwner Owner address where tokens will get burned from
+        @param _amountToBurn Amount to burn
      */
     function burnFromABatch(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
-        uint256 _amountToBurn,
-        address _batchOwner
+        address _batchOwner,
+        uint256 _amountToBurn
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeMintMoreAndBurnMore(
             _projectId,
@@ -213,9 +213,9 @@ contract PlannedCreditManager is
         plannedCreditFactoryContract.updateBatchDetailDuringMintOrBurnMore(
             _projectId,
             _commodityId,
-            _batchId,
             _amountToBurn,
-            1
+            1,
+            _batchId
         );
         IPlannedCredit(_batchId).burnPlannedCredits(_batchOwner, _amountToBurn);
 
@@ -230,16 +230,17 @@ contract PlannedCreditManager is
             _projectId,
             _commodityId,
             _batchId,
-            _amountToBurn,
             _batchOwner,
+            _amountToBurn,
             _currentBatchSupply,
             _currentTotalSupply
         );
     }
 
     /**
-        @notice manyToManyBatchTransfer: Perform PlannedCredit transfer from diferent batches 
-                to different user
+        @notice manyToManyBatchTransfer: Perform M2M PlannedCredit transfer from diferent batches 
+                to different user from different project developers.
+                Note: Approval mechanism should be performed prior to this functionality
         @param _batchTokenIds List of batch Ids
         @param _batchTransferData receiver addresses and amounts to be converted into bytes
         @dev Project developers needs to approve the PlannedCreditManager. 
@@ -282,15 +283,15 @@ contract PlannedCreditManager is
     }
 
     /**
-        @notice updateBatchPlannedDeliveryYear: Update delivery year of batch
+        @notice updateBatchPlannedDeliveryYear: Update delivery year of PlannedCredit batch
         @param _projectId Project Id 
         @param _commodityId Commodity Id
         @param _batchId Batch Id w.r.t to project Id and commidity Id
         @param _updatedPlannedDeliveryYear Updated delivery year value
      */
     function updateBatchPlannedDeliveryYear(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
         uint256 _updatedPlannedDeliveryYear
     ) external onlyRole(MANAGER_ROLE) {
@@ -299,8 +300,8 @@ contract PlannedCreditManager is
             .updateBatchDetailDuringPlannedDeliveryYearChange(
                 _projectId,
                 _commodityId,
-                _batchId,
-                _updatedPlannedDeliveryYear
+                _updatedPlannedDeliveryYear,
+                _batchId
             );
 
         emit PlannedDeliveryYearUpdatedForBatch(
@@ -312,15 +313,15 @@ contract PlannedCreditManager is
     }
 
     /**
-        @notice updateBatchURI: Update Batch URI for a batch
+        @notice updateBatchURI: Update Batch URI for a PlannedCredit batch
         @param _projectId Project Id 
         @param _commodityId Commodity Id
         @param _batchId Batch Id w.r.t to project Id and commidity Id
         @param _updatedURI Updated URI value
      */
     function updateBatchURI(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
         string calldata _updatedURI
     ) external onlyRole(MANAGER_ROLE) {
@@ -328,8 +329,8 @@ contract PlannedCreditManager is
         plannedCreditFactoryContract.updateBatchDetailDuringURIChange(
             _projectId,
             _commodityId,
-            _batchId,
-            _updatedURI
+            _updatedURI,
+            _batchId
         );
 
         emit URIUpdatedForBatch(
@@ -341,6 +342,22 @@ contract PlannedCreditManager is
     }
 
     /**
+     * @notice setFactoryManagerContract: Set's PlannedCreditFactory contract
+     * @param _plannedCreditFactoryContract PlannedCreditFactory contract address
+     */
+    function setFactoryManagerContract(
+        address _plannedCreditFactoryContract
+    ) external onlyRole(MANAGER_ROLE) {
+        require(
+            _plannedCreditFactoryContract != address(0),
+            "ARGUMENT_PASSED_AS_ZERO"
+        );
+        plannedCreditFactoryContract = PlannedCreditFactory(
+            _plannedCreditFactoryContract
+        );
+    }
+
+    /**
      * @notice _checkBeforeMintMoreAndBurnMore: Process different checks before mint/burn more
      * @param _projectId Project Id
      * @param _commodityId Commodity Id
@@ -348,14 +365,14 @@ contract PlannedCreditManager is
      * @param _amountToMintOrBurn Amount to mint/burn
      */
     function _checkBeforeMintMoreAndBurnMore(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string memory _projectId,
+        string memory _commodityId,
         address _batchId,
         uint256 _amountToMintOrBurn
     ) internal pure {
         require(
-            (_projectId != 0) &&
-                (_commodityId != 0) &&
+            (bytes(_projectId).length != 0) &&
+                (bytes(_commodityId).length != 0) &&
                 (_amountToMintOrBurn != 0) &&
                 (_batchId != address(0)),
             "ARGUMENT_PASSED_AS_ZERO"
@@ -369,13 +386,13 @@ contract PlannedCreditManager is
      * @param _batchId Batch Id
      */
     function _checkBeforeUpdatingBatchDetails(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string memory _projectId,
+        string memory _commodityId,
         address _batchId
     ) internal pure {
         require(
-            (_projectId != 0) &&
-                (_commodityId != 0) &&
+            (bytes(_projectId).length != 0) &&
+                (bytes(_commodityId).length != 0) &&
                 (_batchId != address(0)),
             "ARGUMENT_PASSED_AS_ZERO"
         );
