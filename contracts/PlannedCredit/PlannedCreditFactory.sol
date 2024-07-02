@@ -136,7 +136,7 @@ contract PlannedCreditFactory is
         string name
     );
 
-    /// @custom:oz-upgrades-unsafe-allow UUPS constructor
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
