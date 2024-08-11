@@ -31,7 +31,6 @@
 		"chai": "^4.3.6",
 		"dotenv": "^16.0.1",
 		"erc721a": "^4.2.3",
-		"erc721a-upgradeable": "^4.2.3",
 		"ethereum-waffle": "^3.4.4",
 		"ethers": "^5.6.9",
 		"hardhat": "^2.14.0",
@@ -44,5 +43,8 @@
 		"solidity-coverage": "^0.8.5",
 		"truffle-flattener": "^1.6.0",
 		"web3": "^4.0.1"
+	},
+	"devDependencies": {
+		"erc721a-upgradeable": "^4.3.0"
 	}
 }
