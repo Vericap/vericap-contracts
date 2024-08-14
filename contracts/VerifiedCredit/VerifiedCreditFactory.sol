@@ -52,12 +52,12 @@ contract VerifiedCreditFactory is
     }
 
     function initialize(
-        address _adminAddress
+        address _superAdmin
     ) public initializerERC721A initializer {
         __ERC721A_init("Verified Carbon Credit", "VVC");
         __Ownable_init();
-        _setupRole(DEFAULT_ADMIN_ROLE, _adminAddress);
-        _setupRole(VCC_MANAGER_ROLE, _adminAddress);
+        _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
+        _setupRole(VCC_MANAGER_ROLE, _superAdmin);
     }
 
     /// @notice UUPS upgrade mandatory function: To authorize the owner to upgrade the contract
@@ -304,6 +304,7 @@ contract VerifiedCreditFactory is
         }
 
         /** Burn VPC token */
+        
     }
 
     // Mark Offset (can not be accessed post offset)
