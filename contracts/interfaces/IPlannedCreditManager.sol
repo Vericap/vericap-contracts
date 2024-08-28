@@ -4,21 +4,20 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IPlannedCreditManager {
-
     function mintMoreInABatch(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
-        uint256 _amountToMint,
-        address _batchOwner
+        address _batchOwner,
+        uint256 _amountToMint
     ) external;
 
     function burnFromABatch(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
-        uint256 _amountToBurn,
-        address _batchOwner
+        address _batchOwner,
+        uint256 _amountToBurn
     ) external;
 
     function manyToManyBatchTransfer(
@@ -28,15 +27,15 @@ interface IPlannedCreditManager {
     ) external;
 
     function updateBatchPlannedDeliveryYear(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
         uint256 _updatedPlannedDeliveryYear
     ) external;
 
     function updateBatchURI(
-        uint256 _projectId,
-        uint256 _commodityId,
+        string calldata _projectId,
+        string calldata _commodityId,
         address _batchId,
         string calldata _updatedURI
     ) external;

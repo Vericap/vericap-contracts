@@ -4,7 +4,7 @@
 const fs = require("fs");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const plannedCreditABI = require("../testABI/plannedCreditABI.json");
+const plannedCreditABI = require("../testABI/plannedCredit.json");
 const { Web3 } = require("web3");
 
 /**
