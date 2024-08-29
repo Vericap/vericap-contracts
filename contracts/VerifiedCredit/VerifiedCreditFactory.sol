@@ -43,11 +43,11 @@ contract VerifiedCreditFactory is
     }
 
     // projectId -> commodityId -> Vintage -> Verified Credit Detail
-    mapping(string => mapping(string => mapping(uint256 => VerifiedCreditDetail)))
+    mapping(string => mapping(string => mapping(uint256 => mapping(uint256 => VerifiedCreditDetail))))
         public verifiedCreditDetails;
 
     // projectId -> commodityId -> Vintage -> boolean (existance)
-    mapping(string => mapping(string => mapping(uint256 => bool)))
+    mapping(string => mapping(string => mapping(uint256 => mapping(uint256 => bool))))
         public verifiedCreditExistance;
 
     // Optional mapping for token URIs
@@ -71,7 +71,27 @@ contract VerifiedCreditFactory is
         uint256 vintage,
         uint256 tokenId,
         uint256 issuedSupply,
-        uint256 issuedCredits
+        uint256 availableCredits
+    );
+
+    // Block Verified Credit Event
+    event BlockedVerifiedCredit(
+        string projectId,
+        string commodityId,
+        uint256 vintage,
+        uint256 tokenId,
+        uint256 blockedAmount,
+        uint256 availableCredits
+    );
+
+    // Unblock Verified Credit Event
+    event UnblockedVerifiedCredit(
+        string projectId,
+        string commodityId,
+        uint256 vintage,
+        uint256 tokenId,
+        uint256 unBlockedAmount,
+        uint256 availableCredits
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -98,11 +118,12 @@ contract VerifiedCreditFactory is
         string memory _projectId,
         string memory _commodityId,
         uint256 _vintage,
+        uint256 _tokenId,
         address _userAccount
     ) public view returns (uint256) {
         VerifiedCreditDetail memory _credit = verifiedCreditDetails[_projectId][
             _commodityId
-        ][_vintage];
+        ][_vintage][_tokenId];
 
         return balanceOf(_userAccount, _credit.tokenId);
     }
@@ -116,18 +137,19 @@ contract VerifiedCreditFactory is
         uint256 deliveryYear,
         uint256 issuanceSupply
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        uint256 _tokenId = _getCurrentTokenIdIndex();
         _checkBeforeVerifiedCreditCreation(
             projectId,
             commodityId,
             URI,
             vintage,
+            _tokenId,
             deliveryYear,
             issuanceSupply
         );
 
-        uint256 _tokenId = _getCurrentTokenIdIndex();
-        verifiedCreditDetails[projectId][commodityId][
-            vintage
+        verifiedCreditDetails[projectId][commodityId][vintage][
+            _tokenId
         ] = VerifiedCreditDetail(
             projectId,
             commodityId,
@@ -142,7 +164,9 @@ contract VerifiedCreditFactory is
             0
         );
 
-        verifiedCreditExistance[projectId][commodityId][vintage] = true;
+        verifiedCreditExistance[projectId][commodityId][vintage][
+            _tokenId
+        ] = true;
 
         _tokenURIs[_tokenId] = URI;
 
@@ -159,13 +183,15 @@ contract VerifiedCreditFactory is
         );
     }
 
+    /** Issue Verified Credits */
     function issueVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
+        uint256 tokenId,
         uint256 issuanceSupply
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        _checkBeforeIssueAndCancel(
+        _checkBeforeStorageUpdate(
             projectId,
             commodityId,
             vintage,
@@ -173,8 +199,9 @@ contract VerifiedCreditFactory is
         );
         VerifiedCreditDetail storage _creditDetail = verifiedCreditDetails[
             projectId
-        ][commodityId][vintage];
+        ][commodityId][vintage][tokenId];
         _creditDetail.issuedCredits += issuanceSupply;
+        _creditDetail.availableCredits += issuanceSupply;
 
         _mint(address(this), _creditDetail.tokenId, issuanceSupply, "0x00");
 
@@ -184,20 +211,107 @@ contract VerifiedCreditFactory is
             vintage,
             _creditDetail.tokenId,
             issuanceSupply,
-            _creditDetail.issuedCredits
+            _creditDetail.availableCredits
         );
     }
+
+    /** Block Verified Credits */
+    function blockVerifiedCredits(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        uint256 tokenId,
+        uint256 amountToBlock
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        _checkBeforeStorageUpdate(
+            projectId,
+            commodityId,
+            vintage,
+            amountToBlock
+        );
+        VerifiedCreditDetail storage _creditDetail = verifiedCreditDetails[
+            projectId
+        ][commodityId][vintage][tokenId];
+        require(
+            amountToBlock <= _creditDetail.availableCredits,
+            "INSUFFICIENT_CREDIT_SUPPLY"
+        );
+        _creditDetail.blockedCredits += amountToBlock;
+        _creditDetail.availableCredits -= amountToBlock;
+
+        emit BlockedVerifiedCredit(
+            projectId,
+            commodityId,
+            vintage,
+            tokenId,
+            amountToBlock,
+            _creditDetail.availableCredits
+        );
+    }
+
+    /** Unblock Verfied Creditts */
+    /** Block Verified Credits */
+    function unBlockVerifiedCredits(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        uint256 tokenId,
+        uint256 amountToUnblock
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        _checkBeforeStorageUpdate(
+            projectId,
+            commodityId,
+            vintage,
+            amountToUnblock
+        );
+        VerifiedCreditDetail storage _creditDetail = verifiedCreditDetails[
+            projectId
+        ][commodityId][vintage][tokenId];
+        require(
+            amountToUnblock <= _creditDetail.blockedCredits,
+            "INSUFFICIENT_CREDIT_SUPPLY"
+        );
+        _creditDetail.blockedCredits -= amountToUnblock;
+        _creditDetail.availableCredits += amountToUnblock;
+
+        emit UnblockedVerifiedCredit(
+            projectId,
+            commodityId,
+            vintage,
+            tokenId,
+            amountToUnblock,
+            _creditDetail.availableCredits
+        );
+    }
+
+    /** Cancel Verified Credits */
+    function cancelVerifiedCredits(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        uint256 amountToCancel
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {}
+
+    /** Swap And Retire Verified Credits */
+    function swapAndRetireVerifiedCredits(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        uint256 amountToSwap,
+        address investorAddress
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {}
 
     function _checkBeforeVerifiedCreditCreation(
         string calldata projectId,
         string calldata commodityId,
         string calldata URI,
         uint256 vintage,
+        uint256 tokenId,
         uint256 deliveryYear,
         uint256 issuanceSupply
     ) internal view onlyRole(FACTORY_MANAGER_ROLE) {
         require(
-            !verifiedCreditExistance[projectId][commodityId][vintage],
+            !verifiedCreditExistance[projectId][commodityId][vintage][tokenId],
             "CREDIT_ENTRY_ALREADY_EXIST"
         );
         require(
@@ -211,12 +325,12 @@ contract VerifiedCreditFactory is
         );
     }
 
-    function _checkBeforeIssueAndCancel(
+    function _checkBeforeStorageUpdate(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
         uint256 issuanceSupply
-    ) internal {
+    ) internal pure {
         require(
             (bytes(projectId).length != 0) &&
                 (bytes(commodityId).length != 0) &&
