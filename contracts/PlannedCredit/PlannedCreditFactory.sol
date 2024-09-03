@@ -77,11 +77,22 @@ contract PlannedCreditFactory is
         address batchOwner;
     }
 
+    struct PlannedCreditDetailByAddress {
+        string projectId;
+        string commodityId;
+        uint256 vintage;
+        address plannedCreditAddress;
+    }
+
     /**
             @dev batchDetails: Stores BatchDetail w.r.t projectId::commodityId
         */
     mapping(string => mapping(string => mapping(address => BatchDetail[])))
         internal batchDetails;
+
+    // Planned Credit Detail By Address
+    mapping(address => PlannedCreditDetailByAddress)
+        internal plannedCreditDetailsByAddress;
 
     /** 
             @dev commodityList: Stores commodities w.r.t projectId
@@ -247,6 +258,13 @@ contract PlannedCreditFactory is
             ];
     }
 
+    // Get Planned Credit Details By Address
+    function getPlannedCreditDetailsByAddress(
+        address plannedCreditAddress
+    ) external view returns (PlannedCreditDetailByAddress memory) {
+        return plannedCreditDetailsByAddress[plannedCreditAddress];
+    }
+
     /**
             @notice createNewBatch: Create a new batch w.r.t projectId and commodityId
             @dev Follows factory-child pattern for creating batches using CREATE2 opcode
@@ -312,6 +330,7 @@ contract PlannedCreditFactory is
             _batchSupply
         );
 
+
         batchDetails[_projectId][_commodityId][_batchAddress].push(
             BatchDetail(
                 _projectId,
@@ -324,6 +343,15 @@ contract PlannedCreditFactory is
                 _batchAddress,
                 _batchOwner
             )
+        );
+
+        plannedCreditDetailsByAddress[
+            _batchAddress
+        ] = PlannedCreditDetailByAddress(
+            _projectId,
+            _commodityId,
+            _vintage,
+            _batchAddress
         );
 
         batchIndexList[_batchAddress] =
@@ -557,7 +585,6 @@ contract PlannedCreditFactory is
  */
 
 contract PlannedCredit is ERC20, AccessControl {
-
     /**
      * @notice Define FACTORY_MANAGER_ROLE
      */
