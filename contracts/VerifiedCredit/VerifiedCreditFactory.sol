@@ -192,6 +192,41 @@ contract VerifiedCreditFactory is
         return balanceOf(userAccount, _verifiedCreditDetail.tokenId);
     }
 
+    /** Aggregated Verfied Credit Detail Per Vintage */
+    function getAggregatedDataPerVintage(
+        uint256 vintage
+    )
+        public
+        view
+        returns (
+            uint256 issuedCredits,
+            uint256 availableCredits,
+            uint256 blockedCredits,
+            uint256 retiredCredits
+        )
+    {
+        require(vintage != 0, "VINTAGE_PASSED_AS_ZERO");
+        uint256 _verifiedCreditList = verifiedCreditDetailsByVintage[vintage]
+            .length;
+        for (uint256 i = 0; i < _verifiedCreditList; i++) {
+            issuedCredits += verifiedCreditDetailsByVintage[vintage][i]
+                .issuedCredits;
+            availableCredits += verifiedCreditDetailsByVintage[vintage][i]
+                .availableCredits;
+            blockedCredits += verifiedCreditDetailsByVintage[vintage][i]
+                .blockedCredits;
+            retiredCredits += verifiedCreditDetailsByVintage[vintage][i]
+                .retiredCredits;
+        }
+
+        return (
+            issuedCredits,
+            availableCredits,
+            blockedCredits,
+            retiredCredits
+        );
+    }
+
     // Get aggregated detail of a verified credit based on same vintage;
 
     /** Create Verified Credit */
