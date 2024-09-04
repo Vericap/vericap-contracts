@@ -35,6 +35,10 @@ contract VerifiedCreditFactory is
     /** @notice Factory Manager Role: Handles All Major Functionalities */
     bytes32 public constant FACTORY_MANAGER_ROLE = "FACTORY_MANAGER_ROLE";
 
+    IPlannedCreditFactory public plannedCreditFactory;
+
+    IPlannedCreditManager public plannedCreditManager;
+
     /** @notice Verifies Credit Detail
      * @dev Holds The Verfied Credit Properties */
     struct VerifiedCreditDetail {
@@ -45,8 +49,8 @@ contract VerifiedCreditFactory is
         uint256 tokenId;
         string ticker;
         uint256 issuedCredits;
-        uint256 blockedCredits;
         uint256 availableCredits;
+        uint256 blockedCredits;
         uint256 retiredCredits;
         string tokenURI;
     }
@@ -64,16 +68,16 @@ contract VerifiedCreditFactory is
     mapping(string => mapping(string => mapping(uint256 => mapping(string => VerifiedCreditDetail))))
         internal verifiedCreditDetails;
 
-    // Vintage -> Verified Credit Detail []
+    // Vintage -> TokenId -> Verified Credit Detail []
     mapping(uint256 => VerifiedCreditDetail[])
         internal verifiedCreditDetailsByVintage;
 
     mapping(uint256 => VerifiedCreditDetailByTokenId)
         internal verifiedCreditDetailsByTokenId;
 
-    // User address -> token Id -> Amount
-    mapping(address => mapping(uint256 => uint256))
-        internal creditRetiredByUser;
+    // User projectId -> commodityId -> vintage -> total credit retired
+    mapping(string => mapping(string => mapping(uint256 => uint256)))
+        public creditsRetiredByUserPerVintage;
 
     // projectId -> commodityId -> Vintage -> Issuance Date -> boolean (existance)
     mapping(string => mapping(string => mapping(uint256 => mapping(string => bool))))
@@ -145,7 +149,8 @@ contract VerifiedCreditFactory is
         uint256 vintage,
         string issuanceDate,
         uint256 amountRetired,
-        address investorAddress
+        address investorAddress,
+        uint256 availableCredits
     );
 
     // URI Updated For Verified Credit
@@ -162,13 +167,19 @@ contract VerifiedCreditFactory is
         _disableInitializers();
     }
 
-    function initialize(address _superAdmin) public initializer {
+    function initialize(
+        address superAdmin,
+        IPlannedCreditFactory _plannedCreditFactory,
+        IPlannedCreditManager _plannedCreditManager
+    ) public initializer {
         __ERC1155_init("");
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
-        _grantRole(DEFAULT_ADMIN_ROLE, _superAdmin);
-        _grantRole(FACTORY_MANAGER_ROLE, _superAdmin);
+        _grantRole(DEFAULT_ADMIN_ROLE, superAdmin);
+        _grantRole(FACTORY_MANAGER_ROLE, superAdmin);
+        plannedCreditFactory = _plannedCreditFactory;
+        plannedCreditManager = _plannedCreditManager;
     }
 
     /// @notice UUPS upgrade mandatory function: To authorize the owner to upgrade the contract
@@ -176,14 +187,39 @@ contract VerifiedCreditFactory is
         address newImplementation
     ) internal override onlyOwner {}
 
+    /** Get Verified Credit Detail */
+    function getVerifiedCreditDetail(
+        string memory projectId,
+        string memory commodityId,
+        uint256 vintage,
+        string memory issuanceDate
+    ) public view returns (VerifiedCreditDetail memory) {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
+        return
+            verifiedCreditDetails[projectId][commodityId][vintage][
+                issuanceDate
+            ];
+    }
+
     /** User Balance */
-    function getUserBalancePerVintage(
+    function getUserBalancePerIssuanceDate(
         string memory projectId,
         string memory commodityId,
         uint256 vintage,
         string memory issuanceDate,
         address userAccount
     ) public view returns (uint256) {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
         VerifiedCreditDetail
             memory _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
@@ -227,8 +263,6 @@ contract VerifiedCreditFactory is
         );
     }
 
-    // Get aggregated detail of a verified credit based on same vintage;
-
     /** Create Verified Credit */
     function createVerifiedCredit(
         string calldata projectId,
@@ -260,7 +294,7 @@ contract VerifiedCreditFactory is
             _tokenId,
             ticker,
             issuanceSupply,
-            0,
+            issuanceSupply,
             0,
             0,
             tokenURI
@@ -285,7 +319,7 @@ contract VerifiedCreditFactory is
                 _tokenId,
                 ticker,
                 issuanceSupply,
-                0,
+                issuanceSupply,
                 0,
                 0,
                 tokenURI
@@ -327,12 +361,24 @@ contract VerifiedCreditFactory is
             issuanceDate,
             issuanceSupply
         );
+
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
         _verifiedCreditDetail.issuedCredits += issuanceSupply;
         _verifiedCreditDetail.availableCredits += issuanceSupply;
+
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .issuedCredits += issuanceSupply;
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .availableCredits += issuanceSupply;
 
         _mint(
             address(this),
@@ -378,6 +424,11 @@ contract VerifiedCreditFactory is
         _verifiedCreditDetail.blockedCredits += amountToBlock;
         _verifiedCreditDetail.availableCredits -= amountToBlock;
 
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .blockedCredits += amountToBlock;
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .availableCredits -= amountToBlock;
+
         emit BlockedVerifiedCredit(
             projectId,
             commodityId,
@@ -415,6 +466,11 @@ contract VerifiedCreditFactory is
         _verifiedCreditDetail.blockedCredits -= amountToUnblock;
         _verifiedCreditDetail.availableCredits += amountToUnblock;
 
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .blockedCredits -= amountToUnblock;
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .availableCredits += amountToUnblock;
+
         emit UnblockedVerifiedCredit(
             projectId,
             commodityId,
@@ -424,6 +480,42 @@ contract VerifiedCreditFactory is
             amountToUnblock,
             _verifiedCreditDetail.availableCredits
         );
+    }
+
+    /** Transfer Verified Credit Outside */
+    function transferVerifiedCreditOutside(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        string calldata issuanceDate,
+        uint256 amountToTransfer,
+        address userAddress
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
+        VerifiedCreditDetail
+            memory _verifiedCreditDetail = verifiedCreditDetails[projectId][
+                commodityId
+            ][vintage][issuanceDate];
+        safeTransferFrom(
+            address(this),
+            userAddress,
+            _verifiedCreditDetail.tokenId,
+            amountToTransfer,
+            "0x00"
+        );
+    }
+
+    /** Approve Admin To Transfer Verified Credits */
+    function approveAdminToTransfer(
+        address admin
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        require(admin != address(0), "ARGUMENT_TYPE_INVALID");
+        _setApprovalForAll(address(this), admin, true);
     }
 
     /** Swap Verified Credits */
@@ -447,7 +539,7 @@ contract VerifiedCreditFactory is
         );
 
         IPlannedCreditFactory.PlannedCreditDetailByAddress
-            memory _plannedCreditDetail = IPlannedCreditFactory(plannedCredit)
+            memory _plannedCreditDetail = plannedCreditFactory
                 .getPlannedCreditDetailsByAddress(plannedCredit);
 
         VerifiedCreditDetail
@@ -473,7 +565,7 @@ contract VerifiedCreditFactory is
             "AMOUNT_EXCEED_AVAILABLE_CREDIT"
         );
 
-        IPlannedCreditManager(plannedCredit).burnFromABatch(
+        plannedCreditManager.burnFromABatch(
             projectId,
             commodityId,
             plannedCredit,
@@ -509,14 +601,27 @@ contract VerifiedCreditFactory is
         uint256 amountToRetire,
         address investorAddress
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
         VerifiedCreditDetail
-            memory _verifiedCreditDetail = verifiedCreditDetails[projectId][
+            storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
+
         _verifiedCreditDetail.retiredCredits += amountToRetire;
         _verifiedCreditDetail.availableCredits -= amountToRetire;
-        creditRetiredByUser[investorAddress][
-            _verifiedCreditDetail.tokenId
+
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .retiredCredits += amountToRetire;
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .availableCredits -= amountToRetire;
+
+        creditsRetiredByUserPerVintage[projectId][commodityId][
+            vintage
         ] += amountToRetire;
         _burn(investorAddress, _verifiedCreditDetail.tokenId, amountToRetire);
 
@@ -526,7 +631,8 @@ contract VerifiedCreditFactory is
             vintage,
             issuanceDate,
             amountToRetire,
-            investorAddress
+            investorAddress,
+            _verifiedCreditDetail.availableCredits
         );
     }
 
@@ -577,7 +683,7 @@ contract VerifiedCreditFactory is
                 (bytes(ticker).length != 0) &&
                 (issuanceSupply != 0) &&
                 (bytes(tokenURI).length != 0),
-            "ARGUMENT_PASSED_AS_ZERO"
+            "ARGUMENT_TYPE_INVALID"
         );
     }
 
@@ -594,7 +700,7 @@ contract VerifiedCreditFactory is
                 (vintage != 0) &&
                 (bytes(issuanceDate).length != 0) &&
                 (issuanceSupply != 0),
-            "ARGUMENT_PASSED_AS_ZERO"
+            "ARGUMENT_TYPE_INVALID"
         );
     }
 
@@ -615,7 +721,7 @@ contract VerifiedCreditFactory is
                 (amountToSwap != 0) &&
                 (plannedCredit != address(0)) &&
                 (investorAddress != address(0)),
-            "ARGUMENT_PASSED_AS_ZERO"
+            "ARGUMENT_TYPE_INVALID"
         );
     }
 
