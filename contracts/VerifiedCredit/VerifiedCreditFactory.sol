@@ -501,6 +501,10 @@ contract VerifiedCreditFactory is
             memory _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
+        require(
+            amountToTransfer <= _verifiedCreditDetail.availableCredits,
+            "INSUFFICIENT_CREDIT_SUPPLY"
+        );
         safeTransferFrom(
             address(this),
             userAddress,
@@ -528,7 +532,7 @@ contract VerifiedCreditFactory is
         address plannedCredit,
         address investorAddress
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        _checkBeforeSwapAndRetire(
+        _checkBeforeSwap(
             projectId,
             commodityId,
             vintage,
@@ -546,6 +550,11 @@ contract VerifiedCreditFactory is
             memory _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
+
+        require(
+            amountToSwap <= _verifiedCreditDetail.availableCredits,
+            "INSUFFICIENT_CREDIT_SUPPLY"
+        );
 
         require(
             compareCreditDetail(
@@ -601,11 +610,13 @@ contract VerifiedCreditFactory is
         uint256 amountToRetire,
         address investorAddress
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        require(
-            verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
-            ],
-            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        _checkBeforeRetire(
+            projectId,
+            commodityId,
+            vintage,
+            issuanceDate,
+            amountToRetire,
+            investorAddress
         );
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
@@ -644,6 +655,12 @@ contract VerifiedCreditFactory is
         string calldata issuanceDate,
         string calldata updatedURI
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
         require(bytes(updatedURI).length != 0, "EMPTY_URI_PASSED");
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
@@ -693,7 +710,13 @@ contract VerifiedCreditFactory is
         uint256 vintage,
         string calldata issuanceDate,
         uint256 issuanceSupply
-    ) internal pure {
+    ) internal view {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
         require(
             (bytes(projectId).length != 0) &&
                 (bytes(commodityId).length != 0) &&
@@ -704,7 +727,7 @@ contract VerifiedCreditFactory is
         );
     }
 
-    function _checkBeforeSwapAndRetire(
+    function _checkBeforeSwap(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
@@ -712,7 +735,13 @@ contract VerifiedCreditFactory is
         uint256 amountToSwap,
         address plannedCredit,
         address investorAddress
-    ) internal pure {
+    ) internal view {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
         require(
             (bytes(projectId).length != 0) &&
                 (bytes(commodityId).length != 0) &&
@@ -720,6 +749,31 @@ contract VerifiedCreditFactory is
                 (bytes(issuanceDate).length != 0) &&
                 (amountToSwap != 0) &&
                 (plannedCredit != address(0)) &&
+                (investorAddress != address(0)),
+            "ARGUMENT_TYPE_INVALID"
+        );
+    }
+
+    function _checkBeforeRetire(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        string calldata issuanceDate,
+        uint256 amountToRetire,
+        address investorAddress
+    ) internal view {
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
+        require(
+            (bytes(projectId).length != 0) &&
+                (bytes(commodityId).length != 0) &&
+                (vintage != 0) &&
+                (bytes(issuanceDate).length != 0) &&
+                (amountToRetire != 0) &&
                 (investorAddress != address(0)),
             "ARGUMENT_TYPE_INVALID"
         );
