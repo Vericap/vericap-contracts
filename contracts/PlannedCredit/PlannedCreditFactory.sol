@@ -4,7 +4,7 @@ pragma solidity >=0.8.22;
 /**
  * @title Planned Credit Factory Smart Contract
  * @author Team @vericap
- * @notice Planned Credit Factory is a upgradeable contract used for deploying new PlannedCredit contracts
+ * @notice Planned Credit Factory is a upgradeable contract used for releasing new PlannedCredit contracts
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -51,7 +51,7 @@ contract PlannedCreditFactory is
         keccak256("FACTORY_MANAGER_ROLE");
 
     /**
-     * @dev Creating ENUM for handling PlannedCredit batch actions
+     * @dev Creating ENUM for handling PlannedCredit actions
      * @dev Mint - 0
      * @dev Burn - 1
      */
@@ -59,89 +59,106 @@ contract PlannedCreditFactory is
         Mint,
         Burn
     }
-
     /**
-            @dev BatchDetail: Holds the properties for a batch
-        */
-    struct BatchDetail {
+     * @dev PlannedCreditDetail: Stores the properties for a Planned Credit
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param uri IPFS hosted URI link
+     * @param plannedDeliveryYear Planned delivery of the credits associated with the vintage
+     * @param supply Supply of credits (Amount minted)
+     * @param lastUpdated Timestamp for latest changes in the properties of the planned credit
+     * @param vintage Associated vintage to the planned credit
+     * @param plannedCredit Planned credit smart contract reference
+     * @param plannedCreditOwner Planned credit owner
+     */
+    struct PlannedCreditDetail {
         string projectId;
         string commodityId;
-        string batchURI;
+        string uri;
         uint256 plannedDeliveryYear;
-        uint256 batchSupply;
+        uint256 supply;
         uint256 lastUpdated;
         uint64 vintage;
-        address batchId;
-        address batchOwner;
+        address plannedCredit;
+        address plannedCreditOwner;
     }
 
+    /**
+     * @dev PlannedCreditDetailByAddress: Stores Project-Commodity-Vinatge-Planned Credit Reference
+     * @param projectId Associated project Id
+     * @param commodityId Associated commodity Id
+     * @param vintage Associated vintage to the planned credit
+     * @param plannedCredit Planned credit smart contract reference
+     */
     struct PlannedCreditDetailByAddress {
         string projectId;
         string commodityId;
         uint256 vintage;
-        address plannedCreditAddress;
+        address plannedCredit;
     }
 
     /**
-            @dev batchDetails: Stores BatchDetail w.r.t projectId::commodityId
-        */
-    mapping(string => mapping(string => mapping(address => BatchDetail[])))
-        internal batchDetails;
+     * @dev plannedCreditDetails: Stores PlannedCreditDetail w.r.t Project::Commodity::PlannedCredit refrence
+     */
+    mapping(string => mapping(string => mapping(address => PlannedCreditDetail[])))
+        internal plannedCreditDetails;
 
-    // Planned Credit Detail By Address
+    /**
+     * @dev plannedCreditDetailsByAddress: Stores PlannedCreditDetailByAddress w.r.t PlannedCredit reference
+     */
     mapping(address => PlannedCreditDetailByAddress)
         internal plannedCreditDetailsByAddress;
 
     /** 
-            @dev commodityList: Stores commodities w.r.t projectId
+            @dev commodityList: Stores Commodities w.r.t ProjectId
         */
     mapping(string => string[]) internal commodityList;
 
     /**
-            @dev batchIndexList: Batch Indexer, associating each batch with a index value
+            @dev plannedCreditIndexList: Planned Credit Indexer, associating each PlannedCredit with a index value
         */
-    mapping(address => uint256) internal batchIndexList;
+    mapping(address => uint256) internal plannedCreditIndexList;
 
     /**
-            @dev batchList: Stores list of batches w.r.t projectId::commodityId
+            @dev plannedCreditList: Stores list of PlannedCredits w.r.t Project::Commodity
         */
-    mapping(string => mapping(string => address[])) internal batchList;
+    mapping(string => mapping(string => address[])) internal plannedCreditList;
 
     /**
-            @dev projectCommodityTotalSupply: Stores total supply of a project::commodity
+            @dev projectCommodityTotalSupply: Stores total supply of a Project::Commodity
         */
     mapping(string => mapping(string => uint256))
         internal projectCommodityTotalSupply;
 
     /**
-     * @dev commodityIdExists: Checks for duplication of commodityId::projectId
+     * @dev commodityIdExists: Checks for duplication of Project::Commodity
      */
     mapping(string => mapping(string => bool)) internal commodityExists;
 
     /**
-     * @dev projectIdExists: Checks for duplication of projectId
+     * @dev projectIdExists: Checks for duplication of Project
      */
     mapping(string => bool) internal projectExists;
 
     /**
-     * @dev vintageExists: Check for vintage duplication for a project::commodity pair
+     * @dev vintageExists: Check for vintage duplication for a Project::Commodity pair
      */
     mapping(string => mapping(string => mapping(uint64 => bool)))
         public vintageExists;
 
     /**
-            @notice NewBatchCreated: Triggers when a new batch contract is created
+            @notice PlannedCreditCreated: Triggers when a new PlannedCredit contract is created
         */
     event PlannedCreditCreated(
         string projectId,
         string commodityId,
-        string batchURI,
+        string uri,
         uint256 plannedDeliveryYear,
-        uint256 batchSupply,
+        uint256 supply,
         uint256 lastUpdated,
         uint64 vintage,
-        address batchId,
-        address batchOwner,
+        address plannedCredit,
+        address plannedCreditOwner,
         string name
     );
 
@@ -173,20 +190,20 @@ contract PlannedCreditFactory is
     /**
             @notice getProjectCommodityTotalSupply: View function to fetch the 
                     total supply of a projectId-commodityId pair
-            @param _projectId Project Id
-            @param _commodityId Commodity Id
-            @return string Total supply 
+            @param projectId Project
+            @param commodityId Commodity
+            @return Total supply for a Project::Commodity
         */
     function getProjectCommodityTotalSupply(
-        string calldata _projectId,
-        string calldata _commodityId
+        string calldata projectId,
+        string calldata commodityId
     ) public view returns (uint256) {
-        return projectCommodityTotalSupply[_projectId][_commodityId];
+        return projectCommodityTotalSupply[projectId][commodityId];
     }
 
     /**
             @notice getProjectList: View function to fetch the list of projects
-            @return string[] List of projects 
+            @return List of Projects 
         */
     function getProjectList() public view returns (string[] memory) {
         return projectIds;
@@ -195,17 +212,17 @@ contract PlannedCreditFactory is
     /**
             @notice getCommodityListForAProject: View function to fetch list of 
                     commodities w.r.t a projectId
-            @param _projectId Project Id
-            @return uint256[] List of commodities for a project
+            @param projectId Project Id
+            @return List of commodities for a project
         */
     function getCommodityListForAProject(
-        string calldata _projectId
+        string calldata projectId
     ) public view returns (string[] memory) {
         string[] memory _commodityList = new string[](
-            commodityList[_projectId].length
+            commodityList[projectId].length
         );
-        for (uint256 i = 0; i < commodityList[_projectId].length; ) {
-            _commodityList[i] = commodityList[_projectId][i];
+        for (uint256 i = 0; i < commodityList[projectId].length; ) {
+            _commodityList[i] = commodityList[projectId][i];
 
             unchecked {
                 ++i;
@@ -216,247 +233,257 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @notice getBatchListForACommodityInAProject: View function to fetch 
-                    list of batches w.r.t projectId & commodityId
-            @param _projectId Project Id
-            @param _commodityId Commodity Id
-            @return address[] List of batches
+            @notice getPlannedCreditListForACommodityInAProject: View function to fetch 
+                    list of Planned Credits w.r.t Project::Commodity
+            @param projectId Project Id
+            @param commodityId Commodity Id
+            @return List of Planned Credits
         */
     function getPlannedCreditListForACommodityInAProject(
-        string calldata _projectId,
-        string calldata _commodityId
+        string calldata projectId,
+        string calldata commodityId
     ) public view returns (address[] memory) {
-        address[] memory _batchList = new address[](
-            batchList[_projectId][_commodityId].length
+        address[] memory _plannedCreditList = new address[](
+            plannedCreditList[projectId][commodityId].length
         );
-        for (uint256 i = 0; i < batchList[_projectId][_commodityId].length; ) {
-            _batchList[i] = batchList[_projectId][_commodityId][i];
+        for (
+            uint256 i = 0;
+            i < plannedCreditList[projectId][commodityId].length;
+
+        ) {
+            _plannedCreditList[i] = plannedCreditList[projectId][commodityId][
+                i
+            ];
             unchecked {
                 ++i;
             }
         }
 
-        return _batchList;
+        return _plannedCreditList;
     }
 
     /**
-            @notice getBatchDetails: View function to fetch properties of a batch
+            @notice getPlannedCreditDetails: View function to fetch properties of a PlannedCredit w.r.t Project::Commodity::PlannedCredit
+            @param projectId Associated Project
+            @param commodityId Associated Commodity
+            @param plannedCredit PlannedCredit (struct)
         */
     function getPlannedCreditDetails(
-        string calldata _projectId,
-        string calldata _commodityId,
-        address _batchId
-    ) external view returns (BatchDetail memory) {
+        string calldata projectId,
+        string calldata commodityId,
+        address plannedCredit
+    ) external view returns (PlannedCreditDetail memory) {
         return
-            batchDetails[_projectId][_commodityId][_batchId][
-                batchIndexList[_batchId]
+            plannedCreditDetails[projectId][commodityId][plannedCredit][
+                plannedCreditIndexList[plannedCredit]
             ];
     }
 
-    // Get Planned Credit Details By Address
+    /**
+     * @notice getPlannedCreditDetailsByAddress: View function to fetch properties of a PlannedCredit w.r.t PlannedCredit reference
+     */
     function getPlannedCreditDetailsByAddress(
-        address plannedCreditAddress
+        address plannedCredit
     ) external view returns (PlannedCreditDetailByAddress memory) {
-        return plannedCreditDetailsByAddress[plannedCreditAddress];
+        return plannedCreditDetailsByAddress[plannedCredit];
     }
 
     /**
-            @notice createNewBatch: Create a new batch w.r.t projectId and commodityId
-            @dev Follows factory-child pattern for creating batches using CREATE2 opcode
+            @notice createPlannedCredit: Create a new PlannedCredit w.r.t Project::Commodity::Vintage
+            @dev Follows factory-child pattern for creating PlannedCredits using CREATE2 opcode
                     Child contract is going to be ERC20 compatible smart contract
-            @param _projectId Project Id
-            @param _commodityId Commodity Id
-            @param _batchURI Batch URI
-            @param _plannedDeliveryYear Planned delivery year of the batch
-            @param _batchSupply Batch intial supply
-            @param _vintage Project vintage
-            @param _batchOwner Batch owner address
+            @param projectId Associated project
+            @param commodityId Associated commodity
+            @param uri IPFS hosted URI link
+            @param plannedDeliveryYear Planned delivery of the credits associated with the vintage
+            @param supply Supply of credits (Amount minted)
+            @param vintage Associated vintage to the planned credit
+            @param plannedCreditOwner Planned credit owner
         */
     function createPlannedCredit(
-        string calldata _projectId,
-        string calldata _commodityId,
-        string calldata _batchURI,
-        uint256 _plannedDeliveryYear,
-        uint256 _batchSupply,
-        uint64 _vintage,
-        address _batchOwner
+        string calldata projectId,
+        string calldata commodityId,
+        string calldata uri,
+        uint256 plannedDeliveryYear,
+        uint256 supply,
+        uint64 vintage,
+        address plannedCreditOwner
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeCreatePlannedCredit(
-            _projectId,
-            _commodityId,
-            _batchURI,
-            _batchSupply,
-            _plannedDeliveryYear,
-            _vintage,
-            _batchOwner
+            projectId,
+            commodityId,
+            uri,
+            supply,
+            plannedDeliveryYear,
+            vintage,
+            plannedCreditOwner
         );
 
         require(
-            vintageExists[_projectId][_commodityId][_vintage] == false,
+            vintageExists[projectId][commodityId][vintage] == false,
             "VINTAGE_ALREADY_EXIST"
         );
 
-        address _batchAddress = _createPlannedCredit(
+        address _plannedCredit = _createPlannedCredit(
             string(
                 abi.encodePacked(
                     "VPC-",
-                    _projectId,
+                    projectId,
                     "-",
-                    _commodityId,
+                    commodityId,
                     "-",
-                    _vintage.toString()
+                    vintage.toString()
                 )
             ),
             string(
                 abi.encodePacked(
                     "VPC",
-                    _projectId,
-                    _commodityId,
-                    _vintage.toString()
+                    projectId,
+                    commodityId,
+                    vintage.toString()
                 )
             ),
-            _vintage
+            vintage
         );
 
-        vintageExists[_projectId][_commodityId][_vintage] = true;
+        vintageExists[projectId][commodityId][vintage] = true;
 
-        PlannedCredit(_batchAddress).mintPlannedCredits(
-            _batchOwner,
-            _batchSupply
+        PlannedCredit(_plannedCredit).mintPlannedCredits(
+            plannedCreditOwner,
+            supply
         );
 
-        batchDetails[_projectId][_commodityId][_batchAddress].push(
-            BatchDetail(
-                _projectId,
-                _commodityId,
-                _batchURI,
-                _plannedDeliveryYear,
-                _batchSupply,
+        plannedCreditDetails[projectId][commodityId][_plannedCredit].push(
+            PlannedCreditDetail(
+                projectId,
+                commodityId,
+                uri,
+                plannedDeliveryYear,
+                supply,
                 block.timestamp,
-                _vintage,
-                _batchAddress,
-                _batchOwner
+                vintage,
+                _plannedCredit,
+                plannedCreditOwner
             )
         );
 
         plannedCreditDetailsByAddress[
-            _batchAddress
+            _plannedCredit
         ] = PlannedCreditDetailByAddress(
-            _projectId,
-            _commodityId,
-            _vintage,
-            _batchAddress
+            projectId,
+            commodityId,
+            vintage,
+            plannedCreditOwner
         );
 
-        batchIndexList[_batchAddress] =
-            batchDetails[_projectId][_commodityId][_batchAddress].length -
+        plannedCreditIndexList[_plannedCredit] =
+            plannedCreditDetails[projectId][commodityId][_plannedCredit]
+                .length -
             1;
 
         _updateProjectCommodityPlanneCreditStorage(
-            _projectId,
-            _commodityId,
-            _batchAddress
+            projectId,
+            commodityId,
+            _plannedCredit
         );
 
-        projectCommodityTotalSupply[_projectId][_commodityId] += _batchSupply;
+        projectCommodityTotalSupply[projectId][commodityId] += supply;
 
-        string memory _name = PlannedCredit(_batchAddress).name();
+        string memory _name = PlannedCredit(_plannedCredit).name();
 
         emit PlannedCreditCreated(
-            _projectId,
-            _commodityId,
-            _batchURI,
-            _plannedDeliveryYear,
-            _batchSupply,
+            projectId,
+            commodityId,
+            uri,
+            plannedDeliveryYear,
+            supply,
             block.timestamp,
-            _vintage,
-            _batchAddress,
-            _batchOwner,
+            vintage,
+            _plannedCredit,
+            plannedCreditOwner,
             _name
         );
     }
 
     /**
-     * @notice updateBatchDetailDuringMintOrBurnMore: Updates batch details when a Planned Credit's supply is updated
-     * @param _projectId Project Id
-     * @param _commodityId Commodity Id
-     * @param _amountToMintOrBurn Amount of tokens to mint/burn
-     * @param _plannedCreditBatchAction Planned Credit batch actions
-     * @param _batchId Batch Id
+     * @notice updatePlannedCreditDetailDuringMintOrBurnMore: Updates properties when a PlannedCredit's supply is updated
+     * @param projectId Associated Project
+     * @param commodityId Associated Commodity
+     * @param amountToMintOrBurn Amount w.r.t to mint/burn action
+     * @param action Action to mint/burn
+     * @param plannedCredit PlannedCredit reference
      */
     function updatePlannedCreditDetailDuringMintOrBurnMore(
-        string calldata _projectId,
-        string calldata _commodityId,
-        uint256 _amountToMintOrBurn,
-        uint8 _plannedCreditBatchAction,
-        address _batchId
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 amountToMintOrBurn,
+        uint8 action,
+        address plannedCredit
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        uint256 _batchIndex = batchIndexList[_batchId];
-        BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
-            _batchId
-        ][_batchIndex];
-        if (_plannedCreditBatchAction == uint(PlannedCreditTokenActions.Mint)) {
-            _detail.batchSupply = _detail.batchSupply + _amountToMintOrBurn;
+        uint256 _plannedCreditIndex = plannedCreditIndexList[plannedCredit];
+        PlannedCreditDetail storage _detail = plannedCreditDetails[projectId][
+            commodityId
+        ][plannedCredit][_plannedCreditIndex];
+        if (action == uint(PlannedCreditTokenActions.Mint)) {
+            _detail.supply += amountToMintOrBurn;
             _detail.lastUpdated = block.timestamp;
-            projectCommodityTotalSupply[_projectId][
-                _commodityId
-            ] += _amountToMintOrBurn;
-        } else if (
-            _plannedCreditBatchAction == uint(PlannedCreditTokenActions.Burn)
-        ) {
-            _detail.batchSupply = _detail.batchSupply - _amountToMintOrBurn;
+            projectCommodityTotalSupply[projectId][
+                commodityId
+            ] += amountToMintOrBurn;
+        } else if (action == uint(PlannedCreditTokenActions.Burn)) {
+            _detail.supply -= amountToMintOrBurn;
             _detail.lastUpdated = block.timestamp;
-            projectCommodityTotalSupply[_projectId][
-                _commodityId
-            ] -= _amountToMintOrBurn;
+            projectCommodityTotalSupply[projectId][
+                commodityId
+            ] -= amountToMintOrBurn;
         }
     }
 
     /**
-     * @notice updateBatchDetailDuringURIChange: Updates batch details when a Planned Credit's storage is updated
-     * @param _projectId Project Id
-     * @param _commodityId Commodity Id
-     * @param _plannedDeliveryYear Updated batch delivery year
-     * @param _batchId Batch Id
+     * @notice updatePlannedCreditDetailDuringPlannedDeliveryYearChange: Updates properties when a PlannedCredit's storage is updated
+     * @param projectId Associated Project
+     * @param commodityId Associated Commodity
+     * @param plannedDeliveryYear  Planned delivery of the credits associated with the vintage
+     * @param plannedCredit Planned credit reference
      */
     function updatePlannedCreditDetailDuringPlannedDeliveryYearChange(
-        string calldata _projectId,
-        string calldata _commodityId,
-        uint256 _plannedDeliveryYear,
-        address _batchId
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 plannedDeliveryYear,
+        address plannedCredit
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        uint256 _batchIndex = batchIndexList[_batchId];
-        BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
-            _batchId
-        ][_batchIndex];
-        _detail.plannedDeliveryYear = _plannedDeliveryYear;
+        uint256 _plannedCreditIndex = plannedCreditIndexList[plannedCredit];
+        PlannedCreditDetail storage _detail = plannedCreditDetails[projectId][
+            commodityId
+        ][plannedCredit][_plannedCreditIndex];
+        _detail.plannedDeliveryYear = plannedDeliveryYear;
         _detail.lastUpdated = block.timestamp;
     }
 
     /**
-     * @notice updateBatchDetailDuringURIChange: Updates batch details when a Planned Credit's URI is updated
-     * @param _projectId Project Id
-     * @param _commodityId Commodity Id
-     * @param _batchURI Updated batch URI
-     * @param _batchId Batch Id
+     * @notice updatePlannedCreditDetailDuringURIChange: Updates PlannedCredit details when a Planned Credit's URI is updated
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param uri IPFS hosted URI link
+     * @param plannedCredit PlannedCredit reference
      */
     function updatePlannedCreditDetailDuringURIChange(
-        string calldata _projectId,
-        string calldata _commodityId,
-        string calldata _batchURI,
-        address _batchId
+        string calldata projectId,
+        string calldata commodityId,
+        string calldata uri,
+        address plannedCredit
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        uint256 _batchIndex = batchIndexList[_batchId];
-        BatchDetail storage _detail = batchDetails[_projectId][_commodityId][
-            _batchId
-        ][_batchIndex];
-        _detail.batchURI = _batchURI;
+        uint256 _plannedCreditIndex = plannedCreditIndexList[plannedCredit];
+        PlannedCreditDetail storage _detail = plannedCreditDetails[projectId][
+            commodityId
+        ][plannedCredit][_plannedCreditIndex];
+        _detail.uri = uri;
         _detail.lastUpdated = block.timestamp;
     }
 
     /**
      * @notice setPlannedCreditManagerContract: Set's PlannedCreditManager contract
-     * @param _plannedCreditManagerContract PlannedCreditManager contract address
+     * @param _plannedCreditManagerContract PlannedCreditManager reference
      */
     function setPlannedCreditManagerContract(
         address _plannedCreditManagerContract
@@ -470,44 +497,37 @@ contract PlannedCreditFactory is
     }
 
     /**
-     * @notice grantRoleForBatch: manager Roles For PlannedCredit Batch
-     * @param _batchId Batch contract address
-     * @param _address Address to grant role for
+     * @notice grantManagerRoleForPlannedCredit: Grant manager Roles For PlannedCredit
+     * @param plannedCredit PlannedCredit reference
+     * @param manager Manager wallet address
      */
-    function grantManagerRoleForBatch(
-        address _batchId,
-        address _address
+    function grantManagerRoleForPlannedCredit(
+        address plannedCredit,
+        address manager
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        PlannedCredit(_batchId).grantRole(FACTORY_MANAGER_ROLE, _address);
+        PlannedCredit(plannedCredit).grantRole(FACTORY_MANAGER_ROLE, manager);
     }
 
     /**
-            @notice _checkBeforeMintNewBatch: Process different checks before minting new batch
+            @notice _checkBeforeCreatePlannedCredit: Process different checks before minting new PlannedCredit
             @dev Checking credibilty of arguments
-            @param _projectId Project Id
-            @param _commodityId Commodity Id
-            @param _batchURI Batch URI
-            @param _batchSupply Batch token supply
-            @param _plannedDeliveryYear Delivery year
-            @param _vintage Vintage
-            @param _batchOwner Batch owner address
         */
     function _checkBeforeCreatePlannedCredit(
         string memory _projectId,
         string memory _commodityId,
-        string calldata _batchURI,
-        uint256 _batchSupply,
+        string calldata _uri,
+        uint256 _supply,
         uint256 _plannedDeliveryYear,
         uint64 _vintage,
-        address _batchOwner
+        address _plannedCreditOwner
     ) internal view {
         require(
             (address(plannedCreditManagerContract) != address(0)) &&
-                (_batchOwner != address(0)) &&
+                (_plannedCreditOwner != address(0)) &&
                 (bytes(_projectId).length != 0) &&
                 (bytes(_commodityId).length != 0) &&
-                (bytes(_batchURI).length != 0) &&
-                (_batchSupply != 0) &&
+                (bytes(_uri).length != 0) &&
+                (_supply != 0) &&
                 (_plannedDeliveryYear != 0) &&
                 (_vintage != 0),
             "ARGUMENT_PASSED_AS_ZERO"
@@ -515,12 +535,12 @@ contract PlannedCreditFactory is
     }
 
     /**
-            @notice _createNewBatch: Create a new batch w.r.t projectId and commodityId
-            @dev Follows factory-child pattern for creating batches using CREATE2 opcode
+            @notice _createPlannedCredit: Create a new PlannedCredit w.r.t projectId and commodityId
+            @dev Follows factory-child pattern for creating PlannedCredit using CREATE2 opcode
                     Child contract is going to be ERC20 compatible smart contract
             @param _tokenName ERC20 based token name
             @param _tokenSymbol ERC20 based token symbol
-            @param _vintage Batch vintage to be served as unique salt
+            @param _vintage PlannedCredit vintage to be served as unique salt
         */
     function _createPlannedCredit(
         string memory _tokenName,
@@ -535,26 +555,24 @@ contract PlannedCreditFactory is
         uint256 _vintage256 = uint256(_vintage);
         bytes32 _salt = bytes32(_vintage256);
 
-        PlannedCredit _newChildBatch = new PlannedCredit{salt: bytes32(_salt)}(
+        PlannedCredit _newChildPlannedCredit = new PlannedCredit{
+            salt: bytes32(_salt)
+        }(
             _tokenName,
             _tokenSymbol,
             address(this),
             address(plannedCreditManagerContract)
         );
-        return address(_newChildBatch);
+        return address(_newChildPlannedCredit);
     }
 
     /**
-            @notice _updateProjectCommodityBatchStorage: Updating batch storage for a 
-                    project and commodity
-            @param _projectId Project Id
-            @param _commodityId Commodity Id
-            @param _batchAddress Batch Id
+            @notice _updateProjectCommodityPlanneCreditStorage: Updating PlannedCredit storage for Project::Commodity
         */
     function _updateProjectCommodityPlanneCreditStorage(
         string memory _projectId,
         string memory _commodityId,
-        address _batchAddress
+        address _plannedCredit
     ) private onlyRole(FACTORY_MANAGER_ROLE) {
         // Checking for project Id duplication
         if (projectExists[_projectId] == false) {
@@ -568,7 +586,7 @@ contract PlannedCreditFactory is
             commodityExists[_projectId][_commodityId] = true;
         }
 
-        batchList[_projectId][_commodityId].push(_batchAddress);
+        plannedCreditList[_projectId][_commodityId].push(_plannedCredit);
     }
 }
 
@@ -587,22 +605,21 @@ contract PlannedCredit is ERC20, AccessControl {
 
     /**
             @notice Building up the constructor
-            @param _name Token name
-            @param _symbol Token symbol
-            @param _factoryContract PlannedCreditFactory contract address
-            @param _managerContract PlannedCreditManager contract address
-            
+            @param name Token name
+            @param symbol Token symbol
+            @param factoryContract PlannedCreditFactory contract reference
+            @param managerContract PlannedCreditManager contract reference
         */
     constructor(
-        string memory _name,
-        string memory _symbol,
-        address _factoryContract,
-        address _managerContract
-    ) ERC20(_name, _symbol) {
+        string memory name,
+        string memory symbol,
+        address factoryContract,
+        address managerContract
+    ) ERC20(name, symbol) {
         _setRoleAdmin(FACTORY_MANAGER_ROLE, FACTORY_MANAGER_ROLE);
-        _setupRole(DEFAULT_ADMIN_ROLE, _factoryContract);
-        _setupRole(FACTORY_MANAGER_ROLE, _factoryContract);
-        _setupRole(FACTORY_MANAGER_ROLE, _managerContract);
+        _setupRole(DEFAULT_ADMIN_ROLE, factoryContract);
+        _setupRole(FACTORY_MANAGER_ROLE, factoryContract);
+        _setupRole(FACTORY_MANAGER_ROLE, managerContract);
     }
 
     /**
@@ -616,26 +633,26 @@ contract PlannedCredit is ERC20, AccessControl {
     /**
             @notice mint: Standard ERC20's mint
             @dev Using ERC20's internal _mint function
-            @param _account Account for which tokens will get minted
-            @param _amount Amount of tokens to be minted        
+            @param account Account for which tokens will get minted
+            @param amount Amount of tokens to be minted        
         */
     function mintPlannedCredits(
-        address _account,
-        uint256 _amount
+        address account,
+        uint256 amount
     ) public onlyRole(FACTORY_MANAGER_ROLE) {
-        _mint(_account, _amount);
+        _mint(account, amount);
     }
 
     /**
             @notice burn: Standard ERC20's burn
             @dev Using ERC20's internal _burn function
-            @param _account Account from where tokens will get burned
-            @param _amount Amount of tokens to be burned
+            @param account Account from where tokens will get burned
+            @param amount Amount of tokens to be burned
         */
     function burnPlannedCredits(
-        address _account,
-        uint256 _amount
+        address account,
+        uint256 amount
     ) public onlyRole(FACTORY_MANAGER_ROLE) {
-        _burn(_account, _amount);
+        _burn(account, amount);
     }
 }

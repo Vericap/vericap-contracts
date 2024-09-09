@@ -5,38 +5,38 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IPlannedCreditManager {
     function mintPlannedCredits(
-        string calldata _projectId,
-        string calldata _commodityId,
-        address _batchId,
-        address _batchOwner,
-        uint256 _amountToMint
+        string calldata projectId,
+        string calldata commodityId,
+        address plannedCredit,
+        address plannedCreditOwner,
+        uint256 amountToMint
     ) external;
 
     function burnPlannedCredits(
-        string calldata _projectId,
-        string calldata _commodityId,
-        address _batchId,
-        address _batchOwner,
-        uint256 _amountToBurn
+        string calldata projectId,
+        string calldata commodityId,
+        address plannedCredit,
+        address plannedCreditOwner,
+        uint256 amountToBurn
     ) external;
 
     function manyToManyPlannedCreditTransfer(
-        IERC20[] calldata _batchTokenIds,
-        address[] calldata _projectDeveloperAddresses,
-        bytes[] calldata _batchTransferData
+        IERC20[] calldata plannedCredits,
+        address[] calldata projectDeveloperAddresses,
+        bytes[] calldata dataToTransfer
     ) external;
 
     function updatePlannedDeliveryYear(
-        string calldata _projectId,
-        string calldata _commodityId,
-        address _batchId,
-        uint256 _updatedPlannedDeliveryYear
+        string calldata projectId,
+        string calldata commodityId,
+        address plannedCredit,
+        uint256 updatedPlannedDeliveryYear
     ) external;
 
     function updateURI(
-        string calldata _projectId,
-        string calldata _commodityId,
-        address _batchId,
-        string calldata _updatedURI
+        string calldata projectId,
+        string calldata commodityId,
+        address plannedCredit,
+        string calldata updatedURI
     ) external;
 }
