@@ -4,7 +4,7 @@ pragma solidity >=0.8.22;
 /**
  * @title Planned Credit Factory Smart Contract
  * @author Team @vericap
- * @notice Planned Credit Factory is a upgradeable contract used for releasing new PlannedCredit contracts
+ * @notice Planned Credit Factory is a upgradeable contract used for releasing new PlannedCredit
  */
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -170,12 +170,12 @@ contract PlannedCreditFactory is
     /**
             @notice Initialize: Initialize a smart contract
             @dev Works as a constructor for proxy contracts
-            @param _superAdmin Admin wallet address
+            @param superAdmin Admin wallet address
         */
-    function initialize(address _superAdmin) external initializer {
+    function initialize(address superAdmin) external initializer {
         __Ownable_init();
-        _setupRole(DEFAULT_ADMIN_ROLE, _superAdmin);
-        _setupRole(FACTORY_MANAGER_ROLE, _superAdmin);
+        _setupRole(DEFAULT_ADMIN_ROLE, superAdmin);
+        _setupRole(FACTORY_MANAGER_ROLE, superAdmin);
         _setRoleAdmin(FACTORY_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
     }
 

@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/**
+ * @title Verified Credit Factory Contract
+ * @author Team @vericap
+ * @notice Verified Credit Factory is a upgradeable contract used for releasing new VerifiedCredits
+ */
+
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -32,15 +38,28 @@ contract VerifiedCreditFactory is
         */
     using StringsUpgradeable for uint64;
 
-    /** @notice Factory Manager Role: Handles All Major Functionalities */
+    /** @notice Factory Manager Role */
     bytes32 public constant FACTORY_MANAGER_ROLE = "FACTORY_MANAGER_ROLE";
 
+    /**
+     * @notice PlannedCredit's Factory and Manager Instances
+     */
     IPlannedCreditFactory public plannedCreditFactory;
-
     IPlannedCreditManager public plannedCreditManager;
 
-    /** @notice Verifies Credit Detail
-     * @dev Holds The Verfied Credit Properties */
+    /** @dev VerifiedPlannedCredits: Stores the properties for a Planned Credit
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Date of issuance
+     * @param tokenId ERC1155 standarad based token Id
+     * @param ticker Associated ticker based on Project::Commodity::Vintage
+     * @param issuedCredits Supply of credits issued
+     * @param availableCredits Available credits w.r.t Project::Commodity::Vintage
+     * @param blockedCredits Blocked credits w.r.t Project::Commodity::Vintage
+     * @param retiredCredits Retired credits w.r.t Project::Commodity::Vintage
+     * @param tokenURI IPFS hosted URI link
+     */
     struct VerifiedCreditDetail {
         string projectId;
         string commodityId;
@@ -55,7 +74,13 @@ contract VerifiedCreditFactory is
         string tokenURI;
     }
 
-    // Verified Credit Detail By Token Id
+    /**
+     * @dev VerifiedCreditDetailByTokenId: Stores tokenId for a VerifiedCredit along with issuance date
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param tokenId ERC1155 standarad based token Id
+     */
     struct VerifiedCreditDetailByTokenId {
         string projectId;
         string commodityId;
@@ -64,29 +89,44 @@ contract VerifiedCreditFactory is
         uint256 tokenId;
     }
 
-    // projectId -> commodityId -> Vintage -> Issuance Date -> Token Id -> Verified Credit Detail
+    /**
+     * @dev verifiedCreditDetails: Stores VerifiedCreditDetail w.r.t Project::Commodity::Vintage::IssuanceDate::TokenId
+     */
     mapping(string => mapping(string => mapping(uint256 => mapping(string => VerifiedCreditDetail))))
         internal verifiedCreditDetails;
 
-    // Vintage -> TokenId -> Verified Credit Detail []
+    /**
+     * @dev verifiedCreditDetailsByVintage: Stores list of VerifiedCreditDetail w.r.t tokenId
+     */
     mapping(uint256 => VerifiedCreditDetail[])
         internal verifiedCreditDetailsByVintage;
 
+    /**
+     * @dev verifiedCreditDetailsByTokenId: Stores VerifiedCreditDetailByTokenId w.r.t TokenId
+     */
     mapping(uint256 => VerifiedCreditDetailByTokenId)
         internal verifiedCreditDetailsByTokenId;
 
-    // User projectId -> commodityId -> vintage -> total credit retired
+    /**
+     * @dev creditsRetiredByUserPerVintage: Stores the total credits retired by a user w.r.t Project::Commodity::Vintage
+     */
     mapping(string => mapping(string => mapping(uint256 => uint256)))
         public creditsRetiredByUserPerVintage;
 
-    // projectId -> commodityId -> Vintage -> Issuance Date -> boolean (existance)
+    /**
+     * @dev verifiedCreditExistance: Stores existance of a IssuanceDate w.r.t Project::Commodity::Vintage
+     */
     mapping(string => mapping(string => mapping(uint256 => mapping(string => bool))))
         public verifiedCreditExistance;
 
-    // Optional mapping for token URIs
+    /**
+     * @dev _tokenURIs: Stores tokenURI for all Verified Credits
+     */
     mapping(uint256 => string) private _tokenURIs;
 
-    // Create Verified Credit Event
+    /**
+     * @dev VerifiedCreditCreated: Triggers when a new VerifiedCredit is created
+     */
     event VerifiedCreditCreated(
         string projectId,
         string commodityId,
@@ -98,7 +138,9 @@ contract VerifiedCreditFactory is
         string tokenURI
     );
 
-    // Issued Verified Credit Event
+    /**
+     * @dev IssuedVerifiedCredit: Triggers when new credits are a issued for a particular pair of VerifiedCredits
+     */
     event IssuedVerifiedCredit(
         string projectId,
         string commodityId,
@@ -109,7 +151,9 @@ contract VerifiedCreditFactory is
         uint256 availableCredits
     );
 
-    // Block Verified Credit Event
+    /**
+     * @dev BlockedVerifiedCredit: Triggers when credits are blocked for a pair of IssuanceDate::VerifiedCredits
+     */
     event BlockedVerifiedCredit(
         string projectId,
         string commodityId,
@@ -120,7 +164,9 @@ contract VerifiedCreditFactory is
         uint256 availableCredits
     );
 
-    // Unblock Verified Credit Event
+    /**
+     * @dev UnblockedVerifiedCredit: Triggers when credits are unblocked for a pair of IssuanceDate::VerifiedCredits
+     */
     event UnblockedVerifiedCredit(
         string projectId,
         string commodityId,
@@ -131,7 +177,9 @@ contract VerifiedCreditFactory is
         uint256 availableCredits
     );
 
-    // Swapped Verfied Credit Event
+    /**
+     * @dev SwappedVerifiedCredit: Triggers when credits are swapped for a pair of IssuanceDate::VerifiedCredits
+     */
     event SwappedVerifiedCredit(
         string projectId,
         string commodityId,
@@ -142,7 +190,9 @@ contract VerifiedCreditFactory is
         address investorAddress
     );
 
-    // Retired Verfied Credit Event
+    /**
+     * @dev RetiredVerifiedCredit: Triggers when credits are Retired for a pair of IssuanceDate::VerifiedCredits
+     */
     event RetiredVerifiedCredit(
         string projectId,
         string commodityId,
@@ -153,7 +203,9 @@ contract VerifiedCreditFactory is
         uint256 availableCredits
     );
 
-    // URI Updated For Verified Credit
+    /**
+     * @dev URIUpdateForVerifiedCredit: Triggers when URI is updated for a pair of IssuanceDate::VerifiedCredits
+     */
     event URIUpdateForVerifiedCredit(
         string projectId,
         string commodityId,
@@ -167,6 +219,11 @@ contract VerifiedCreditFactory is
         _disableInitializers();
     }
 
+    /**
+            @notice Initialize: Initialize a smart contract
+            @dev Works as a constructor for proxy contracts
+            @param superAdmin Admin wallet address
+        */
     function initialize(
         address superAdmin,
         IPlannedCreditFactory _plannedCreditFactory,
@@ -187,7 +244,13 @@ contract VerifiedCreditFactory is
         address newImplementation
     ) internal override onlyOwner {}
 
-    /** Get Verified Credit Detail */
+    /**
+     * @notice getVerifiedCreditDetail: View function to fetch properties of a VerifiedCredit w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated Vintage
+     * @param issuanceDate Associated IssuanceDate
+     */
     function getVerifiedCreditDetail(
         string memory projectId,
         string memory commodityId,
@@ -206,7 +269,14 @@ contract VerifiedCreditFactory is
             ];
     }
 
-    /** User Balance */
+    /**
+     * @notice getUserBalancePerIssuanceDate: View function to fetch user balance w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated Vintage
+     * @param issuanceDate Associated IssuanceDate
+     * @param userAccount User Wallet
+     */
     function getUserBalancePerIssuanceDate(
         string memory projectId,
         string memory commodityId,
@@ -228,7 +298,9 @@ contract VerifiedCreditFactory is
         return balanceOf(userAccount, _verifiedCreditDetail.tokenId);
     }
 
-    /** Aggregated Verfied Credit Detail Per Vintage */
+    /**
+     * @notice getAggregatedDataPerVintage: View function to fetch VerifiedCredit's data w.r.t Vintage
+     */
     function getAggregatedDataPerVintage(
         uint256 vintage
     )
@@ -263,7 +335,17 @@ contract VerifiedCreditFactory is
         );
     }
 
-    /** Create Verified Credit */
+    /**
+     * @notice createVerifiedCredit: Create a new PlannedCredit w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @dev Follows ERC1155 token standard fundamental to create VerifiedCredits
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param ticker Associated ticker based on Project::Commodity::Vintage
+     * @param issuanceSupply Issuance supply
+     * @param tokenURI IPFS hosted URI link
+     */
     function createVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
@@ -346,7 +428,14 @@ contract VerifiedCreditFactory is
         );
     }
 
-    /** Issue Verified Credits */
+    /**
+     * @notice issueVerifiedCredit: Issue verified credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param issuanceSupply Issuance supply
+     */
     function issueVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
@@ -398,7 +487,14 @@ contract VerifiedCreditFactory is
         );
     }
 
-    /** Block Verified Credits */
+    /**
+     * @notice blockVerifiedCredits: Block verified Credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param amountToBlock Amount of credits to block
+     */
     function blockVerifiedCredits(
         string calldata projectId,
         string calldata commodityId,
@@ -440,8 +536,15 @@ contract VerifiedCreditFactory is
         );
     }
 
-    /** Unblock Verfied Credits */
-    function unBlockVerifiedCredits(
+    /**
+     * @notice unblockVerifiedCredits: Unblock verified Credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param amountToUnblock Amount of credits to unblock
+     */
+    function unblockVerifiedCredits(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
@@ -482,14 +585,22 @@ contract VerifiedCreditFactory is
         );
     }
 
-    /** Transfer Verified Credit Outside */
+    /**
+     * @notice transferVerifiedCreditOutside: Transfer verified Credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param amountToTransfer Amount of credits to transfer
+     * @param receiver Receiver wallet
+     */
     function transferVerifiedCreditOutside(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
         string calldata issuanceDate,
         uint256 amountToTransfer,
-        address userAddress
+        address receiver
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         require(
             verifiedCreditExistance[projectId][commodityId][vintage][
@@ -507,14 +618,17 @@ contract VerifiedCreditFactory is
         );
         safeTransferFrom(
             address(this),
-            userAddress,
+            receiver,
             _verifiedCreditDetail.tokenId,
             amountToTransfer,
             "0x00"
         );
     }
 
-    /** Approve Admin To Transfer Verified Credits */
+    /**
+     * @notice approveAdminToTransfer: Approve admin to access Verified Credit available in contract
+     * @param admin Admin wallet
+     */
     function approveAdminToTransfer(
         address admin
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
@@ -522,7 +636,15 @@ contract VerifiedCreditFactory is
         _setApprovalForAll(address(this), admin, true);
     }
 
-    /** Swap Verified Credits */
+    /**
+     * @notice swapVerifiedCredits: Swap verified Credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param amountToSwap Amount of credits to swap
+     * @param investor Investor wallet
+     */
     function swapVerifiedCredits(
         string calldata projectId,
         string calldata commodityId,
@@ -530,7 +652,7 @@ contract VerifiedCreditFactory is
         string calldata issuanceDate,
         uint256 amountToSwap,
         address plannedCredit,
-        address investorAddress
+        address investor
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeSwap(
             projectId,
@@ -539,7 +661,7 @@ contract VerifiedCreditFactory is
             issuanceDate,
             amountToSwap,
             plannedCredit,
-            investorAddress
+            investor
         );
 
         IPlannedCreditFactory.PlannedCreditDetailByAddress
@@ -578,13 +700,13 @@ contract VerifiedCreditFactory is
             projectId,
             commodityId,
             plannedCredit,
-            investorAddress,
+            investor,
             amountToSwap
         );
 
         _safeTransferFrom(
             address(this),
-            investorAddress,
+            investor,
             _verifiedCreditDetail.tokenId,
             amountToSwap,
             "0x00"
@@ -597,18 +719,26 @@ contract VerifiedCreditFactory is
             issuanceDate,
             amountToSwap,
             plannedCredit,
-            investorAddress
+            investor
         );
     }
 
-    /** Retire Verified Credits */
+    /**
+     * @notice retireVerifiedCredits: Retire verified Credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param amountToRetire Amount of credits to swap
+     * @param investor Investor wallet
+     */
     function retireVerifiedCredits(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
         string calldata issuanceDate,
         uint256 amountToRetire,
-        address investorAddress
+        address investor
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeRetire(
             projectId,
@@ -616,7 +746,7 @@ contract VerifiedCreditFactory is
             vintage,
             issuanceDate,
             amountToRetire,
-            investorAddress
+            investor
         );
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
@@ -634,7 +764,7 @@ contract VerifiedCreditFactory is
         creditsRetiredByUserPerVintage[projectId][commodityId][
             vintage
         ] += amountToRetire;
-        _burn(investorAddress, _verifiedCreditDetail.tokenId, amountToRetire);
+        _burn(investor, _verifiedCreditDetail.tokenId, amountToRetire);
 
         emit RetiredVerifiedCredit(
             projectId,
@@ -642,12 +772,19 @@ contract VerifiedCreditFactory is
             vintage,
             issuanceDate,
             amountToRetire,
-            investorAddress,
+            investor,
             _verifiedCreditDetail.availableCredits
         );
     }
 
-    /* Update Verified Credit URI */
+    /**
+     * @notice updateVerifiedCreditURI: Update URI for a verified Credits w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param updatedURI IPFS hostes URI link
+     */
     function updateVerifiedCreditURI(
         string calldata projectId,
         string calldata commodityId,
@@ -677,6 +814,10 @@ contract VerifiedCreditFactory is
         );
     }
 
+    /**
+            @notice _checkBeforeVerifiedCreditCreation: Process different checks before creating new VerifiedCredits
+            @dev Checking credibilty of arguments
+        */
     function _checkBeforeVerifiedCreditCreation(
         string calldata _projectId,
         string calldata _commodityId,
@@ -704,6 +845,10 @@ contract VerifiedCreditFactory is
         );
     }
 
+    /**
+            @notice _checkBeforeStorageUpdate: Process different checks before updating storage of VerifiedCredits
+            @dev Checking credibilty of arguments
+        */
     function _checkBeforeStorageUpdate(
         string calldata _projectId,
         string calldata _commodityId,
@@ -727,6 +872,10 @@ contract VerifiedCreditFactory is
         );
     }
 
+    /**
+            @notice _checkBeforeSwap: Process different checks before swapping VerifiedCredits
+            @dev Checking credibilty of arguments
+        */
     function _checkBeforeSwap(
         string calldata _projectId,
         string calldata _commodityId,
@@ -754,6 +903,10 @@ contract VerifiedCreditFactory is
         );
     }
 
+    /**
+            @notice _checkBeforeRetire: Process different checks before retiring VerifiedCredits
+            @dev Checking credibilty of arguments
+        */
     function _checkBeforeRetire(
         string calldata _projectId,
         string calldata _commodityId,
@@ -779,10 +932,19 @@ contract VerifiedCreditFactory is
         );
     }
 
+    /**
+     * @notice _getCurrentTokenIdIndex: Get current indexer for tokenIds
+     */
     function _getCurrentTokenIdIndex() internal view returns (uint256) {
         return _currentIndex.current();
     }
 
+    /**
+     * @notice _beforeTokenTransfer: Overriding inherited function from ERC1155 token standard
+     *          Added internal checks for handing VerifiedCredits storage
+     * @dev Hook that is called before any token transfer. This includes minting
+     * and burning, as well as batched variants.
+     */
     function _beforeTokenTransfer(
         address operator,
         address from,
@@ -824,6 +986,9 @@ contract VerifiedCreditFactory is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
+    /**
+     * @notice supportsInterface: Override riding base, to make it compatible with inherited contracts
+     */
     function supportsInterface(
         bytes4 interfaceId
     )
@@ -839,6 +1004,9 @@ contract VerifiedCreditFactory is
         return super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @notice compareCreditDetail: Internal tool to compare PlannedCredits details with VerifiedCredits
+     */
     function compareCreditDetail(
         string memory dataX,
         string memory dataY
@@ -847,6 +1015,4 @@ contract VerifiedCreditFactory is
             keccak256(abi.encodePacked(dataX)) ==
             keccak256(abi.encodePacked(dataY));
     }
-
-    function _beforeTokenTransfer() external {}
 }
