@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
 interface IPlannedCredit {
-    function mintPlannedCredits(address _account, uint256 _amount) external;
+    function mintPlannedCredits(address account, uint256 amount) external;
 
-    function burnPlannedCredits(address _account, uint256 _amount) external;
+    function burnPlannedCredits(address account, uint256 amount) external;
 }

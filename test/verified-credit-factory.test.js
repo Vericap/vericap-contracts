@@ -2,10 +2,8 @@
  * @package Imports
  */
 const fs = require("fs");
-const { expect, should } = require("chai");
+const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const batchABIPath =
-  "artifacts/contracts/PlannedCredit/PlannedCreditFactory.sol/PlannedCredit.json";
 
 /**
  * @global Initializing Global Variables
@@ -16,7 +14,7 @@ const ZERO_ADDRESS = ethers.constants.AddressZero;
 /**
  * @global Parent Describe Test Block
  */
-describe("Planned Credit Factory Smart Contract", () => {
+describe("Verified Credit Factory Smart Contract", () => {
   /**
    * @public Block Scoped Variable Declaration
    */
@@ -266,7 +264,7 @@ describe("Planned Credit Factory Smart Contract", () => {
 
         const plannedCredit = await plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -296,7 +294,7 @@ describe("Planned Credit Factory Smart Contract", () => {
 
     it("Should Swap Planned Credit (VPC) To Verified Credit (VCC)", async () => {
       const plannedCreditList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );

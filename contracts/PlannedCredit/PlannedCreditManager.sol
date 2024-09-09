@@ -49,7 +49,7 @@ contract PlannedCreditManager is
         @notice MintedMoreInABatch: Triggers when a more tokens are minted in a 
                 batch
      */
-    event MintedMoreInABatch(
+    event MintedMoreForAPlannedCredit(
         string projectId,
         string commodityId,
         address batchId,
@@ -63,7 +63,7 @@ contract PlannedCreditManager is
         @notice BurnedFromABatch: Triggers when a some tokens are burned 
                 from a batch
      */
-    event BurnedFromABatch(
+    event BurnedFromAPlannedCredit(
         string projectId,
         string commodityId,
         address batchId,
@@ -76,7 +76,7 @@ contract PlannedCreditManager is
     /**
         @notice ManyToManyBatchTransfer: Triggers on many-many transfer 
      */
-    event ManyToManyBatchTransfer(
+    event ManyToManyPlannedCreditTransferred(
         IERC20[] batchIds,
         address[] _projectDeveloperAddresses,
         bytes[] batchTransferData
@@ -86,7 +86,7 @@ contract PlannedCreditManager is
         @notice BatchPlannedDeliveryYearUpdated: Triggers when a batch's delivery 
                 year is updated
      */
-    event PlannedDeliveryYearUpdatedForBatch(
+    event PlannedDeliveryYearUpdated(
         string projectId,
         string commodityId,
         address batchId,
@@ -97,7 +97,7 @@ contract PlannedCreditManager is
         @notice BatchPlannedDeliveryYearUpdated: Triggers when a batch's URI is 
                 updated
      */
-    event URIUpdatedForBatch(
+    event URIUpdated(
         string projectId,
         string commodityId,
         address batchId,
@@ -147,7 +147,7 @@ contract PlannedCreditManager is
         @param _batchOwner Receiver address where tokens will get mint
         @param _amountToMint Amount to minting more
      */
-    function mintMoreInABatch(
+    function mintPlannedCredits(
         string calldata _projectId,
         string calldata _commodityId,
         address _batchId,
@@ -160,23 +160,24 @@ contract PlannedCreditManager is
             _batchId,
             _amountToMint
         );
-        plannedCreditFactoryContract.updateBatchDetailDuringMintOrBurnMore(
-            _projectId,
-            _commodityId,
-            _amountToMint,
-            0,
-            _batchId
-        );
+        plannedCreditFactoryContract
+            .updatePlannedCreditDetailDuringMintOrBurnMore(
+                _projectId,
+                _commodityId,
+                _amountToMint,
+                0,
+                _batchId
+            );
         IPlannedCredit(_batchId).mintPlannedCredits(_batchOwner, _amountToMint);
 
         uint256 _currentBatchSupply = plannedCreditFactoryContract
-            .getBatchDetails(_projectId, _commodityId, _batchId)
+            .getPlannedCreditDetails(_projectId, _commodityId, _batchId)
             .batchSupply;
 
         uint256 _currentTotalSupply = plannedCreditFactoryContract
             .getProjectCommodityTotalSupply(_projectId, _commodityId);
 
-        emit MintedMoreInABatch(
+        emit MintedMoreForAPlannedCredit(
             _projectId,
             _commodityId,
             _batchId,
@@ -197,7 +198,7 @@ contract PlannedCreditManager is
         @param _batchOwner Owner address where tokens will get burned from
         @param _amountToBurn Amount to burn
      */
-    function burnFromABatch(
+    function burnPlannedCredits(
         string calldata _projectId,
         string calldata _commodityId,
         address _batchId,
@@ -210,23 +211,24 @@ contract PlannedCreditManager is
             _batchId,
             _amountToBurn
         );
-        plannedCreditFactoryContract.updateBatchDetailDuringMintOrBurnMore(
-            _projectId,
-            _commodityId,
-            _amountToBurn,
-            1,
-            _batchId
-        );
+        plannedCreditFactoryContract
+            .updatePlannedCreditDetailDuringMintOrBurnMore(
+                _projectId,
+                _commodityId,
+                _amountToBurn,
+                1,
+                _batchId
+            );
         IPlannedCredit(_batchId).burnPlannedCredits(_batchOwner, _amountToBurn);
 
         uint256 _currentBatchSupply = plannedCreditFactoryContract
-            .getBatchDetails(_projectId, _commodityId, _batchId)
+            .getPlannedCreditDetails(_projectId, _commodityId, _batchId)
             .batchSupply;
 
         uint256 _currentTotalSupply = plannedCreditFactoryContract
             .getProjectCommodityTotalSupply(_projectId, _commodityId);
 
-        emit BurnedFromABatch(
+        emit BurnedFromAPlannedCredit(
             _projectId,
             _commodityId,
             _batchId,
@@ -246,7 +248,7 @@ contract PlannedCreditManager is
         @dev Project developers needs to approve the PlannedCreditManager. 
              As, PlannedCreditManager will trigger the transfer function in PlannedCreditBatch contract
      */
-    function manyToManyBatchTransfer(
+    function manyToManyPlannedCreditTransfer(
         IERC20[] calldata _batchTokenIds,
         address[] calldata _projectDeveloperAddresses,
         bytes[] calldata _batchTransferData
@@ -275,7 +277,7 @@ contract PlannedCreditManager is
             }
         }
 
-        emit ManyToManyBatchTransfer(
+        emit ManyToManyPlannedCreditTransferred(
             _batchTokenIds,
             _projectDeveloperAddresses,
             _batchTransferData
@@ -289,7 +291,7 @@ contract PlannedCreditManager is
         @param _batchId Batch Id w.r.t to project Id and commidity Id
         @param _updatedPlannedDeliveryYear Updated delivery year value
      */
-    function updateBatchPlannedDeliveryYear(
+    function updatePlannedDeliveryYear(
         string calldata _projectId,
         string calldata _commodityId,
         address _batchId,
@@ -297,14 +299,14 @@ contract PlannedCreditManager is
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
         plannedCreditFactoryContract
-            .updateBatchDetailDuringPlannedDeliveryYearChange(
+            .updatePlannedCreditDetailDuringPlannedDeliveryYearChange(
                 _projectId,
                 _commodityId,
                 _updatedPlannedDeliveryYear,
                 _batchId
             );
 
-        emit PlannedDeliveryYearUpdatedForBatch(
+        emit PlannedDeliveryYearUpdated(
             _projectId,
             _commodityId,
             _batchId,
@@ -319,26 +321,21 @@ contract PlannedCreditManager is
         @param _batchId Batch Id w.r.t to project Id and commidity Id
         @param _updatedURI Updated URI value
      */
-    function updateBatchURI(
+    function updateURI(
         string calldata _projectId,
         string calldata _commodityId,
         address _batchId,
         string calldata _updatedURI
     ) external onlyRole(MANAGER_ROLE) {
         _checkBeforeUpdatingBatchDetails(_projectId, _commodityId, _batchId);
-        plannedCreditFactoryContract.updateBatchDetailDuringURIChange(
+        plannedCreditFactoryContract.updatePlannedCreditDetailDuringURIChange(
             _projectId,
             _commodityId,
             _updatedURI,
             _batchId
         );
 
-        emit URIUpdatedForBatch(
-            _projectId,
-            _commodityId,
-            _batchId,
-            _updatedURI
-        );
+        emit URIUpdated(_projectId, _commodityId, _batchId, _updatedURI);
     }
 
     /**

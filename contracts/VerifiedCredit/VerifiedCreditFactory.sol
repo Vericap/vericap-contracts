@@ -574,7 +574,7 @@ contract VerifiedCreditFactory is
             "AMOUNT_EXCEED_AVAILABLE_CREDIT"
         );
 
-        plannedCreditManager.burnFromABatch(
+        plannedCreditManager.burnPlannedCredits(
             projectId,
             commodityId,
             plannedCredit,
@@ -678,103 +678,103 @@ contract VerifiedCreditFactory is
     }
 
     function _checkBeforeVerifiedCreditCreation(
-        string calldata projectId,
-        string calldata commodityId,
-        uint256 vintage,
-        string calldata issuanceDate,
-        string calldata ticker,
-        uint256 issuanceSupply,
-        string calldata tokenURI
+        string calldata _projectId,
+        string calldata _commodityId,
+        uint256 _vintage,
+        string calldata _issuanceDate,
+        string calldata _ticker,
+        uint256 _issuanceSupply,
+        string calldata _tokenURI
     ) internal view onlyRole(FACTORY_MANAGER_ROLE) {
         require(
-            !verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
+            !verifiedCreditExistance[_projectId][_commodityId][_vintage][
+                _issuanceDate
             ],
             "CREDIT_ENTRY_ALREADY_EXIST"
         );
         require(
-            (bytes(projectId).length != 0) &&
-                (bytes(commodityId).length != 0) &&
-                (vintage != 0) &&
-                (bytes(issuanceDate).length != 0) &&
-                (bytes(ticker).length != 0) &&
-                (issuanceSupply != 0) &&
-                (bytes(tokenURI).length != 0),
+            (bytes(_projectId).length != 0) &&
+                (bytes(_commodityId).length != 0) &&
+                (_vintage != 0) &&
+                (bytes(_issuanceDate).length != 0) &&
+                (bytes(_ticker).length != 0) &&
+                (_issuanceSupply != 0) &&
+                (bytes(_tokenURI).length != 0),
             "ARGUMENT_TYPE_INVALID"
         );
     }
 
     function _checkBeforeStorageUpdate(
-        string calldata projectId,
-        string calldata commodityId,
-        uint256 vintage,
-        string calldata issuanceDate,
-        uint256 issuanceSupply
+        string calldata _projectId,
+        string calldata _commodityId,
+        uint256 _vintage,
+        string calldata _issuanceDate,
+        uint256 _issuanceSupply
     ) internal view {
         require(
-            verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
+            verifiedCreditExistance[_projectId][_commodityId][_vintage][
+                _issuanceDate
             ],
             "CREDIT_ENTRY_DOES_NOT_EXIST"
         );
         require(
-            (bytes(projectId).length != 0) &&
-                (bytes(commodityId).length != 0) &&
-                (vintage != 0) &&
-                (bytes(issuanceDate).length != 0) &&
-                (issuanceSupply != 0),
+            (bytes(_projectId).length != 0) &&
+                (bytes(_commodityId).length != 0) &&
+                (_vintage != 0) &&
+                (bytes(_issuanceDate).length != 0) &&
+                (_issuanceSupply != 0),
             "ARGUMENT_TYPE_INVALID"
         );
     }
 
     function _checkBeforeSwap(
-        string calldata projectId,
-        string calldata commodityId,
-        uint256 vintage,
-        string calldata issuanceDate,
-        uint256 amountToSwap,
-        address plannedCredit,
-        address investorAddress
+        string calldata _projectId,
+        string calldata _commodityId,
+        uint256 _vintage,
+        string calldata _issuanceDate,
+        uint256 _amountToSwap,
+        address _plannedCredit,
+        address _investorAddress
     ) internal view {
         require(
-            verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
+            verifiedCreditExistance[_projectId][_commodityId][_vintage][
+                _issuanceDate
             ],
             "CREDIT_ENTRY_DOES_NOT_EXIST"
         );
         require(
-            (bytes(projectId).length != 0) &&
-                (bytes(commodityId).length != 0) &&
-                (vintage != 0) &&
-                (bytes(issuanceDate).length != 0) &&
-                (amountToSwap != 0) &&
-                (plannedCredit != address(0)) &&
-                (investorAddress != address(0)),
+            (bytes(_projectId).length != 0) &&
+                (bytes(_commodityId).length != 0) &&
+                (_vintage != 0) &&
+                (bytes(_issuanceDate).length != 0) &&
+                (_amountToSwap != 0) &&
+                (_plannedCredit != address(0)) &&
+                (_investorAddress != address(0)),
             "ARGUMENT_TYPE_INVALID"
         );
     }
 
     function _checkBeforeRetire(
-        string calldata projectId,
-        string calldata commodityId,
-        uint256 vintage,
-        string calldata issuanceDate,
-        uint256 amountToRetire,
-        address investorAddress
+        string calldata _projectId,
+        string calldata _commodityId,
+        uint256 _vintage,
+        string calldata _issuanceDate,
+        uint256 _amountToRetire,
+        address _investorAddress
     ) internal view {
         require(
-            verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
+            verifiedCreditExistance[_projectId][_commodityId][_vintage][
+                _issuanceDate
             ],
             "CREDIT_ENTRY_DOES_NOT_EXIST"
         );
         require(
-            (bytes(projectId).length != 0) &&
-                (bytes(commodityId).length != 0) &&
-                (vintage != 0) &&
-                (bytes(issuanceDate).length != 0) &&
-                (amountToRetire != 0) &&
-                (investorAddress != address(0)),
+            (bytes(_projectId).length != 0) &&
+                (bytes(_commodityId).length != 0) &&
+                (_vintage != 0) &&
+                (bytes(_issuanceDate).length != 0) &&
+                (_amountToRetire != 0) &&
+                (_investorAddress != address(0)),
             "ARGUMENT_TYPE_INVALID"
         );
     }
@@ -823,10 +823,6 @@ contract VerifiedCreditFactory is
         // Call the parent hook for transfers
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
-
-    function _fetchVerifiedCreditDetailById(
-        uint256 tokenId
-    ) internal view returns (uint256) {}
 
     function supportsInterface(
         bytes4 interfaceId

@@ -104,7 +104,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      * @description Case: Successful Call To Web3 Function
      */
     it("Should create new batch successfully", async () => {
-      const createNewBatch = await plannedCreditFactory.createNewBatch(
+      const createPlannedCredit = await plannedCreditFactory.createPlannedCredit(
         "PZC",
         "CC",
         "https://project-1.com/1",
@@ -114,7 +114,7 @@ describe("Planned Credit Manager Smart Contract", () => {
         owner.address
       );
 
-      expect(createNewBatch)
+      expect(createPlannedCredit)
         .to.emit(plannedCreditFactory, "mintNewBatch")
         .withArgs(
           "PZC",
@@ -141,22 +141,22 @@ describe("Planned Credit Manager Smart Contract", () => {
 
     /**
      * @description Call Web3 Function In Before Block
-     * @function mintMoreInABatch
+     * @function mintPlannedCredits
      * @param projectId
      * @param commodityId
      * @param batchId
      * @param amountToMint
      * @param batchOwnerAddress
      */
-    before("web3 call to mintMoreInABatch", async () => {
+    before("web3 call to mintPlannedCredits", async () => {
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
@@ -164,12 +164,12 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Fetch Batch Detail Before Minting More
-       * @function getBatchDetails
+       * @function getPlannedCreditDetails
        * @param projectId
        * @param commodityId
        * @param batchId
        */
-      batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
+      batchDetailBeforeMint = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchAddress
@@ -177,9 +177,9 @@ describe("Planned Credit Manager Smart Contract", () => {
       batchSupplyBeforeMint = batchDetailBeforeMint[8];
 
       /**
-       * @description mintMoreInABatch Function Call
+       * @description mintPlannedCredits Function Call
        */
-      await plannedCreditManager.mintMoreInABatch(
+      await plannedCreditManager.mintPlannedCredits(
         "PZC",
         "CC",
         batchAddress,
@@ -189,12 +189,12 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Fetch Batch Detail After Minting More
-       * @function getBatchDetails
+       * @function getPlannedCreditDetails
        * @param projectId
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
+      batchDetailAfterMint = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchAddress
@@ -207,7 +207,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If project Id is empty", async () => {
       await expect(
-        plannedCreditManager.mintMoreInABatch(
+        plannedCreditManager.mintPlannedCredits(
           "",
           "CC",
           batchAddress,
@@ -222,7 +222,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If commodity Id is empty", async () => {
       await expect(
-        plannedCreditManager.mintMoreInABatch(
+        plannedCreditManager.mintPlannedCredits(
           "PZC",
           "",
           batchAddress,
@@ -237,7 +237,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If amount is zero", async () => {
       await expect(
-        plannedCreditManager.mintMoreInABatch(
+        plannedCreditManager.mintPlannedCredits(
           "PZC",
           "CC",
           batchAddress,
@@ -252,7 +252,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If batch Id is zero", async () => {
       await expect(
-        plannedCreditManager.mintMoreInABatch(
+        plannedCreditManager.mintPlannedCredits(
           "PZC",
           "CC",
           ZERO_ADDRESS,
@@ -285,20 +285,20 @@ describe("Planned Credit Manager Smart Contract", () => {
 
     /**
      * @description Call Web3 Function In Before Block
-     * @function burnFromABatch
+     * @function burnPlannedCredits
      * @param projectId
      * @param commodityId
      * @param batchId
      * @param amountToBurn
      * @param batchOwnerAddress
      */
-    before("web3 call to burnFromABatch", async () => {
+    before("web3 call to burnPlannedCredits", async () => {
       await plannedCreditFactory
         .connect(owner)
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -309,12 +309,12 @@ describe("Planned Credit Manager Smart Contract", () => {
         );
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
@@ -322,18 +322,18 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Fetch Batch Detail After Burning More
-       * @function getBatchDetails
+       * @function getPlannedCreditDetails
        * @param projectId
        * @param commodityId
        * @param batchId
        */
-      batchDetailBeforeBurn = await plannedCreditFactory.getBatchDetails(
+      batchDetailBeforeBurn = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchAddress
       );
       batchSupplyBeforeBurn = batchDetailBeforeBurn[8];
-      await plannedCreditManager.burnFromABatch(
+      await plannedCreditManager.burnPlannedCredits(
         "PZC",
         "CC",
         batchAddress,
@@ -343,12 +343,12 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Fetch Batch Detail After Burning
-       * @function getBatchDetails
+       * @function getPlannedCreditDetails
        * @param projectId
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterBurn = await plannedCreditFactory.getBatchDetails(
+      batchDetailAfterBurn = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchAddress
@@ -361,7 +361,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If project Id is empty", async () => {
       await expect(
-        plannedCreditManager.burnFromABatch(
+        plannedCreditManager.burnPlannedCredits(
           "",
           "CC",
           batchAddress,
@@ -376,7 +376,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If commodity Id is empty", async () => {
       await expect(
-        plannedCreditManager.burnFromABatch(
+        plannedCreditManager.burnPlannedCredits(
           "PZC",
           "",
           batchAddress,
@@ -391,7 +391,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If amount is zero", async () => {
       await expect(
-        plannedCreditManager.burnFromABatch(
+        plannedCreditManager.burnPlannedCredits(
           "PZC",
           "CC",
           batchAddress,
@@ -406,7 +406,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If batch Id is zero", async () => {
       await expect(
-        plannedCreditManager.burnFromABatch(
+        plannedCreditManager.burnPlannedCredits(
           "PZC",
           "CC",
           ZERO_ADDRESS,
@@ -438,7 +438,7 @@ describe("Planned Credit Manager Smart Contract", () => {
 
     /**
      * @description Call Web3 Function In Before Block
-     * @function createNewBatch
+     * @function createPlannedCredit
      * @param projectId
      * @param commodityId
      * @param batchId
@@ -453,7 +453,7 @@ describe("Planned Credit Manager Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -465,7 +465,7 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -476,12 +476,12 @@ describe("Planned Credit Manager Smart Contract", () => {
         );
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
@@ -547,14 +547,14 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Web3 Function Call
-       * @function manyToManyBatchTransfer
+       * @function manyToManyPlannedCreditTransfer
        * @param batchList[]
        * @param addressList[]
        * @param amount[]
        */
       await plannedCreditManager
         .connect(owner)
-        .manyToManyBatchTransfer(
+        .manyToManyPlannedCreditTransfer(
           [batchList[0], batchList[1]],
           [projectDeveloperOne.address, projectDeveloperTwo.address],
           encodedData_1
@@ -583,7 +583,7 @@ describe("Planned Credit Manager Smart Contract", () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .manyToManyBatchTransfer(
+          .manyToManyPlannedCreditTransfer(
             [batchList[0]],
             [projectDeveloperOne.address, projectDeveloperTwo.address],
             encodedData_1
@@ -611,7 +611,7 @@ describe("Planned Credit Manager Smart Contract", () => {
 
     /**
      * @description Call Web3 Function Before Each Block
-     * @function createNewBatch
+     * @function createPlannedCredit
      * @param projectId
      * @param commodityId
      * @param batchId
@@ -626,7 +626,7 @@ describe("Planned Credit Manager Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -638,19 +638,19 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
 
       /**
        * @description Updating Batch's Delivery Year
-       * @function updateBatchPlannedDeliveryYear
+       * @function updatePlannedDeliveryYear
        * @param projectId
        * @param commodityId
        * @param batchId
@@ -658,16 +658,16 @@ describe("Planned Credit Manager Smart Contract", () => {
        */
       await plannedCreditManager
         .connect(owner)
-        .updateBatchPlannedDeliveryYear("PZC", "CC", batchList[0], 2025);
+        .updatePlannedDeliveryYear("PZC", "CC", batchList[0], 2025);
 
       /**
        * @description Getting Batch Details After Update
-       * @function getBatchDetails
+       * @function getPlannedCreditDetails
        * @param projectId
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchList[0]
@@ -682,7 +682,7 @@ describe("Planned Credit Manager Smart Contract", () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .updateBatchPlannedDeliveryYear("", "CC", batchList[0], 2025)
+          .updatePlannedDeliveryYear("", "CC", batchList[0], 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -693,7 +693,7 @@ describe("Planned Credit Manager Smart Contract", () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .updateBatchPlannedDeliveryYear("PZC", "", batchList[0], 2025)
+          .updatePlannedDeliveryYear("PZC", "", batchList[0], 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -704,7 +704,7 @@ describe("Planned Credit Manager Smart Contract", () => {
       await expect(
         plannedCreditManager
           .connect(owner)
-          .updateBatchPlannedDeliveryYear("PZC", "CC", ZERO_ADDRESS, 2025)
+          .updatePlannedDeliveryYear("PZC", "CC", ZERO_ADDRESS, 2025)
       ).to.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -735,13 +735,13 @@ describe("Planned Credit Manager Smart Contract", () => {
      * @param deliveryEstimate
      * @param uniqueIdentifier
      */
-    before("web3 call to updateBatchURI", async () => {
+    before("web3 call to updateURI", async () => {
       await plannedCreditFactory
         .connect(owner)
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -753,31 +753,31 @@ describe("Planned Credit Manager Smart Contract", () => {
 
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
 
       /**
        * @description Updating Batch's Delivery Estimate
-       * @function updateBatchURI
+       * @function updateURI
        * @param projectId
        * @param commodityId
        * @param batchId
        * @param updatedBatchURI
        */
-      await plannedCreditManager.updateBatchURI(
+      await plannedCreditManager.updateURI(
         "PZC",
         "CC",
         batchList[0],
         "https://project-1.com/updatedSlug"
       );
-      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchList[0]
@@ -790,7 +790,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If projectId is empty", async () => {
       await expect(
-        plannedCreditManager.updateBatchURI(
+        plannedCreditManager.updateURI(
           "",
           "CC",
           batchList[0],
@@ -804,7 +804,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If commodityId is empty", async () => {
       await expect(
-        plannedCreditManager.updateBatchURI(
+        plannedCreditManager.updateURI(
           "PZC",
           "",
           batchList[0],
@@ -818,7 +818,7 @@ describe("Planned Credit Manager Smart Contract", () => {
      */
     it("Should fail If batchId is zero", async () => {
       await expect(
-        plannedCreditManager.updateBatchURI(
+        plannedCreditManager.updateURI(
           "PZC",
           "CC",
           ZERO_ADDRESS,

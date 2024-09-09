@@ -17,8 +17,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-error ARGUMENT_PASSED_AS_ZERO();
-
 contract PlannedCreditFactory is
     Initializable,
     UUPSUpgradeable,
@@ -134,7 +132,7 @@ contract PlannedCreditFactory is
     /**
             @notice NewBatchCreated: Triggers when a new batch contract is created
         */
-    event NewBatchCreated(
+    event PlannedCreditCreated(
         string projectId,
         string commodityId,
         string batchURI,
@@ -224,7 +222,7 @@ contract PlannedCreditFactory is
             @param _commodityId Commodity Id
             @return address[] List of batches
         */
-    function getBatchListForACommodityInAProject(
+    function getPlannedCreditListForACommodityInAProject(
         string calldata _projectId,
         string calldata _commodityId
     ) public view returns (address[] memory) {
@@ -243,11 +241,8 @@ contract PlannedCreditFactory is
 
     /**
             @notice getBatchDetails: View function to fetch properties of a batch
-            @param _projectId Project Id
-            @param _commodityId Commodity Id
-            @param _batchId Batch Id w.r.t project
         */
-    function getBatchDetails(
+    function getPlannedCreditDetails(
         string calldata _projectId,
         string calldata _commodityId,
         address _batchId
@@ -277,7 +272,7 @@ contract PlannedCreditFactory is
             @param _vintage Project vintage
             @param _batchOwner Batch owner address
         */
-    function createNewBatch(
+    function createPlannedCredit(
         string calldata _projectId,
         string calldata _commodityId,
         string calldata _batchURI,
@@ -286,7 +281,7 @@ contract PlannedCreditFactory is
         uint64 _vintage,
         address _batchOwner
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
-        _checkBeforeMintNewBatch(
+        _checkBeforeCreatePlannedCredit(
             _projectId,
             _commodityId,
             _batchURI,
@@ -301,7 +296,7 @@ contract PlannedCreditFactory is
             "VINTAGE_ALREADY_EXIST"
         );
 
-        address _batchAddress = _createNewBatch(
+        address _batchAddress = _createPlannedCredit(
             string(
                 abi.encodePacked(
                     "VPC-",
@@ -330,7 +325,6 @@ contract PlannedCreditFactory is
             _batchSupply
         );
 
-
         batchDetails[_projectId][_commodityId][_batchAddress].push(
             BatchDetail(
                 _projectId,
@@ -358,7 +352,7 @@ contract PlannedCreditFactory is
             batchDetails[_projectId][_commodityId][_batchAddress].length -
             1;
 
-        _updateProjectCommodityBatchStorage(
+        _updateProjectCommodityPlanneCreditStorage(
             _projectId,
             _commodityId,
             _batchAddress
@@ -368,7 +362,7 @@ contract PlannedCreditFactory is
 
         string memory _name = PlannedCredit(_batchAddress).name();
 
-        emit NewBatchCreated(
+        emit PlannedCreditCreated(
             _projectId,
             _commodityId,
             _batchURI,
@@ -390,7 +384,7 @@ contract PlannedCreditFactory is
      * @param _plannedCreditBatchAction Planned Credit batch actions
      * @param _batchId Batch Id
      */
-    function updateBatchDetailDuringMintOrBurnMore(
+    function updatePlannedCreditDetailDuringMintOrBurnMore(
         string calldata _projectId,
         string calldata _commodityId,
         uint256 _amountToMintOrBurn,
@@ -425,7 +419,7 @@ contract PlannedCreditFactory is
      * @param _plannedDeliveryYear Updated batch delivery year
      * @param _batchId Batch Id
      */
-    function updateBatchDetailDuringPlannedDeliveryYearChange(
+    function updatePlannedCreditDetailDuringPlannedDeliveryYearChange(
         string calldata _projectId,
         string calldata _commodityId,
         uint256 _plannedDeliveryYear,
@@ -446,7 +440,7 @@ contract PlannedCreditFactory is
      * @param _batchURI Updated batch URI
      * @param _batchId Batch Id
      */
-    function updateBatchDetailDuringURIChange(
+    function updatePlannedCreditDetailDuringURIChange(
         string calldata _projectId,
         string calldata _commodityId,
         string calldata _batchURI,
@@ -498,7 +492,7 @@ contract PlannedCreditFactory is
             @param _vintage Vintage
             @param _batchOwner Batch owner address
         */
-    function _checkBeforeMintNewBatch(
+    function _checkBeforeCreatePlannedCredit(
         string memory _projectId,
         string memory _commodityId,
         string calldata _batchURI,
@@ -528,7 +522,7 @@ contract PlannedCreditFactory is
             @param _tokenSymbol ERC20 based token symbol
             @param _vintage Batch vintage to be served as unique salt
         */
-    function _createNewBatch(
+    function _createPlannedCredit(
         string memory _tokenName,
         string memory _tokenSymbol,
         uint64 _vintage
@@ -557,7 +551,7 @@ contract PlannedCreditFactory is
             @param _commodityId Commodity Id
             @param _batchAddress Batch Id
         */
-    function _updateProjectCommodityBatchStorage(
+    function _updateProjectCommodityPlanneCreditStorage(
         string memory _projectId,
         string memory _commodityId,
         address _batchAddress
@@ -590,15 +584,6 @@ contract PlannedCredit is ERC20, AccessControl {
      */
     bytes32 public constant FACTORY_MANAGER_ROLE =
         keccak256("FACTORY_MANAGER_ROLE");
-
-    /**
-            @notice BatchTransfer: triggers when tokens are transferred in 
-                    a batch
-        */
-    event BatchTransfer(
-        address[] receiverAddresses,
-        uint256[] amountToTransfer
-    );
 
     /**
             @notice Building up the constructor
