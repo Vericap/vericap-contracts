@@ -77,7 +77,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -125,7 +125,7 @@ describe("Planned Credit Factory Smart Contract", () => {
 
         await plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -144,7 +144,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "",
             "CC",
             "https://project-1.com/1",
@@ -163,7 +163,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "",
             "https://project-1.com/1",
@@ -182,7 +182,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch("PZC", "CC", "", 2028, 1000, 2024, owner.address)
+          .createPlannedCredit("PZC", "CC", "", 2028, 1000, 2024, owner.address)
       ).to.be.revertedWith("ARGUMENT_PASSED_AS_ZERO");
     });
 
@@ -193,7 +193,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -212,7 +212,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -231,7 +231,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -250,7 +250,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       await expect(
         plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -268,7 +268,7 @@ describe("Planned Credit Factory Smart Contract", () => {
     it("Should create new batch successfully", async () => {
       const createNewBatch = await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -278,17 +278,36 @@ describe("Planned Credit Factory Smart Contract", () => {
           owner.address
         );
 
-      expect(createNewBatch)
-        .to.emit(plannedCreditFactory, "NewBatchCreated")
-        .withArgs(
+      await createNewBatch.wait();
+
+      setTimeout(async () => {
+        const creditList =
+          await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
+            "PZC",
+            "CC"
+          );
+        const creditRef = await creditList[0];
+        const creditDetail = await plannedCreditFactory.getPlannedCreditDetails(
           "PZC",
           "CC",
-          "https://project-1.com/1",
-          2028,
-          1000,
-          2024,
-          owner.address
+          creditRef
         );
+
+        await expect(createNewBatch)
+          .to.emit(plannedCreditFactory, "NewBatchCreated")
+          .withArgs(
+            "PZC",
+            "CC",
+            "https://project-1.com/1",
+            2028,
+            1000,
+            parseInt(creditDetail.lastUpdated),
+            2024,
+            creditRef,
+            owner.address,
+            "PZC-CC-2024"
+          );
+      });
     });
   });
 
@@ -304,11 +323,11 @@ describe("Planned Credit Factory Smart Contract", () => {
     let batchSupplyAfterMint;
 
     before(
-      "web3 call to updateBatchDetailDuringDeliveryYearChange",
+      "web3 call to updatePlannedCreditDetailDuringPlannedDeliveryYearChange",
       async () => {
         /**
          * @description Getting List Of Batches w.r.t ProjectId & CommodityId
-         * @function getBatchListForACommodityInAProject
+         * @function getPlannedCreditListForACommodityInAProject
          * @param projectId
          * @param commodityId
          */
@@ -316,7 +335,7 @@ describe("Planned Credit Factory Smart Contract", () => {
           .connect(owner)
           .setPlannedCreditManagerContract(plannedCreditManager.address);
         batchList =
-          await plannedCreditFactory.getBatchListForACommodityInAProject(
+          await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
             "PZC",
             "CC"
           );
@@ -329,16 +348,16 @@ describe("Planned Credit Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
+        batchDetailBeforeMint = await plannedCreditFactory.getPlannedCreditDetails(
           "PZC",
           "CC",
           batchAddress
         );
         batchSupplyBeforeMint = batchDetailBeforeMint[4];
         /**
-         * @description updateBatchDetailDuringMintOrBurnMore Function Call
+         * @description updatePlannedCreditDetailDuringMintOrBurnMore Function Call
          */
-        await plannedCreditFactory.updateBatchDetailDuringMintOrBurnMore(
+        await plannedCreditFactory.updatePlannedCreditDetailDuringMintOrBurnMore(
           "PZC",
           "CC",
           50,
@@ -353,7 +372,7 @@ describe("Planned Credit Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
+        batchDetailAfterMint = await plannedCreditFactory.getPlannedCreditDetails(
           "PZC",
           "CC",
           batchAddress
@@ -393,11 +412,11 @@ describe("Planned Credit Factory Smart Contract", () => {
      * @param batchOwnerAddress
      */
     before(
-      "web3 call to updateBatchDetailDuringDeliveryYearChange",
+      "web3 call to updatePlannedCreditDetailDuringPlannedDeliveryYearChange",
       async () => {
         /**
          * @description Getting List Of Batches w.r.t ProjectId & CommodityId
-         * @function getBatchListForACommodityInAProject
+         * @function getPlannedCreditListForACommodityInAProject
          * @param projectId
          * @param commodityId
          */
@@ -407,7 +426,7 @@ describe("Planned Credit Factory Smart Contract", () => {
 
         await plannedCreditFactory
           .connect(owner)
-          .createNewBatch(
+          .createPlannedCredit(
             "PZC",
             "CC",
             "https://project-1.com/1",
@@ -421,7 +440,7 @@ describe("Planned Credit Factory Smart Contract", () => {
           .connect(owner)
           .setPlannedCreditManagerContract(plannedCreditManager.address);
         batchList =
-          await plannedCreditFactory.getBatchListForACommodityInAProject(
+          await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
             "PZC",
             "CC"
           );
@@ -434,16 +453,16 @@ describe("Planned Credit Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailBeforeMint = await plannedCreditFactory.getBatchDetails(
+        batchDetailBeforeMint = await plannedCreditFactory.getPlannedCreditDetails(
           "PZC",
           "CC",
           batchAddress
         );
         batchSupplyBeforeMint = batchDetailBeforeMint[4];
         /**
-         * @description updateBatchDetailDuringMintOrBurnMore Function Call
+         * @description updatePlannedCreditDetailDuringMintOrBurnMore Function Call
          */
-        await plannedCreditFactory.updateBatchDetailDuringMintOrBurnMore(
+        await plannedCreditFactory.updatePlannedCreditDetailDuringMintOrBurnMore(
           "PZC",
           "CC",
           50,
@@ -458,7 +477,7 @@ describe("Planned Credit Factory Smart Contract", () => {
          * @param commodityId
          * @param batchId
          */
-        batchDetailAfterMint = await plannedCreditFactory.getBatchDetails(
+        batchDetailAfterMint = await plannedCreditFactory.getPlannedCreditDetails(
           "PZC",
           "CC",
           batchAddress
@@ -502,7 +521,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -514,25 +533,25 @@ describe("Planned Credit Factory Smart Contract", () => {
 
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
 
       /**
-       * @description updateBatchDetailDuringDeliveryYearChange Update Batch's Delivery Year
+       * @description updatePlannedCreditDetailDuringPlannedDeliveryYearChange Update Batch's Delivery Year
        * @function updateBatchDeliveryYear
        * @param projectId
        * @param commodityId
        * @param batchId
        * @param updatedDeliveryYear
        */
-      await plannedCreditFactory.updateBatchDetailDuringPlannedDeliveryYearChange(
+      await plannedCreditFactory.updatePlannedCreditDetailDuringPlannedDeliveryYearChange(
         "PZC",
         "CC",
         2025,
@@ -546,7 +565,7 @@ describe("Planned Credit Factory Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchList[0]
@@ -586,7 +605,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -598,31 +617,31 @@ describe("Planned Credit Factory Smart Contract", () => {
 
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
 
       /**
-       * @description updateBatchDetailDuringURIChange Update Batch's Delivery Estimate
+       * @description updatePlannedCreditDetailDuringURIChange Update Batch's Delivery Estimate
        * @function updateBatchURI
        * @param projectId
        * @param commodityId
        * @param batchId
        * @param updatedBatchURI
        */
-      await plannedCreditFactory.updateBatchDetailDuringURIChange(
+      await plannedCreditFactory.updatePlannedCreditDetailDuringURIChange(
         "PZC",
         "CC",
         "https://project-1.com/updatedSlug",
         batchList[0]
       );
-      batchDetailAfterUpdate = await plannedCreditFactory.getBatchDetails(
+      batchDetailAfterUpdate = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchList[0]
@@ -666,7 +685,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -689,7 +708,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       batchAddress = batchList[0];
 
       /**
-       * @description updateBatchDetailDuringURIChange Update Batch's Delivery Estimate
+       * @description updatePlannedCreditDetailDuringURIChange Update Batch's Delivery Estimate
        * @function grantManagerRoleForBatch
        * @param batchId
        * @param userAddress
@@ -751,7 +770,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -763,7 +782,7 @@ describe("Planned Credit Factory Smart Contract", () => {
       projectListLength += 1;
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "CBC",
           "CC",
           "https://project-1.com/2",
@@ -812,7 +831,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -823,7 +842,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         );
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "PWR",
           "https://project-1.com/2",
@@ -874,7 +893,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -885,7 +904,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         );
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/2",
@@ -940,7 +959,7 @@ describe("Planned Credit Factory Smart Contract", () => {
         .setPlannedCreditManagerContract(plannedCreditManager.address);
       await plannedCreditFactory
         .connect(owner)
-        .createNewBatch(
+        .createPlannedCredit(
           "PZC",
           "CC",
           "https://project-1.com/1",
@@ -952,12 +971,12 @@ describe("Planned Credit Factory Smart Contract", () => {
 
       /**
        * @description Geting List Of Batches w.r.t ProjectId & CommodityId
-       * @function getBatchListForACommodityInAProject
+       * @function getPlannedCreditListForACommodityInAProject
        * @param projectId
        * @param commodityId
        */
       batchList =
-        await plannedCreditFactory.getBatchListForACommodityInAProject(
+        await plannedCreditFactory.getPlannedCreditListForACommodityInAProject(
           "PZC",
           "CC"
         );
@@ -969,7 +988,7 @@ describe("Planned Credit Factory Smart Contract", () => {
        * @param commodityId
        * @param batchId
        */
-      batchDetail = await plannedCreditFactory.getBatchDetails(
+      batchDetail = await plannedCreditFactory.getPlannedCreditDetails(
         "PZC",
         "CC",
         batchList[0]
