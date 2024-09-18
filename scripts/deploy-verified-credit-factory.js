@@ -23,8 +23,8 @@ async function main() {
       VerifiedCreditFactory,
       [
         process.env.ADMIN_WALLET_ADDRESS,
-        PLANNED_CREDIT_FACTORY_CONTRACT_ADDRESS,
-        PLANNED_CREDIT_MANAGER_CONTRACT_ADDRESS,
+        process.env.PLANNED_CREDIT_FACTORY_CONTRACT_ADDRESS,
+        process.env.PLANNED_CREDIT_MANAGER_CONTRACT_ADDRESS,
       ],
       { kind: "uups" }
     );
