@@ -108,13 +108,20 @@ contract VerifiedCreditFactory is
         internal verifiedCreditDetailsByTokenId;
 
     /**
+     * @dev User's Verified Credit Balance
+     * address => project => commodity => vintage => Issuance Date => tokenId => user Holding
+     */
+    mapping(address => mapping(string => mapping(string => mapping(uint256 => mapping(string => mapping(uint256 => uint256))))))
+        internal usersBlockedHolding;
+
+    /**
      * @dev creditsRetiredByUserPerVintage: Stores the total credits retired by a user w.r.t Project::Commodity::Vintage
      */
     mapping(string => mapping(string => mapping(uint256 => uint256)))
         public creditsRetiredByUserPerVintage;
 
     /**
-     * @dev verifiedCreditExistance: Stores existance of a IssuanceDate w.r.t Project::Commodity::Vintage
+     * @dev verifiedCreditExistance: Stores existance of a IssuanceDate w.r.t Project::Commodity::Vintage::IssuanceDate
      */
     mapping(string => mapping(string => mapping(uint256 => mapping(string => bool))))
         public verifiedCreditExistance;
@@ -161,7 +168,8 @@ contract VerifiedCreditFactory is
         string issuanceDate,
         uint256 tokenId,
         uint256 blockedAmount,
-        uint256 availableCredits
+        uint256 availableCredits,
+        address account
     );
 
     /**
@@ -174,6 +182,20 @@ contract VerifiedCreditFactory is
         string issuanceDate,
         uint256 tokenId,
         uint256 unBlockedAmount,
+        uint256 availableCredits,
+        address account
+    );
+
+    /**
+     * @dev
+     */
+    event BurnedVerifiedCredit(
+        string projectId,
+        string commodityId,
+        uint256 vintage,
+        string issuanceDate,
+        uint256 tokenId,
+        uint256 burnedSupply,
         uint256 availableCredits
     );
 
@@ -185,6 +207,7 @@ contract VerifiedCreditFactory is
         string commodityId,
         uint256 vintage,
         string issuanceDate,
+        uint256 tokenId,
         uint256 amountSwapped,
         address plannedCredit,
         address investorAddress
@@ -198,6 +221,7 @@ contract VerifiedCreditFactory is
         string commodityId,
         uint256 vintage,
         string issuanceDate,
+        uint256 tokenId,
         uint256 amountRetired,
         address investorAddress,
         uint256 availableCredits
@@ -211,7 +235,8 @@ contract VerifiedCreditFactory is
         string commodityId,
         uint256 vintage,
         string issuanceDate,
-        string updatedURI
+        string updatedURI,
+        uint256 lastUpdatedAt
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -495,12 +520,13 @@ contract VerifiedCreditFactory is
      * @param issuanceDate Associated IssuanceDate
      * @param amountToBlock Amount of credits to block
      */
-    function blockVerifiedCredits(
+    function blockVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
         string calldata issuanceDate,
-        uint256 amountToBlock
+        uint256 amountToBlock,
+        address account
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeStorageUpdate(
             projectId,
@@ -525,6 +551,10 @@ contract VerifiedCreditFactory is
         verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
             .availableCredits -= amountToBlock;
 
+        usersBlockedHolding[account][projectId][commodityId][vintage][
+            issuanceDate
+        ][_verifiedCreditDetail.tokenId] += amountToBlock;
+
         emit BlockedVerifiedCredit(
             projectId,
             commodityId,
@@ -532,7 +562,8 @@ contract VerifiedCreditFactory is
             issuanceDate,
             _verifiedCreditDetail.tokenId,
             amountToBlock,
-            _verifiedCreditDetail.availableCredits
+            _verifiedCreditDetail.availableCredits,
+            account
         );
     }
 
@@ -544,12 +575,13 @@ contract VerifiedCreditFactory is
      * @param issuanceDate Associated IssuanceDate
      * @param amountToUnblock Amount of credits to unblock
      */
-    function unblockVerifiedCredits(
+    function unblockVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
         string calldata issuanceDate,
-        uint256 amountToUnblock
+        uint256 amountToUnblock,
+        address account
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeStorageUpdate(
             projectId,
@@ -574,6 +606,10 @@ contract VerifiedCreditFactory is
         verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
             .availableCredits += amountToUnblock;
 
+        usersBlockedHolding[account][projectId][commodityId][vintage][
+            issuanceDate
+        ][_verifiedCreditDetail.tokenId] -= amountToUnblock;
+
         emit UnblockedVerifiedCredit(
             projectId,
             commodityId,
@@ -581,6 +617,54 @@ contract VerifiedCreditFactory is
             issuanceDate,
             _verifiedCreditDetail.tokenId,
             amountToUnblock,
+            _verifiedCreditDetail.availableCredits,
+            account
+        );
+    }
+
+    // burn Verified credit
+    function burnVerifiedCredit(
+        string calldata projectId,
+        string calldata commodityId,
+        uint256 vintage,
+        string calldata issuanceDate,
+        uint256 issuanceSupply
+    ) external onlyRole(FACTORY_MANAGER_ROLE) {
+        _checkBeforeStorageUpdate(
+            projectId,
+            commodityId,
+            vintage,
+            issuanceDate,
+            issuanceSupply
+        );
+
+        require(
+            verifiedCreditExistance[projectId][commodityId][vintage][
+                issuanceDate
+            ],
+            "CREDIT_ENTRY_DOES_NOT_EXIST"
+        );
+        VerifiedCreditDetail
+            storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
+                commodityId
+            ][vintage][issuanceDate];
+        _verifiedCreditDetail.issuedCredits -= issuanceSupply;
+        _verifiedCreditDetail.availableCredits -= issuanceSupply;
+
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .issuedCredits -= issuanceSupply;
+        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
+            .availableCredits -= issuanceSupply;
+
+        _burn(address(this), _verifiedCreditDetail.tokenId, issuanceSupply);
+
+        emit BurnedVerifiedCredit(
+            projectId,
+            commodityId,
+            vintage,
+            issuanceDate,
+            _verifiedCreditDetail.tokenId,
+            issuanceSupply,
             _verifiedCreditDetail.availableCredits
         );
     }
@@ -645,7 +729,7 @@ contract VerifiedCreditFactory is
      * @param amountToSwap Amount of credits to swap
      * @param investor Investor wallet
      */
-    function swapVerifiedCredits(
+    function swapVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
@@ -717,6 +801,7 @@ contract VerifiedCreditFactory is
             commodityId,
             vintage,
             issuanceDate,
+            _verifiedCreditDetail.tokenId,
             amountToSwap,
             plannedCredit,
             investor
@@ -732,7 +817,7 @@ contract VerifiedCreditFactory is
      * @param amountToRetire Amount of credits to swap
      * @param investor Investor wallet
      */
-    function retireVerifiedCredits(
+    function retireVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
         uint256 vintage,
@@ -771,6 +856,7 @@ contract VerifiedCreditFactory is
             commodityId,
             vintage,
             issuanceDate,
+            _verifiedCreditDetail.tokenId,
             amountToRetire,
             investor,
             _verifiedCreditDetail.availableCredits
@@ -810,7 +896,8 @@ contract VerifiedCreditFactory is
             commodityId,
             vintage,
             issuanceDate,
-            updatedURI
+            updatedURI,
+            block.timestamp
         );
     }
 
@@ -968,16 +1055,15 @@ contract VerifiedCreditFactory is
                     tokenId
                 ];
 
-            VerifiedCreditDetail
-                memory _verifiedCreditDetail = verifiedCreditDetails[
-                    _verifiedCreditDetailById.projectId
-                ][_verifiedCreditDetailById.commodityId][
-                    _verifiedCreditDetailById.vintage
-                ][_verifiedCreditDetailById.issuanceDate];
+            uint256 _blockedHolding = usersBlockedHolding[from][
+                _verifiedCreditDetailById.projectId
+            ][_verifiedCreditDetailById.commodityId][
+                _verifiedCreditDetailById.vintage
+            ][_verifiedCreditDetailById.issuanceDate][tokenId];
 
             // Ensure that the transferable supply is not exceeded
             require(
-                amounts[i] <= _verifiedCreditDetail.availableCredits,
+                _blockedHolding < amounts[i],
                 "AMOUNT_EXCEED_AVAILABLE_CREDITS"
             );
         }
