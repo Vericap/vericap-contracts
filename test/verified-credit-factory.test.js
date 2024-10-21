@@ -167,7 +167,7 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await expect(blockVerifiedCredit)
         .to.emit(verifiedCreditFactory, "BlockedVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 1000, 2000);
+        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 1000, 2000, verifiedCreditFactory.address);
     });
   });
 
@@ -217,7 +217,7 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await expect(unblockVerifiedCredit)
         .to.emit(verifiedCreditFactory, "UnblockedVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/10/2025", 0, 1000, 4000);
+        .withArgs("PZC", "CC", 2024, "22/10/2025", 0, 1000, 4000, verifiedCreditFactory.address);
     });
   });
 
@@ -356,6 +356,7 @@ describe("Verified Credit Factory Smart Contract", () => {
           "CC",
           2024,
           "22/12/2025",
+          0,
           2000,
           plannedCreditReference,
           owner.address
@@ -415,7 +416,7 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await expect(retireVerifiedCredit)
         .to.emit(verifiedCreditFactory, "RetiredVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/08/2025", 500, owner.address, 2500);
+        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 500, owner.address, 2500);
     });
   });
 
@@ -453,9 +454,12 @@ describe("Verified Credit Factory Smart Contract", () => {
         "http://127.0.0.1:8545"
       );
 
+      console.log(provider);
+
       // console.log(updatedURI)
       const txReceipt = await provider.getTransactionReceipt(updatedURI.hash);
 
+      console.log(txReceipt);
       // Get block details using block number from the receipt
       const block = await provider.getBlock(txReceipt.blockNumber);
 

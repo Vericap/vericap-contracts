@@ -361,7 +361,7 @@ contract VerifiedCreditFactory is
     }
 
     /**
-     * @notice createVerifiedCredit: Create a new PlannedCredit w.r.t Project::Commodity::Vintage::IssuanceDate
+     * @notice createVerifiedCredit: Create a new VerifiedCredit w.r.t Project::Commodity::Vintage::IssuanceDate
      * @dev Follows ERC1155 token standard fundamental to create VerifiedCredits
      * @param projectId Associated project
      * @param commodityId Associated commodity
