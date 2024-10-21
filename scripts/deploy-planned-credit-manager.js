@@ -38,7 +38,7 @@ async function main() {
     );
     setTimeout(() => {
       console.log(
-        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Planned Credit Manager smart contrat deployed successfully to: \x1b[4mhttps://sepolia.etherscan.io/address/${
+        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Planned Credit Manager smart contrat deployed successfully to: \x1b[4mhttps://polygonscan.com/address/${
           plannedCreditManager.address
         }#code\x1b[0m \n`
       );

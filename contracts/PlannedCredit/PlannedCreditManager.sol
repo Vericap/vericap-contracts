@@ -156,7 +156,7 @@ contract PlannedCreditManager is
         _checkBeforeMintMoreAndBurnMore(
             projectId,
             commodityId,
-            plannedCredit,
+            plannedCreditOwner,
             amountToMint
         );
         plannedCreditFactoryContract
@@ -168,7 +168,7 @@ contract PlannedCreditManager is
                 plannedCredit
             );
         IPlannedCredit(plannedCredit).mintPlannedCredits(
-            plannedCredit,
+            plannedCreditOwner,
             amountToMint
         );
 
@@ -210,7 +210,7 @@ contract PlannedCreditManager is
         _checkBeforeMintMoreAndBurnMore(
             projectId,
             commodityId,
-            plannedCredit,
+            plannedCreditOwner,
             amountToBurn
         );
         plannedCreditFactoryContract

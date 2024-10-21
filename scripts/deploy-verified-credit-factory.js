@@ -21,7 +21,11 @@ async function main() {
     );
     verifiedCreditFactory = await upgrades.deployProxy(
       VerifiedCreditFactory,
-      [process.env.ADMIN_WALLET_ADDRESS],
+      [
+        process.env.ADMIN_WALLET_ADDRESS,
+        process.env.PLANNED_CREDIT_FACTORY_CONTRACT_ADDRESS,
+        process.env.PLANNED_CREDIT_MANAGER_CONTRACT_ADDRESS,
+      ],
       { kind: "uups" }
     );
     await verifiedCreditFactory.deployed();
@@ -35,7 +39,7 @@ async function main() {
     );
     setTimeout(() => {
       console.log(
-        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Verified Credit Factory smart contrat deployed successfully to: \x1b[4mhttps://sepolia.etherscan.io/address/${
+        `\x1b[1m\x1b[32m${"[success]"}\x1b[0m Verified Credit Factory smart contrat deployed successfully to: \x1b[4mhttps://polygonscan.com/address/${
           verifiedCreditFactory.address
         }#code\x1b[0m \n`
       );

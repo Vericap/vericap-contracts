@@ -154,13 +154,20 @@ describe("Verified Credit Factory Smart Contract", () => {
     it("Should Block Verified Credits", async () => {
       const blockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .blockVerifiedCredits("PZC", "CC", 2024, "22/08/2025", 1000);
+        .blockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/08/2025",
+          1000,
+          verifiedCreditFactory.address
+        );
 
       await blockVerifiedCredit.wait();
 
       await expect(blockVerifiedCredit)
         .to.emit(verifiedCreditFactory, "BlockedVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 1000, 2000);
+        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 1000, 2000, verifiedCreditFactory.address);
     });
   });
 
@@ -182,7 +189,14 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       const blockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .blockVerifiedCredits("PZC", "CC", 2024, "22/10/2025", 1000);
+        .blockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/10/2025",
+          1000,
+          verifiedCreditFactory.address
+        );
 
       await blockVerifiedCredit.wait();
     });
@@ -190,13 +204,20 @@ describe("Verified Credit Factory Smart Contract", () => {
     it("Should Unblock Verified Credits", async () => {
       const unblockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .unBlockVerifiedCredits("PZC", "CC", 2024, "22/10/2025", 1000);
+        .unblockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/10/2025",
+          1000,
+          verifiedCreditFactory.address
+        );
 
       await unblockVerifiedCredit.wait();
 
       await expect(unblockVerifiedCredit)
         .to.emit(verifiedCreditFactory, "UnblockedVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/10/2025", 0, 1000, 4000);
+        .withArgs("PZC", "CC", 2024, "22/10/2025", 0, 1000, 4000, verifiedCreditFactory.address);
     });
   });
 
@@ -316,7 +337,7 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       const swappedPlannedCredit = await verifiedCreditFactory
         .connect(owner)
-        .swapVerifiedCredits(
+        .swapVerifiedCredit(
           "PZC",
           "CC",
           2024,
@@ -335,6 +356,7 @@ describe("Verified Credit Factory Smart Contract", () => {
           "CC",
           2024,
           "22/12/2025",
+          0,
           2000,
           plannedCreditReference,
           owner.address
@@ -381,7 +403,7 @@ describe("Verified Credit Factory Smart Contract", () => {
     it("Should Retire Verified Credits", async () => {
       const retireVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .retireVerifiedCredits(
+        .retireVerifiedCredit(
           "PZC",
           "CC",
           2024,
@@ -394,11 +416,11 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await expect(retireVerifiedCredit)
         .to.emit(verifiedCreditFactory, "RetiredVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/08/2025", 500, owner.address, 2500);
+        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 500, owner.address, 2500);
     });
   });
 
-  describe("Update URI For A Verified Crefit", async () => {
+  describe("Update URI For A Verified Credit", async () => {
     beforeEach("Create New Verified Credit", async () => {
       const verifiedCredit = await verifiedCreditFactory
         .connect(owner)
@@ -428,6 +450,22 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await updatedURI.wait();
 
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545"
+      );
+
+      console.log(provider);
+
+      // console.log(updatedURI)
+      const txReceipt = await provider.getTransactionReceipt(updatedURI.hash);
+
+      console.log(txReceipt);
+      // Get block details using block number from the receipt
+      const block = await provider.getBlock(txReceipt.blockNumber);
+
+      // The timestamp is in seconds since UNIX epoch
+      const timestamp = block.timestamp;
+
       await expect(updatedURI)
         .to.emit(verifiedCreditFactory, "URIUpdateForVerifiedCredit")
         .withArgs(
@@ -435,7 +473,8 @@ describe("Verified Credit Factory Smart Contract", () => {
           "CC",
           2024,
           "22/06/2025",
-          "https://update-URI.com/xyz"
+          "https://update-URI.com/xyz",
+          timestamp
         );
     });
   });
@@ -503,7 +542,14 @@ describe("Verified Credit Factory Smart Contract", () => {
     it("Should Update Verified Credit Detail Post Block", async () => {
       const blockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .blockVerifiedCredits("PZC", "CC", 2024, "22/06/2025", 1000);
+        .blockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/06/2025",
+          1000,
+          verifiedCreditFactory.address
+        );
 
       await blockVerifiedCredit.wait();
 
@@ -518,13 +564,27 @@ describe("Verified Credit Factory Smart Contract", () => {
     it("Should Update Verified Credit Detail Post Unblock", async () => {
       const blockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .blockVerifiedCredits("PZC", "CC", 2024, "22/06/2025", 1000);
+        .blockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/06/2025",
+          1000,
+          verifiedCreditFactory.address
+        );
 
       await blockVerifiedCredit.wait();
 
       const unblockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .unBlockVerifiedCredits("PZC", "CC", 2024, "22/06/2025", 1000);
+        .unblockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/06/2025",
+          1000,
+          verifiedCreditFactory.address
+        );
 
       await unblockVerifiedCredit.wait();
 
@@ -558,7 +618,7 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       const retireVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .retireVerifiedCredits(
+        .retireVerifiedCredit(
           "PZC",
           "CC",
           2024,
@@ -629,13 +689,20 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       const blockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .blockVerifiedCredits("PZC", "CC", 2024, "22/06/2025", 500);
+        .blockVerifiedCredit(
+          "PZC",
+          "CC",
+          2024,
+          "22/06/2025",
+          500,
+          verifiedCreditFactory.address
+        );
 
       await blockVerifiedCredit.wait();
 
       const retireVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .retireVerifiedCredits(
+        .retireVerifiedCredit(
           "PZC",
           "CC",
           2024,
