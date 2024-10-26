@@ -10,7 +10,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -28,10 +27,8 @@ contract VerifiedCreditFactory is
     OwnableUpgradeable,
     AccessControlUpgradeable
 {
-    using Counters for Counters.Counter;
-
     /** @notice ERC1155 Token Indexer  */
-    Counters.Counter private _currentIndex;
+    uint256 private _tokenIdCounter;
 
     /**
             @dev Inheriting StringsUpgradeable library for uint64
@@ -441,6 +438,8 @@ contract VerifiedCreditFactory is
 
         _mint(address(this), _tokenId, issuanceSupply, "0x00");
 
+        _tokenIdCounter++;
+
         emit VerifiedCreditCreated(
             projectId,
             commodityId,
@@ -486,6 +485,7 @@ contract VerifiedCreditFactory is
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
+            
         _verifiedCreditDetail.issuedCredits += issuanceSupply;
         _verifiedCreditDetail.availableCredits += issuanceSupply;
 
@@ -1023,7 +1023,7 @@ contract VerifiedCreditFactory is
      * @notice _getCurrentTokenIdIndex: Get current indexer for tokenIds
      */
     function _getCurrentTokenIdIndex() internal view returns (uint256) {
-        return _currentIndex.current();
+        return _tokenIdCounter;
     }
 
     /**

@@ -89,6 +89,20 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await verifiedCredit.wait();
 
+      const verifiedCreditTest = await verifiedCreditFactory
+      .connect(owner)
+      .createVerifiedCredit(
+        "PZC",
+        "CC",
+        2024,
+        "22/04/2026",
+        "VCC-PZC-CC-2024",
+        2000,
+        "https://project-1.com/1"
+      );
+
+    await verifiedCreditTest.wait();
+
       await expect(verifiedCredit)
         .to.emit(verifiedCreditFactory, "VerifiedCreditCreated")
         .withArgs(
@@ -97,6 +111,19 @@ describe("Verified Credit Factory Smart Contract", () => {
           2024,
           "22/04/2025",
           0,
+          "VCC-PZC-CC-2024",
+          2000,
+          "https://project-1.com/1"
+        );
+
+        await expect(verifiedCreditTest)
+        .to.emit(verifiedCreditFactory, "VerifiedCreditCreated")
+        .withArgs(
+          "PZC",
+          "CC",
+          2024,
+          "22/04/2026",
+          1,
           "VCC-PZC-CC-2024",
           2000,
           "https://project-1.com/1"
@@ -127,7 +154,7 @@ describe("Verified Credit Factory Smart Contract", () => {
         .issueVerifiedCredit("PZC", "CC", 2024, "22/06/2025", 1000);
 
       await issueVerifiedCredit.wait();
-
+      
       await expect(issueVerifiedCredit)
         .to.emit(verifiedCreditFactory, "IssuedVerifiedCredit")
         .withArgs("PZC", "CC", 2024, "22/06/2025", 0, 1000, 3000);
@@ -454,12 +481,9 @@ describe("Verified Credit Factory Smart Contract", () => {
         "http://127.0.0.1:8545"
       );
 
-      console.log(provider);
-
       // console.log(updatedURI)
       const txReceipt = await provider.getTransactionReceipt(updatedURI.hash);
-
-      console.log(txReceipt);
+      
       // Get block details using block number from the receipt
       const block = await provider.getBlock(txReceipt.blockNumber);
 
