@@ -90,19 +90,13 @@ contract VerifiedCreditFactory is
      * @dev verifiedCreditDetails: Stores VerifiedCreditDetail w.r.t Project::Commodity::Vintage::IssuanceDate::TokenId
      */
     mapping(string => mapping(string => mapping(uint256 => mapping(string => VerifiedCreditDetail))))
-        internal verifiedCreditDetails;
-
-    /**
-     * @dev verifiedCreditDetailsByVintage: Stores list of VerifiedCreditDetail w.r.t tokenId
-     */
-    mapping(uint256 => VerifiedCreditDetail[])
-        internal verifiedCreditDetailsByVintage;
+        public verifiedCreditDetails;
 
     /**
      * @dev verifiedCreditDetailsByTokenId: Stores VerifiedCreditDetailByTokenId w.r.t TokenId
      */
     mapping(uint256 => VerifiedCreditDetailByTokenId)
-        internal verifiedCreditDetailsByTokenId;
+        public verifiedCreditDetailsByTokenId;
 
     /**
      * @dev User's Verified Credit Balance
@@ -321,43 +315,6 @@ contract VerifiedCreditFactory is
     }
 
     /**
-     * @notice getAggregatedDataPerVintage: View function to fetch VerifiedCredit's data w.r.t Vintage
-     */
-    function getAggregatedDataPerVintage(
-        uint256 vintage
-    )
-        public
-        view
-        returns (
-            uint256 issuedCredits,
-            uint256 availableCredits,
-            uint256 blockedCredits,
-            uint256 retiredCredits
-        )
-    {
-        require(vintage != 0, "VINTAGE_PASSED_AS_ZERO");
-        uint256 _verifiedCreditList = verifiedCreditDetailsByVintage[vintage]
-            .length;
-        for (uint256 i = 0; i < _verifiedCreditList; i++) {
-            issuedCredits += verifiedCreditDetailsByVintage[vintage][i]
-                .issuedCredits;
-            availableCredits += verifiedCreditDetailsByVintage[vintage][i]
-                .availableCredits;
-            blockedCredits += verifiedCreditDetailsByVintage[vintage][i]
-                .blockedCredits;
-            retiredCredits += verifiedCreditDetailsByVintage[vintage][i]
-                .retiredCredits;
-        }
-
-        return (
-            issuedCredits,
-            availableCredits,
-            blockedCredits,
-            retiredCredits
-        );
-    }
-
-    /**
      * @notice createVerifiedCredit: Create a new VerifiedCredit w.r.t Project::Commodity::Vintage::IssuanceDate
      * @dev Follows ERC1155 token standard fundamental to create VerifiedCredits
      * @param projectId Associated project
@@ -414,22 +371,6 @@ contract VerifiedCreditFactory is
             _tokenId
         );
 
-        verifiedCreditDetailsByVintage[vintage].push(
-            VerifiedCreditDetail(
-                projectId,
-                commodityId,
-                vintage,
-                issuanceDate,
-                _tokenId,
-                ticker,
-                issuanceSupply,
-                issuanceSupply,
-                0,
-                0,
-                tokenURI
-            )
-        );
-
         verifiedCreditExistance[projectId][commodityId][vintage][
             issuanceDate
         ] = true;
@@ -475,24 +416,13 @@ contract VerifiedCreditFactory is
             issuanceSupply
         );
 
-        require(
-            verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
-            ],
-            "CREDIT_ENTRY_DOES_NOT_EXIST"
-        );
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
-            
+
         _verifiedCreditDetail.issuedCredits += issuanceSupply;
         _verifiedCreditDetail.availableCredits += issuanceSupply;
-
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .issuedCredits += issuanceSupply;
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .availableCredits += issuanceSupply;
 
         _mint(
             address(this),
@@ -546,11 +476,6 @@ contract VerifiedCreditFactory is
         _verifiedCreditDetail.blockedCredits += amountToBlock;
         _verifiedCreditDetail.availableCredits -= amountToBlock;
 
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .blockedCredits += amountToBlock;
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .availableCredits -= amountToBlock;
-
         usersBlockedHolding[account][projectId][commodityId][vintage][
             issuanceDate
         ][_verifiedCreditDetail.tokenId] += amountToBlock;
@@ -601,11 +526,6 @@ contract VerifiedCreditFactory is
         _verifiedCreditDetail.blockedCredits -= amountToUnblock;
         _verifiedCreditDetail.availableCredits += amountToUnblock;
 
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .blockedCredits -= amountToUnblock;
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .availableCredits += amountToUnblock;
-
         usersBlockedHolding[account][projectId][commodityId][vintage][
             issuanceDate
         ][_verifiedCreditDetail.tokenId] -= amountToUnblock;
@@ -638,23 +558,12 @@ contract VerifiedCreditFactory is
             issuanceSupply
         );
 
-        require(
-            verifiedCreditExistance[projectId][commodityId][vintage][
-                issuanceDate
-            ],
-            "CREDIT_ENTRY_DOES_NOT_EXIST"
-        );
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
         _verifiedCreditDetail.issuedCredits -= issuanceSupply;
         _verifiedCreditDetail.availableCredits -= issuanceSupply;
-
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .issuedCredits -= issuanceSupply;
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .availableCredits -= issuanceSupply;
 
         _burn(address(this), _verifiedCreditDetail.tokenId, issuanceSupply);
 
@@ -840,11 +749,6 @@ contract VerifiedCreditFactory is
 
         _verifiedCreditDetail.retiredCredits += amountToRetire;
         _verifiedCreditDetail.availableCredits -= amountToRetire;
-
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .retiredCredits += amountToRetire;
-        verifiedCreditDetailsByVintage[vintage][_verifiedCreditDetail.tokenId]
-            .availableCredits -= amountToRetire;
 
         creditsRetiredByUserPerVintage[projectId][commodityId][
             vintage

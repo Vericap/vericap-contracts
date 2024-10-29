@@ -75,65 +75,114 @@ describe("Verified Credit Factory Smart Contract", () => {
 
   describe("Create A New Verified Credit", async () => {
     it("Should Create New Verified Credit", async () => {
-      const verifiedCredit = await verifiedCreditFactory
+      const createFirstVCC = await verifiedCreditFactory
         .connect(owner)
         .createVerifiedCredit(
-          "PZC",
+          "PBB",
           "CC",
-          2024,
-          "22/04/2025",
-          "VCC-PZC-CC-2024",
+          2015,
+          "2015-10-10",
+          "VCC-PBB-CC-2015",
           2000,
           "https://project-1.com/1"
         );
 
-      await verifiedCredit.wait();
+      await createFirstVCC.wait();
 
-      const verifiedCreditTest = await verifiedCreditFactory
-      .connect(owner)
-      .createVerifiedCredit(
-        "PZC",
-        "CC",
-        2024,
-        "22/04/2026",
-        "VCC-PZC-CC-2024",
-        2000,
-        "https://project-1.com/1"
-      );
-
-    await verifiedCreditTest.wait();
-
-      await expect(verifiedCredit)
+      await expect(createFirstVCC)
         .to.emit(verifiedCreditFactory, "VerifiedCreditCreated")
         .withArgs(
-          "PZC",
+          "PBB",
           "CC",
-          2024,
-          "22/04/2025",
+          2015,
+          "2015-10-10",
           0,
-          "VCC-PZC-CC-2024",
+          "VCC-PBB-CC-2015",
           2000,
           "https://project-1.com/1"
         );
 
-        await expect(verifiedCreditTest)
-        .to.emit(verifiedCreditFactory, "VerifiedCreditCreated")
-        .withArgs(
-          "PZC",
+      const createSecondVCC = await verifiedCreditFactory
+        .connect(owner)
+        .createVerifiedCredit(
+          "PBB",
           "CC",
-          2024,
-          "22/04/2026",
-          1,
-          "VCC-PZC-CC-2024",
-          2000,
+          2038,
+          "2038-10-10",
+          "VCC-PBB-CC-2038",
+          1000,
           "https://project-1.com/1"
         );
+
+      await createSecondVCC.wait();
+
+      await expect(createSecondVCC)
+        .to.emit(verifiedCreditFactory, "VerifiedCreditCreated")
+        .withArgs(
+          "PBB",
+          "CC",
+          2038,
+          "2038-10-10",
+          1,
+          "VCC-PBB-CC-2038",
+          1000,
+          "https://project-1.com/1"
+        );
+
+      const issueMoreForSecondVCC = await verifiedCreditFactory
+        .connect(owner)
+        .issueVerifiedCredit("PBB", "CC", 2038, "2038-10-10", 1000);
+
+      await issueMoreForSecondVCC.wait();
+
+      await expect(issueMoreForSecondVCC)
+        .to.emit(verifiedCreditFactory, "IssuedVerifiedCredit")
+        .withArgs("PBB", "CC", 2038, "2038-10-10", 1, 1000, 2000);
+
+      //----------------------------------------------------
+
+      const createThirdVCC = await verifiedCreditFactory
+        .connect(owner)
+        .createVerifiedCredit(
+          "PBB",
+          "CC",
+          2039,
+          "2039-10-10",
+          "VCC-PBB-CC-2039",
+          5000,
+          "https://project-1.com/1"
+        );
+
+      await createThirdVCC.wait();
+
+      await expect(createThirdVCC)
+        .to.emit(verifiedCreditFactory, "VerifiedCreditCreated")
+        .withArgs(
+          "PBB",
+          "CC",
+          2039,
+          "2039-10-10",
+          2,
+          "VCC-PBB-CC-2039",
+          5000,
+          "https://project-1.com/1"
+        );
+
+      const issueMoreForThirdVCC = await verifiedCreditFactory
+        .connect(owner)
+        .issueVerifiedCredit("PBB", "CC", 2039, "2039-10-10", 1000);
+
+      await issueMoreForThirdVCC.wait();
+
+      await expect(issueMoreForThirdVCC)
+        .to.emit(verifiedCreditFactory, "IssuedVerifiedCredit")
+        .withArgs("PBB", "CC", 2039, "2039-10-10", 2, 1000, 6000);
     });
   });
 
   describe("Issued More Verified Credits To A Vinatag-Issuance Date Pair", async () => {
     beforeEach("Create New Verified Credit", async () => {
-      const verifiedCredit = await verifiedCreditFactory
+      const verifiedCreditFirstIssuance = await verifiedCreditFactory
         .connect(owner)
         .createVerifiedCredit(
           "PZC",
@@ -145,7 +194,21 @@ describe("Verified Credit Factory Smart Contract", () => {
           "https://project-1.com/1"
         );
 
-      await verifiedCredit.wait();
+      await verifiedCreditFirstIssuance.wait();
+
+      const verifiedCreditSecondIssuance = await verifiedCreditFactory
+        .connect(owner)
+        .createVerifiedCredit(
+          "PZC",
+          "CC",
+          2025,
+          "22/06/2025",
+          "VCC-PZC-CC-2024",
+          2000,
+          "https://project-1.com/1"
+        );
+
+      await verifiedCreditSecondIssuance.wait();
     });
 
     it("Should Issue More Verified Credits", async () => {
@@ -154,7 +217,7 @@ describe("Verified Credit Factory Smart Contract", () => {
         .issueVerifiedCredit("PZC", "CC", 2024, "22/06/2025", 1000);
 
       await issueVerifiedCredit.wait();
-      
+
       await expect(issueVerifiedCredit)
         .to.emit(verifiedCreditFactory, "IssuedVerifiedCredit")
         .withArgs("PZC", "CC", 2024, "22/06/2025", 0, 1000, 3000);
@@ -194,7 +257,16 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await expect(blockVerifiedCredit)
         .to.emit(verifiedCreditFactory, "BlockedVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/08/2025", 0, 1000, 2000, verifiedCreditFactory.address);
+        .withArgs(
+          "PZC",
+          "CC",
+          2024,
+          "22/08/2025",
+          0,
+          1000,
+          2000,
+          verifiedCreditFactory.address
+        );
     });
   });
 
@@ -244,7 +316,16 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       await expect(unblockVerifiedCredit)
         .to.emit(verifiedCreditFactory, "UnblockedVerifiedCredit")
-        .withArgs("PZC", "CC", 2024, "22/10/2025", 0, 1000, 4000, verifiedCreditFactory.address);
+        .withArgs(
+          "PZC",
+          "CC",
+          2024,
+          "22/10/2025",
+          0,
+          1000,
+          4000,
+          verifiedCreditFactory.address
+        );
     });
   });
 
@@ -483,7 +564,7 @@ describe("Verified Credit Factory Smart Contract", () => {
 
       // console.log(updatedURI)
       const txReceipt = await provider.getTransactionReceipt(updatedURI.hash);
-      
+
       // Get block details using block number from the receipt
       const block = await provider.getBlock(txReceipt.blockNumber);
 
@@ -765,24 +846,6 @@ describe("Verified Credit Factory Smart Contract", () => {
         );
 
       expect(userBalance).to.be.eq(900);
-    });
-
-    it("Should Fetch Aggregated Data For A Vintage", async () => {
-      const verifiedCreditDetail =
-        await verifiedCreditFactory.getVerifiedCreditDetail(
-          "PZC",
-          "CC",
-          2024,
-          "22/06/2025"
-        );
-
-      const aggregatedDetail =
-        await verifiedCreditFactory.getAggregatedDataPerVintage(2024);
-
-      expect(aggregatedDetail.issuedCredits).to.eq(3000);
-      expect(aggregatedDetail.availableCredits).to.eq(2400);
-      expect(aggregatedDetail.blockedCredits).to.eq(500);
-      expect(aggregatedDetail.retiredCredits).to.eq(100);
     });
   });
 });
