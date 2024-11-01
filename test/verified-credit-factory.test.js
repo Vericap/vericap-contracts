@@ -334,12 +334,12 @@ describe("Verified Credit Factory Smart Contract", () => {
       const verifiedCredit = await verifiedCreditFactory
         .connect(owner)
         .createVerifiedCredit(
-          "PZC",
+          "PBB",
           "CC",
-          2024,
-          "22/02/2025",
-          "VCC-PZC-CC-2024",
-          4000,
+          2038,
+          "2038-10-10",
+          "VCC-PBB-CC-2038",
+          400,
           "https://project-1.com/1"
         );
 
@@ -347,9 +347,18 @@ describe("Verified Credit Factory Smart Contract", () => {
     });
 
     it("Should Transfer Verified Credits", async () => {
-      const verifiedCreditDetail = await verifiedCreditFactory
+      const blockVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
-        .getVerifiedCreditDetail("PZC", "CC", 2024, "22/02/2025");
+        .blockVerifiedCredit(
+          "PBB",
+          "CC",
+          2038,
+          "2038-10-10",
+          50,
+          verifiedCreditFactory.address
+        );
+
+      await blockVerifiedCredit.wait();
 
       const approveAdminToTransfer = await verifiedCreditFactory
         .connect(owner)
@@ -360,12 +369,12 @@ describe("Verified Credit Factory Smart Contract", () => {
       const transferVerifiedCredit = await verifiedCreditFactory
         .connect(owner)
         .transferVerifiedCreditOutside(
-          "PZC",
+          "PBB",
           "CC",
-          2024,
-          "22/02/2025",
-          1000,
-          owner.address
+          2038,
+          "2038-10-10",
+          10,
+          add1.address
         );
 
       await transferVerifiedCredit.wait();

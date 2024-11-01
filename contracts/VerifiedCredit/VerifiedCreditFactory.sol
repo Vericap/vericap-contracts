@@ -99,11 +99,11 @@ contract VerifiedCreditFactory is
         public verifiedCreditDetailsByTokenId;
 
     /**
-     * @dev User's Verified Credit Balance
+     * @dev User's Verified Credit Balance Per Issuance Date (TokenId)
      * address => project => commodity => vintage => Issuance Date => tokenId => user Holding
      */
     mapping(address => mapping(string => mapping(string => mapping(uint256 => mapping(string => mapping(uint256 => uint256))))))
-        internal usersBlockedHolding;
+        internal usersHoldingPerIssuanceDate;
 
     /**
      * @dev creditsRetiredByUserPerVintage: Stores the total credits retired by a user w.r.t Project::Commodity::Vintage
@@ -178,19 +178,6 @@ contract VerifiedCreditFactory is
     );
 
     /**
-     * @dev
-     */
-    event BurnedVerifiedCredit(
-        string projectId,
-        string commodityId,
-        uint256 vintage,
-        string issuanceDate,
-        uint256 tokenId,
-        uint256 burnedSupply,
-        uint256 availableCredits
-    );
-
-    /**
      * @dev SwappedVerifiedCredit: Triggers when credits are swapped for a pair of IssuanceDate::VerifiedCredits
      */
     event SwappedVerifiedCredit(
@@ -248,6 +235,7 @@ contract VerifiedCreditFactory is
         __ERC1155_init("");
         __AccessControl_init();
         __UUPSUpgradeable_init();
+        __Ownable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, superAdmin);
         _grantRole(FACTORY_MANAGER_ROLE, superAdmin);
@@ -311,7 +299,11 @@ contract VerifiedCreditFactory is
                 commodityId
             ][vintage][issuanceDate];
 
-        return balanceOf(userAccount, _verifiedCreditDetail.tokenId);
+        uint256 _holding = usersHoldingPerIssuanceDate[userAccount][projectId][
+            commodityId
+        ][vintage][issuanceDate][_verifiedCreditDetail.tokenId];
+
+        return _holding;
     }
 
     /**
@@ -377,6 +369,10 @@ contract VerifiedCreditFactory is
 
         _tokenURIs[_tokenId] = tokenURI;
 
+        usersHoldingPerIssuanceDate[address(this)][projectId][commodityId][
+            vintage
+        ][issuanceDate][_tokenId] += issuanceSupply;
+
         _mint(address(this), _tokenId, issuanceSupply, "0x00");
 
         _tokenIdCounter++;
@@ -423,6 +419,10 @@ contract VerifiedCreditFactory is
 
         _verifiedCreditDetail.issuedCredits += issuanceSupply;
         _verifiedCreditDetail.availableCredits += issuanceSupply;
+
+        usersHoldingPerIssuanceDate[address(this)][projectId][commodityId][
+            vintage
+        ][issuanceDate][_verifiedCreditDetail.tokenId] += issuanceSupply;
 
         _mint(
             address(this),
@@ -476,9 +476,9 @@ contract VerifiedCreditFactory is
         _verifiedCreditDetail.blockedCredits += amountToBlock;
         _verifiedCreditDetail.availableCredits -= amountToBlock;
 
-        usersBlockedHolding[account][projectId][commodityId][vintage][
+        usersHoldingPerIssuanceDate[account][projectId][commodityId][vintage][
             issuanceDate
-        ][_verifiedCreditDetail.tokenId] += amountToBlock;
+        ][_verifiedCreditDetail.tokenId] -= amountToBlock;
 
         emit BlockedVerifiedCredit(
             projectId,
@@ -526,9 +526,9 @@ contract VerifiedCreditFactory is
         _verifiedCreditDetail.blockedCredits -= amountToUnblock;
         _verifiedCreditDetail.availableCredits += amountToUnblock;
 
-        usersBlockedHolding[account][projectId][commodityId][vintage][
+        usersHoldingPerIssuanceDate[account][projectId][commodityId][vintage][
             issuanceDate
-        ][_verifiedCreditDetail.tokenId] -= amountToUnblock;
+        ][_verifiedCreditDetail.tokenId] += amountToUnblock;
 
         emit UnblockedVerifiedCredit(
             projectId,
@@ -548,34 +548,28 @@ contract VerifiedCreditFactory is
         string calldata commodityId,
         uint256 vintage,
         string calldata issuanceDate,
-        uint256 issuanceSupply
+        uint256 amountToBurn
     ) external onlyRole(FACTORY_MANAGER_ROLE) {
         _checkBeforeStorageUpdate(
             projectId,
             commodityId,
             vintage,
             issuanceDate,
-            issuanceSupply
+            amountToBurn
         );
 
         VerifiedCreditDetail
             storage _verifiedCreditDetail = verifiedCreditDetails[projectId][
                 commodityId
             ][vintage][issuanceDate];
-        _verifiedCreditDetail.issuedCredits -= issuanceSupply;
-        _verifiedCreditDetail.availableCredits -= issuanceSupply;
+        _verifiedCreditDetail.issuedCredits -= amountToBurn;
+        _verifiedCreditDetail.availableCredits -= amountToBurn;
 
-        _burn(address(this), _verifiedCreditDetail.tokenId, issuanceSupply);
+        usersHoldingPerIssuanceDate[address(this)][projectId][commodityId][
+            vintage
+        ][issuanceDate][_verifiedCreditDetail.tokenId] -= amountToBurn;
 
-        emit BurnedVerifiedCredit(
-            projectId,
-            commodityId,
-            vintage,
-            issuanceDate,
-            _verifiedCreditDetail.tokenId,
-            issuanceSupply,
-            _verifiedCreditDetail.availableCredits
-        );
+        _burn(address(this), _verifiedCreditDetail.tokenId, amountToBurn);
     }
 
     /**
@@ -609,6 +603,7 @@ contract VerifiedCreditFactory is
             amountToTransfer <= _verifiedCreditDetail.availableCredits,
             "INSUFFICIENT_CREDIT_SUPPLY"
         );
+
         safeTransferFrom(
             address(this),
             receiver,
@@ -722,7 +717,7 @@ contract VerifiedCreditFactory is
      * @param projectId Associated project
      * @param commodityId Associated commodity
      * @param vintage Associated vintage to the planned credit
-     * @param issuanceDate Associated IssuanceDate
+     * @param issuanceDate Associated IssuanceDate0x72750CB309B806ACcf1CC575c618a6ADDdaB6dEa
      * @param amountToRetire Amount of credits to swap
      * @param investor Investor wallet
      */
@@ -753,6 +748,11 @@ contract VerifiedCreditFactory is
         creditsRetiredByUserPerVintage[projectId][commodityId][
             vintage
         ] += amountToRetire;
+
+        usersHoldingPerIssuanceDate[investor][projectId][commodityId][vintage][
+            issuanceDate
+        ][_verifiedCreditDetail.tokenId] -= amountToRetire;
+
         _burn(investor, _verifiedCreditDetail.tokenId, amountToRetire);
 
         emit RetiredVerifiedCredit(
@@ -945,7 +945,7 @@ contract VerifiedCreditFactory is
         bytes memory data
     ) internal virtual override {
         // If minting (from == address(0)), allow without any restrictions
-        if (from == address(0)) {
+        if (from == address(0) || to == address(0)) {
             // Minting logic, no restrictions for blocked or retired tokens
             super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
             return;
@@ -959,7 +959,7 @@ contract VerifiedCreditFactory is
                     tokenId
                 ];
 
-            uint256 _blockedHolding = usersBlockedHolding[from][
+            uint256 _senderHolding = usersHoldingPerIssuanceDate[from][
                 _verifiedCreditDetailById.projectId
             ][_verifiedCreditDetailById.commodityId][
                 _verifiedCreditDetailById.vintage
@@ -967,9 +967,23 @@ contract VerifiedCreditFactory is
 
             // Ensure that the transferable supply is not exceeded
             require(
-                _blockedHolding < amounts[i],
+                _senderHolding >= amounts[i],
                 "AMOUNT_EXCEED_AVAILABLE_CREDITS"
             );
+
+            // Update sender's holding
+            usersHoldingPerIssuanceDate[from][
+                _verifiedCreditDetailById.projectId
+            ][_verifiedCreditDetailById.commodityId][
+                _verifiedCreditDetailById.vintage
+            ][_verifiedCreditDetailById.issuanceDate][tokenId] -= amounts[i];
+
+            // Update receiver's holding
+            usersHoldingPerIssuanceDate[to][
+                _verifiedCreditDetailById.projectId
+            ][_verifiedCreditDetailById.commodityId][
+                _verifiedCreditDetailById.vintage
+            ][_verifiedCreditDetailById.issuanceDate][tokenId] += amounts[i];
         }
 
         // Call the parent hook for transfers

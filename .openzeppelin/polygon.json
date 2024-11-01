@@ -70,6 +70,11 @@
       "address": "0x72750CB309B806ACcf1CC575c618a6ADDdaB6dEa",
       "txHash": "0x09a07596a8c7a5866b2b78ca9d11b370d6317dc4128f974e604e8d7523958b80",
       "kind": "uups"
+    },
+    {
+      "address": "0xba4fE3a60C7E8AF40551A638aFB38d5D3436b27e",
+      "txHash": "0xe4b6cf898a73ec9497ecb02296baa85ea5d500ab4835c449ed5e226b0a74e825",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -3699,6 +3704,481 @@
             "numberOfBytes": "20"
           },
           "t_contract(IPlannedCreditManager)6414": {
+            "label": "contract IPlannedCreditManager",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256))))))": {
+            "label": "mapping(address => mapping(string => mapping(string => mapping(uint256 => mapping(string => mapping(uint256 => uint256))))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)23_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_bool)": {
+            "label": "mapping(string => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_bool))))": {
+            "label": "mapping(string => mapping(string => mapping(uint256 => mapping(string => bool))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256)))))": {
+            "label": "mapping(string => mapping(string => mapping(uint256 => mapping(string => mapping(uint256 => uint256)))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_struct(VerifiedCreditDetail)4657_storage))))": {
+            "label": "mapping(string => mapping(string => mapping(uint256 => mapping(string => struct VerifiedCreditFactory.VerifiedCreditDetail))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(string => mapping(string => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_bool)))": {
+            "label": "mapping(string => mapping(uint256 => mapping(string => bool)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256))))": {
+            "label": "mapping(string => mapping(uint256 => mapping(string => mapping(uint256 => uint256))))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_struct(VerifiedCreditDetail)4657_storage)))": {
+            "label": "mapping(string => mapping(uint256 => mapping(string => struct VerifiedCreditFactory.VerifiedCreditDetail)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(string => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_struct(VerifiedCreditDetail)4657_storage)": {
+            "label": "mapping(string => struct VerifiedCreditFactory.VerifiedCreditDetail)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_bool))": {
+            "label": "mapping(uint256 => mapping(string => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(uint256 => mapping(string => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_struct(VerifiedCreditDetail)4657_storage))": {
+            "label": "mapping(uint256 => mapping(string => struct VerifiedCreditFactory.VerifiedCreditDetail))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(VerifiedCreditDetailByTokenId)4669_storage)": {
+            "label": "mapping(uint256 => struct VerifiedCreditFactory.VerifiedCreditDetailByTokenId)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)23_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(VerifiedCreditDetail)4657_storage": {
+            "label": "struct VerifiedCreditFactory.VerifiedCreditDetail",
+            "members": [
+              {
+                "label": "projectId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "commodityId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "vintage",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "issuanceDate",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "tokenId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "ticker",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "issuedCredits",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "availableCredits",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "blockedCredits",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "8"
+              },
+              {
+                "label": "retiredCredits",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "9"
+              },
+              {
+                "label": "tokenURI",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "10"
+              }
+            ],
+            "numberOfBytes": "352"
+          },
+          "t_struct(VerifiedCreditDetailByTokenId)4669_storage": {
+            "label": "struct VerifiedCreditFactory.VerifiedCreditDetailByTokenId",
+            "members": [
+              {
+                "label": "projectId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "commodityId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "vintage",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "issuanceDate",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "tokenId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    },
+    "12563a5da27f800b807edc4c1ea51370b1e0757841248025520ade6bb47b7d0d": {
+      "address": "0xa4BA1d00376941748657564c5795721060913b98",
+      "txHash": "0x3198617b335b0a98cf50067546f93821e91890fd918b2e7b7ad47737440e53ee",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:25"
+          },
+          {
+            "label": "_operatorApprovals",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:28"
+          },
+          {
+            "label": "_uri",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_string_storage",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:508"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155ReceiverUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol:48"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "351",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "352",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "401",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)23_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:57"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "402",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:260"
+          },
+          {
+            "label": "_tokenIdCounter",
+            "offset": 0,
+            "slot": "451",
+            "type": "t_uint256",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:31"
+          },
+          {
+            "label": "plannedCreditFactory",
+            "offset": 0,
+            "slot": "452",
+            "type": "t_contract(IPlannedCreditFactory)6460",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:44"
+          },
+          {
+            "label": "plannedCreditManager",
+            "offset": 0,
+            "slot": "453",
+            "type": "t_contract(IPlannedCreditManager)6525",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:45"
+          },
+          {
+            "label": "verifiedCreditDetails",
+            "offset": 0,
+            "slot": "454",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_struct(VerifiedCreditDetail)4657_storage))))",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:92"
+          },
+          {
+            "label": "verifiedCreditDetailsByTokenId",
+            "offset": 0,
+            "slot": "455",
+            "type": "t_mapping(t_uint256,t_struct(VerifiedCreditDetailByTokenId)4669_storage)",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:98"
+          },
+          {
+            "label": "usersHoldingPerIssuanceDate",
+            "offset": 0,
+            "slot": "456",
+            "type": "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256))))))",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:105"
+          },
+          {
+            "label": "creditsRetiredByUserPerVintage",
+            "offset": 0,
+            "slot": "457",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_uint256)))",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:111"
+          },
+          {
+            "label": "verifiedCreditExistance",
+            "offset": 0,
+            "slot": "458",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_bool))))",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:117"
+          },
+          {
+            "label": "_tokenURIs",
+            "offset": 0,
+            "slot": "459",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "contract": "VerifiedCreditFactory",
+            "src": "contracts/VerifiedCredit/VerifiedCreditFactory.sol:123"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IPlannedCreditFactory)6460": {
+            "label": "contract IPlannedCreditFactory",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPlannedCreditManager)6525": {
             "label": "contract IPlannedCreditManager",
             "numberOfBytes": "20"
           },
