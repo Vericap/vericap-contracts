@@ -17,7 +17,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/IPlannedCreditManager.sol";
 import "../interfaces/IPlannedCreditFactory.sol";
-import "hardhat/console.sol";
 
 contract VerifiedCreditFactory is
     Initializable,
@@ -76,6 +75,7 @@ contract VerifiedCreditFactory is
      * @param projectId Associated project
      * @param commodityId Associated commodity
      * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Date of issuance
      * @param tokenId ERC1155 standarad based token Id
      */
     struct VerifiedCreditDetailByTokenId {
@@ -449,6 +449,7 @@ contract VerifiedCreditFactory is
      * @param vintage Associated vintage to the planned credit
      * @param issuanceDate Associated IssuanceDate
      * @param amountToBlock Amount of credits to block
+     * @param account Account to block credits for
      */
     function blockVerifiedCredit(
         string calldata projectId,
@@ -499,6 +500,7 @@ contract VerifiedCreditFactory is
      * @param vintage Associated vintage to the planned credit
      * @param issuanceDate Associated IssuanceDate
      * @param amountToUnblock Amount of credits to unblock
+     * * @param account Account to unblock credits for
      */
     function unblockVerifiedCredit(
         string calldata projectId,
@@ -542,7 +544,14 @@ contract VerifiedCreditFactory is
         );
     }
 
-    // burn Verified credit
+    /**
+     * @notice burnVerifiedCredit: Burn verified credits
+     * @param projectId Associated project
+     * @param commodityId Associated commodity
+     * @param vintage Associated vintage to the planned credit
+     * @param issuanceDate Associated IssuanceDate
+     * @param amountToBurn Amount to burn
+     */
     function burnVerifiedCredit(
         string calldata projectId,
         string calldata commodityId,
@@ -631,6 +640,7 @@ contract VerifiedCreditFactory is
      * @param vintage Associated vintage to the planned credit
      * @param issuanceDate Associated IssuanceDate
      * @param amountToSwap Amount of credits to swap
+     * @param plannedCredit Planned credit address to swap for
      * @param investor Investor wallet
      */
     function swapVerifiedCredit(
@@ -806,9 +816,9 @@ contract VerifiedCreditFactory is
     }
 
     /**
-            @notice _checkBeforeVerifiedCreditCreation: Process different checks before creating new VerifiedCredits
-            @dev Checking credibilty of arguments
-        */
+     * @notice _checkBeforeVerifiedCreditCreation: Process different checks before creating new VerifiedCredits
+     * @dev Checking credibilty of arguments
+     */
     function _checkBeforeVerifiedCreditCreation(
         string calldata _projectId,
         string calldata _commodityId,
@@ -837,9 +847,9 @@ contract VerifiedCreditFactory is
     }
 
     /**
-            @notice _checkBeforeStorageUpdate: Process different checks before updating storage of VerifiedCredits
-            @dev Checking credibilty of arguments
-        */
+     * @notice _checkBeforeStorageUpdate: Process different checks before updating storage of VerifiedCredits
+     * @dev Checking credibilty of arguments
+     */
     function _checkBeforeStorageUpdate(
         string calldata _projectId,
         string calldata _commodityId,
@@ -864,9 +874,9 @@ contract VerifiedCreditFactory is
     }
 
     /**
-            @notice _checkBeforeSwap: Process different checks before swapping VerifiedCredits
-            @dev Checking credibilty of arguments
-        */
+     * @notice _checkBeforeSwap: Process different checks before swapping VerifiedCredits
+     * @dev Checking credibilty of arguments
+     */
     function _checkBeforeSwap(
         string calldata _projectId,
         string calldata _commodityId,
@@ -895,9 +905,9 @@ contract VerifiedCreditFactory is
     }
 
     /**
-            @notice _checkBeforeRetire: Process different checks before retiring VerifiedCredits
-            @dev Checking credibilty of arguments
-        */
+     * @notice _checkBeforeRetire: Process different checks before retiring VerifiedCredits
+     * @dev Checking credibilty of arguments
+     */
     function _checkBeforeRetire(
         string calldata _projectId,
         string calldata _commodityId,
